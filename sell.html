@@ -367,12 +367,17 @@
 
             if (isValid) {
                 try {
+                    // Show loading state
+                    const submitButton = document.querySelector('.submit-button');
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Enviando...';
+
                     // Upload images to Firebase Storage
                     const imageUrls = await Promise.all(
                         selectedImages.map(async (file) => {
-                            const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
-                            await uploadBytes(storageRef, file);
-                            return await getDownloadURL(storageRef);
+                            const storageRef = ref(storage, `products/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
+                            const snapshot = await uploadBytes(storageRef, file);
+                            return await getDownloadURL(snapshot.ref);
                         })
                     );
 
@@ -386,6 +391,7 @@
                         description: formData.get('description'),
                         images: imageUrls,
                         sellerId: auth.currentUser.uid,
+                        sellerName: auth.currentUser.displayName || 'Anônimo',
                         createdAt: new Date().toISOString(),
                         status: 'active'
                     };
@@ -397,6 +403,11 @@
                 } catch (error) {
                     console.error('Error publishing product:', error);
                     alert('Erro ao publicar o produto. Tente novamente.');
+                } finally {
+                    // Reset button state
+                    const submitButton = document.querySelector('.submit-button');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Publicar Anúncio';
                 }
             }
         });
