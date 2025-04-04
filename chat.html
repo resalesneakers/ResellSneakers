@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - ResellSneakers</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .chat-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            height: calc(100vh - 8rem);
+        }
+
+        .chat-list {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .chat-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .chat-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .chat-item.active {
+            background-color: #f3f4f6;
+        }
+
+        .chat-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .chat-item-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .chat-item-time {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .chat-item-preview {
+            font-size: 0.875rem;
+            color: #4b5563;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-messages {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .product-image {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.25rem;
+            object-fit: cover;
+        }
+
+        .product-details h3 {
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .product-details p {
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            position: relative;
+        }
+
+        .message.sent {
+            background-color: #dc2626;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .message.received {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            align-self: flex-start;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-top: 0.25rem;
+        }
+
+        .chat-input {
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+        }
+
+        .chat-input button {
+            padding: 0.75rem 1.5rem;
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .chat-input button:hover {
+            background-color: #b91c1c;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-list {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">Resell<span>Sneakers</span></a>
+            <div class="nav-links">
+                <a href="products.html">Produtos</a>
+                <a href="sell.html">Vender</a>
+                <a href="login.html" class="login-btn">Entrar</a>
+                <a href="register.html" class="register-btn">Cadastrar</a>
+            </div>
+            <button class="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="chat-container">
+        <div class="chat-list" id="chatList">
+            <!-- Chat list items will be added here dynamically -->
+        </div>
+
+        <div class="chat-messages">
+            <div class="chat-header">
+                <div class="product-info">
+                    <img src="" alt="" class="product-image" id="productImage">
+                    <div class="product-details">
+                        <h3 id="productName"></h3>
+                        <p id="sellerName"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <!-- Messages will be added here dynamically -->
+            </div>
+
+            <form class="chat-input" id="messageForm">
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="Digite sua mensagem..." 
+                    required
+                >
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './firebase-config.js';
+        import { 
+            collection, 
+            addDoc, 
+            query, 
+            where, 
+            orderBy, 
+            onSnapshot,
+            doc,
+            getDoc,
+            getDocs
+        } from 'firebase/firestore';
+
+        // Get chat ID and product ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatId = urlParams.get('chatId');
+        const productId = urlParams.get('productId');
+
+        let currentChat = null;
+
+        // Check if user is logged in
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                alert('Você precisa estar logado para acessar o chat');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Load chat data
+            if (chatId) {
+                await loadChat(chatId);
+            } else if (productId) {
+                await initializeChat(productId, user.uid);
+            }
+
+            // Load user's chats
+            await loadUserChats(user.uid);
+        });
+
+        async function loadChat(chatId) {
+            try {
+                const chatDoc = await getDoc(doc(db, 'chats', chatId));
+                if (!chatDoc.exists()) {
+                    alert('Chat não encontrado');
+                    return;
+                }
+
+                currentChat = { id: chatDoc.id, ...chatDoc.data() };
+
+                // Load product details
+                const productDoc = await getDoc(doc(db, 'products', currentChat.productId));
+                const productData = productDoc.data();
+
+                document.getElementById('productImage').src = productData.images[0];
+                document.getElementById('productName').textContent = productData.name;
+                document.getElementById('sellerName').textContent = productData.sellerName;
+
+                // Subscribe to messages
+                const messagesQuery = query(
+                    collection(db, 'messages'),
+                    where('chatId', '==', chatId),
+                    orderBy('timestamp', 'asc')
+                );
+
+                onSnapshot(messagesQuery, (snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === 'added') {
+                            displayMessage(change.doc.data());
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading chat:', error);
+                alert('Erro ao carregar o chat');
+            }
+        }
+
+        async function initializeChat(productId, userId) {
+            try {
+                const productDoc = await getDoc(doc(db, 'products', productId));
+                if (!productDoc.exists()) {
+                    alert('Produto não encontrado');
+                    return;
+                }
+
+                const productData = productDoc.data();
+
+                // Check if chat already exists
+                const chatsQuery = query(
+                    collection(db, 'chats'),
+                    where('productId', '==', productId),
+                    where('buyerId', '==', userId)
+                );
+
+                const existingChats = await getDocs(chatsQuery);
+                if (!existingChats.empty) {
+                    const existingChat = existingChats.docs[0];
+                    window.location.href = `chat.html?chatId=${existingChat.id}`;
+                    return;
+                }
+
+                // Create new chat
+                const chatData = {
+                    productId,
+                    sellerId: productData.sellerId,
+                    buyerId: userId,
+                    createdAt: new Date().toISOString(),
+                    lastMessage: null,
+                    lastMessageTime: null
+                };
+
+                const chatRef = await addDoc(collection(db, 'chats'), chatData);
+                window.location.href = `chat.html?chatId=${chatRef.id}`;
+            } catch (error) {
+                console.error('Error initializing chat:', error);
+                alert('Erro ao iniciar o chat');
+            }
+        }
+
+        async function loadUserChats(userId) {
+            try {
+                const chatsQuery = query(
+                    collection(db, 'chats'),
+                    where('buyerId', '==', userId)
+                );
+
+                onSnapshot(chatsQuery, async (snapshot) => {
+                    const chatList = document.getElementById('chatList');
+                    chatList.innerHTML = '';
+
+                    for (const doc of snapshot.docs) {
+                        const chatData = doc.data();
+                        const productDoc = await getDoc(doc(db, 'products', chatData.productId));
+                        const productData = productDoc.data();
+
+                        const chatItem = document.createElement('div');
+                        chatItem.className = `chat-item${doc.id === chatId ? ' active' : ''}`;
+                        chatItem.innerHTML = `
+                            <div class="chat-item-header">
+                                <span class="chat-item-name">${productData.name}</span>
+                                <span class="chat-item-time">${formatDate(chatData.lastMessageTime || chatData.createdAt)}</span>
+                            </div>
+                            <div class="chat-item-preview">${chatData.lastMessage || 'Nenhuma mensagem'}</div>
+                        `;
+
+                        chatItem.addEventListener('click', () => {
+                            window.location.href = `chat.html?chatId=${doc.id}`;
+                        });
+
+                        chatList.appendChild(chatItem);
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading user chats:', error);
+            }
+        }
+
+        function displayMessage(messageData) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${messageData.senderId === auth.currentUser.uid ? 'sent' : 'received'}`;
+            messageElement.innerHTML = `
+                <div class="message-content">${messageData.content}</div>
+                <div class="message-time">${formatDate(messageData.timestamp)}</div>
+            `;
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                day: '2-digit',
+                month: '2-digit'
+            });
+        }
+
+        // Handle message form submission
+        document.getElementById('messageForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const messageInput = document.getElementById('messageInput');
+            const content = messageInput.value.trim();
+
+            if (!content || !currentChat) return;
+
+            try {
+                const messageData = {
+                    chatId: currentChat.id,
+                    content,
+                    senderId: auth.currentUser.uid,
+                    timestamp: new Date().toISOString()
+                };
+
+                await addDoc(collection(db, 'messages'), messageData);
+
+                // Update chat's last message
+                await updateDoc(doc(db, 'chats', currentChat.id), {
+                    lastMessage: content,
+                    lastMessageTime: messageData.timestamp
+                });
+
+                messageInput.value = '';
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Erro ao enviar mensagem');
+            }
+        });
+    </script>
+</body>
+</html> 

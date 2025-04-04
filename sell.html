@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vender Tênis - ResellSneakers</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .sell-page {
+            padding: 4rem 1rem;
+            background-color: #f9fafb;
+            min-height: calc(100vh - 4rem);
+        }
+
+        .sell-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .sell-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .sell-header h1 {
+            font-size: 2rem;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+        }
+
+        .sell-header p {
+            color: #4b5563;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4b5563;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        .form-group.error input,
+        .form-group.error select,
+        .form-group.error textarea {
+            border-color: #dc2626;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .image-upload {
+            border: 2px dashed #d1d5db;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .image-upload:hover {
+            border-color: #dc2626;
+        }
+
+        .image-upload input {
+            display: none;
+        }
+
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 0.375rem;
+            overflow: hidden;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background-color: #b91c1c;
+        }
+
+        @media (max-width: 768px) {
+            .sell-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">Resell<span>Sneakers</span></a>
+            <div class="nav-links">
+                <a href="products.html">Produtos</a>
+                <a href="sell.html">Vender</a>
+                <a href="login.html" class="login-btn">Entrar</a>
+                <a href="register.html" class="register-btn">Cadastrar</a>
+            </div>
+            <button class="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="sell-page">
+        <div class="sell-container">
+            <div class="sell-header">
+                <h1>Vender Tênis</h1>
+                <p>Preencha os detalhes do seu produto para começar a vender</p>
+            </div>
+            <form id="sellForm" novalidate>
+                <div class="form-group">
+                    <label for="name">Nome do Tênis</label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        required 
+                        placeholder="Ex: Nike Air Jordan 1"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="brand">Marca</label>
+                    <select id="brand" name="brand" required>
+                        <option value="">Selecione a marca</option>
+                        <option value="nike">Nike</option>
+                        <option value="adidas">Adidas</option>
+                        <option value="puma">Puma</option>
+                        <option value="new-balance">New Balance</option>
+                        <option value="vans">Vans</option>
+                        <option value="converse">Converse</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="size">Tamanho</label>
+                    <select id="size" name="size" required>
+                        <option value="">Selecione o tamanho</option>
+                        <option value="36">36</option>
+                        <option value="37">37</option>
+                        <option value="38">38</option>
+                        <option value="39">39</option>
+                        <option value="40">40</option>
+                        <option value="41">41</option>
+                        <option value="42">42</option>
+                        <option value="43">43</option>
+                        <option value="44">44</option>
+                        <option value="45">45</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="condition">Condição</label>
+                    <select id="condition" name="condition" required>
+                        <option value="">Selecione a condição</option>
+                        <option value="new">Novo</option>
+                        <option value="like-new">Quase Novo</option>
+                        <option value="good">Bom</option>
+                        <option value="fair">Regular</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="price">Preço (R$)</label>
+                    <input 
+                        type="number" 
+                        id="price" 
+                        name="price" 
+                        required 
+                        min="0" 
+                        step="0.01"
+                        placeholder="Ex: 999.99"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="description">Descrição</label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        rows="4" 
+                        required
+                        placeholder="Descreva o produto em detalhes"
+                    ></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Fotos do Produto</label>
+                    <div class="image-upload" id="imageUpload">
+                        <input type="file" id="images" name="images" multiple accept="image/*">
+                        <p>Clique ou arraste as fotos aqui</p>
+                        <p class="text-sm text-gray-500">Máximo 5 fotos</p>
+                    </div>
+                    <div class="image-preview" id="imagePreview"></div>
+                </div>
+                <button type="submit" class="submit-button">Publicar Anúncio</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db, storage } from './firebase-config.js';
+        import { collection, addDoc } from 'firebase/firestore';
+        import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
+        const sellForm = document.getElementById('sellForm');
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreview = document.getElementById('imagePreview');
+        let selectedImages = [];
+
+        // Handle image upload
+        imageUpload.addEventListener('click', () => {
+            document.getElementById('images').click();
+        });
+
+        imageUpload.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            imageUpload.style.borderColor = '#dc2626';
+        });
+
+        imageUpload.addEventListener('dragleave', () => {
+            imageUpload.style.borderColor = '#d1d5db';
+        });
+
+        imageUpload.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imageUpload.style.borderColor = '#d1d5db';
+            const files = e.dataTransfer.files;
+            handleImageSelection(files);
+        });
+
+        document.getElementById('images').addEventListener('change', (e) => {
+            handleImageSelection(e.target.files);
+        });
+
+        function handleImageSelection(files) {
+            if (selectedImages.length + files.length > 5) {
+                alert('Você pode adicionar no máximo 5 fotos');
+                return;
+            }
+
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const previewItem = document.createElement('div');
+                        previewItem.className = 'preview-item';
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        
+                        const removeBtn = document.createElement('button');
+                        removeBtn.innerHTML = '×';
+                        removeBtn.onclick = () => {
+                            previewItem.remove();
+                            selectedImages = selectedImages.filter(img => img !== file);
+                        };
+                        
+                        previewItem.appendChild(img);
+                        previewItem.appendChild(removeBtn);
+                        imagePreview.appendChild(previewItem);
+                        
+                        selectedImages.push(file);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Handle form submission
+        sellForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!auth.currentUser) {
+                alert('Você precisa estar logado para vender produtos');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const formData = new FormData(sellForm);
+            let isValid = true;
+
+            // Validate form fields
+            for (const [key, value] of formData.entries()) {
+                if (!value && key !== 'images') {
+                    showError(document.getElementById(key), 'Este campo é obrigatório');
+                    isValid = false;
+                } else {
+                    clearError(document.getElementById(key));
+                }
+            }
+
+            if (selectedImages.length === 0) {
+                showError(imageUpload, 'Adicione pelo menos uma foto');
+                isValid = false;
+            } else {
+                clearError(imageUpload);
+            }
+
+            if (isValid) {
+                try {
+                    // Show loading state
+                    const submitButton = document.querySelector('.submit-button');
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Enviando...';
+
+                    // Upload images to Firebase Storage
+                    const imageUrls = await Promise.all(
+                        selectedImages.map(async (file) => {
+                            const storageRef = ref(storage, `products/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
+                            const snapshot = await uploadBytes(storageRef, file);
+                            return await getDownloadURL(snapshot.ref);
+                        })
+                    );
+
+                    // Add product to Firestore
+                    const productData = {
+                        name: formData.get('name'),
+                        brand: formData.get('brand'),
+                        size: formData.get('size'),
+                        condition: formData.get('condition'),
+                        price: parseFloat(formData.get('price')),
+                        description: formData.get('description'),
+                        images: imageUrls,
+                        sellerId: auth.currentUser.uid,
+                        sellerName: auth.currentUser.displayName || 'Anônimo',
+                        createdAt: new Date().toISOString(),
+                        status: 'active'
+                    };
+
+                    await addDoc(collection(db, 'products'), productData);
+                    
+                    alert('Produto publicado com sucesso!');
+                    window.location.href = 'products.html';
+                } catch (error) {
+                    console.error('Error publishing product:', error);
+                    alert('Erro ao publicar o produto. Tente novamente.');
+                } finally {
+                    // Reset button state
+                    const submitButton = document.querySelector('.submit-button');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Publicar Anúncio';
+                }
+            }
+        });
+
+        function showError(input, message) {
+            const formGroup = input.parentElement;
+            formGroup.classList.add('error');
+            
+            let errorDiv = formGroup.querySelector('.error-message');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                formGroup.appendChild(errorDiv);
+            }
+            errorDiv.textContent = message;
+        }
+        
+        function clearError(input) {
+            const formGroup = input.parentElement;
+            formGroup.classList.remove('error');
+            const errorDiv = formGroup.querySelector('.error-message');
+            if (errorDiv) {
+                errorDiv.remove();
+            }
+        }
+    </script>
+</body>
+</html> 
