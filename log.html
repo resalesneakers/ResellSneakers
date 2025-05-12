@@ -524,6 +524,73 @@
         console.error("Erro no login com GitHub:", error.message);
       }
     });
+    // Google Login
+document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    console.log('Login com Google bem-sucedido:', result.user);
+    window.location.href = 'home.html';
+  } catch (error) {
+    console.error('Erro no login com Google:', error.message);
+  }
+});
+
+// GitHub Login
+document.getElementById('githubLoginBtn').addEventListener('click', async () => {
+  try {
+    const result = await signInWithPopup(auth, githubProvider);
+    console.log('Login com GitHub bem-sucedido:', result.user);
+    window.location.href = 'home.html';
+  } catch (error) {
+    console.error('Erro no login com GitHub:', error.message);
+  }
+});
+
+// Email/Password Login
+document.getElementById('form-login').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log('Login com email/senha bem-sucedido:', userCredential.user);
+    window.location.href = 'home.html';
+  } catch (error) {
+    document.getElementById('msg-erro').textContent = error.message;
+  }
+});
+
+// Email/Password Registration
+document.getElementById('form-register').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById('registerEmail').value;
+  const password = document.getElementById('registerPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+
+  if (password !== confirmPassword) {
+    alert('As palavras-passe não coincidem.');
+    return;
+  }
+
+  try {
+    const methods = await fetchSignInMethodsForEmail(auth, email);
+    if (methods.length > 0) {
+      alert('Este email já está registado.');
+      return;
+    }
+
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    console.log('Conta criada com sucesso:', userCredential.user);
+
+    // Mostrar a página de sucesso
+    document.querySelector('.auth-container').style.display = 'none';
+    document.querySelector('.success-container').style.display = 'flex';
+  } catch (error) {
+    alert('Erro ao criar conta: ' + error.message);
+  }
+});
   </script>  
 </body>
 </html>
