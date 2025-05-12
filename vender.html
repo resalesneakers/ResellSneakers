@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResellSneakers - Colocar à Venda</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  
+    const firebaseConfig = { apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
+  authDomain: "resalesneakers-e17cb.firebaseapp.com",
+  databaseURL: "https://resalesneakers-e17cb-default-rtdb.firebaseio.com",
+  projectId: "resalesneakers-e17cb",
+  storageBucket: "resalesneakers-e17cb.firebasestorage.app",
+  messagingSenderId: "698715655625",
+  appId: "1:698715655625:web:fde7f7a7f2da0037792c18",
+  measurementId: "G-WVNMT06HJS" };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+  
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html"; // redireciona para login
+      }
+    });
+  </script>
+  
+  <style>
+    :root {
+      --primary-color: #e74c3c;
+      --secondary-color: #2c3e50;
+      --accent-color: #3498db;
+      --light-gray: #f4f4f4;
+      --dark-gray: #333;
+      --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f9f9f9;
+    }
+    
+    header {
+      background-color: white;
+      box-shadow: var(--box-shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .nav-links a {
+      text-decoration: none;
+      color: var(--dark-gray);
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    
+    .nav-links a:hover {
+      color: var(--primary-color);
+    }
+    
+    .btn-custom-primary {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      transition: all 0.3s;
+    }
+    
+    .btn-custom-outline {
+      background-color: transparent;
+      border: 1px solid var(--primary-color);
+      color: var(--primary-color);
+      transition: all 0.3s;
+    }
+    
+    .btn-custom-primary:hover, 
+    .btn-custom-outline:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+    
+    .page-title {
+      text-align: center;
+      margin: 30px 0;
+      color: var(--secondary-color);
+    }
+    
+    .sell-form-container {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: var(--box-shadow);
+      padding: 30px;
+      margin-bottom: 40px;
+    }
+    
+    .image-upload-container {
+      border: 2px dashed #ddd;
+      border-radius: 6px;
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .image-upload-container:hover {
+      border-color: var(--primary-color);
+    }
+    
+    .upload-icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+      color: #999;
+    }
+    
+    .image-preview-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .image-preview {
+      height: 150px;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #ddd;
+    }
+    
+    .image-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .image-preview .delete-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: rgba(255, 255, 255, 0.7);
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--primary-color);
+    }
+    
+    .sale-type-option {
+      text-align: center;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      height: 100%;
+    }
+    
+    .sale-type-option.active {
+      border-color: var(--primary-color);
+      background-color: rgba(231, 76, 60, 0.05);
+    }
+    
+    .sale-type-option h3 {
+      margin-bottom: 8px;
+      color: var(--secondary-color);
+    }
+    
+    .sale-type-option p {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    @media (max-width: 768px) {
+      .sale-type-selector {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+          <a class="navbar-brand logo" href="#">ResellSneakers</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link" href="#">Início</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Comprar</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="#" aria-current="page">Vender</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Trocar</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Sobre</a>
+              </li>
+            </ul>
+            <div class="d-flex gap-2">
+              <button class="btn btn-custom-outline" id="loginBtn">Entrar</button>
+              <button class="btn btn-custom-primary" id="signupBtn">Registar</button>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+  
+  <main class="container py-4">
+    <h1 class="page-title">Vender Ténis</h1>
+    
+    <div class="sell-form-container">
+      <div class="row mb-4 sale-type-selector">
+        <div class="col-md-4 mb-3 mb-md-0">
+          <div class="sale-type-option active" data-type="sale">
+            <h3>Venda</h3>
+            <p>Definir um preço fixo para os seus ténis</p>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+          <div class="sale-type-option" data-type="auction">
+            <h3>Leilão</h3>
+            <p>Deixe os compradores licitarem no seu produto</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="sale-type-option" data-type="trade">
+            <h3>Troca</h3>
+            <p>Proponha trocar por outros ténis</p>
+          </div>
+        </div>
+      </div>
+      
+      <form id="sellForm" class="needs-validation" novalidate>
+        <div class="mb-3">
+          <label for="title" class="form-label">Título do Anúncio *</label>
+          <input type="text" class="form-control" id="title" name="title" placeholder="Ex: Nike Air Jordan 1 Chicago - Tamanho 42" required>
+          <div class="invalid-feedback">
+            Por favor, insira um título para o anúncio.
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <label for="brand" class="form-label">Marca *</label>
+            <select class="form-select" id="brand" name="brand" required>
+              <option value="">Selecione a marca</option>
+              <option value="nike">Nike</option>
+              <option value="adidas">Adidas</option>
+              <option value="jordan">Jordan</option>
+              <option value="puma">Puma</option>
+              <option value="reebok">Reebok</option>
+              <option value="newbalance">New Balance</option>
+              <option value="asics">Asics</option>
+              <option value="converse">Converse</option>
+              <option value="vans">Vans</option>
+              <option value="other">Outra</option>
+            </select>
+            <div class="invalid-feedback">
+              Por favor, selecione uma marca.
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <label for="model" class="form-label">Modelo *</label>
+            <input type="text" class="form-control" id="model" name="model" placeholder="Ex: Air Jordan 1 High OG" required>
+            <div class="invalid-feedback">
+              Por favor, insira o modelo dos ténis.
+            </div>
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <label for="size" class="form-label">Tamanho *</label>
+            <select class="form-select" id="size" name="size" required>
+              <option value="">Selecione o tamanho</option>
+              <option value="eu35">EU 35</option>
+              <option value="eu36">EU 36</option>
+              <option value="eu37">EU 37</option>
+              <option value="eu38">EU 38</option>
+              <option value="eu39">EU 39</option>
+              <option value="eu40">EU 40</option>
+              <option value="eu41">EU 41</option>
+              <option value="eu42">EU 42</option>
+              <option value="eu43">EU 43</option>
+              <option value="eu44">EU 44</option>
+              <option value="eu45">EU 45</option>
+              <option value="eu46">EU 46</option>
+              <option value="eu47">EU 47</option>
+            </select>
+            <div class="invalid-feedback">
+              Por favor, selecione um tamanho.
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <label for="condition" class="form-label">Estado *</label>
+            <select class="form-select" id="condition" name="condition" required>
+              <option value="">Selecione o estado</option>
+              <option value="new">Novo com Caixa</option>
+              <option value="newNoBox">Novo sem Caixa</option>
+              <option value="usedExcellent">Usado - Excelente</option>
+              <option value="usedGood">Usado - Bom</option>
+              <option value="usedFair">Usado - Razoável</option>
+              <option value="vintage">Vintage</option>
+              <option value="defect">Com Defeitos</option>
+            </select>
+            <div class="invalid-feedback">
+              Por favor, selecione o estado dos ténis.
+            </div>
+          </div>
+        </div>
+        
+        <div class="row mb-3" id="price-section">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <label for="price" class="form-label">Preço (€) *</label>
+            <input type="number" class="form-control" id="price" name="price" placeholder="Ex: 150" min="1" required>
+            <div class="invalid-feedback">
+              Por favor, insira um preço válido.
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <label for="negotiable" class="form-label">Negociável</label>
+            <select class="form-select" id="negotiable" name="negotiable">
+              <option value="yes">Sim</option>
+              <option value="no">Não</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="description" class="form-label">Descrição *</label>
+          <textarea class="form-control" id="description" name="description" rows="4" placeholder="Descreva os ténis com detalhes: cor, estado, autenticidade, defeitos, etc. Quanto mais detalhes, mais rápido venderá." required></textarea>
+          <div class="invalid-feedback">
+            Por favor, adicione uma descrição.
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Imagens (Máximo 6 imagens) *</label>
+          <div class="image-upload-container" id="imageUpload">
+            <div class="upload-icon">📷</div>
+            <p>Clique ou arraste as imagens para aqui</p>
+            <p>Máximo 6 imagens - A primeira será a imagem principal</p>
+            <input type="file" id="imagemInput" accept="image/*" multiple />
+  <div id="preview" class="preview-container"></div>
+          <div class="image-preview-container" id="imagePreviewContainer">
+            <!-- Image previews will be added here -->
+          </div>
+          <div class="progress mt-3 d-none" id="progressContainer">
+            <div class="progress-bar bg-danger" role="progressbar" style="width: 0%" id="progressFill"></div>
+          </div>
+          <p class="text-muted small mt-1" id="progressText"></p>
+        </div>
+        
+        <div class="mb-4">
+          <label for="location" class="form-label">Localização *</label>
+          <input type="text" class="form-control" id="location" name="location" placeholder="Ex: Lisboa, Portugal" required>
+          <div class="invalid-feedback">
+            Por favor, insira uma localização.
+          </div>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center">
+          <p class="text-muted mb-0"><small>* Campos obrigatórios</small></p>
+          <button type="submit" class="btn btn-custom-primary">Publicar Anúncio</button>
+        </div>
+      </form>
+    </div>
+  </main>
+  
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Sale type selector
+      const saleTypeOptions = document.querySelectorAll('.sale-type-option');
+      const priceSection = document.getElementById('price-section');
+      
+      saleTypeOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          // Remove active class from all options
+          saleTypeOptions.forEach(opt => opt.classList.remove('active'));
+          
+          // Add active class to clicked option
+          this.classList.add('active');
+          
+          // Handle specific sale type logic
+          const saleType = this.getAttribute('data-type');
+          if (saleType === 'trade') {
+            priceSection.style.display = 'none';
+            document.getElementById('price').removeAttribute('required');
+          } else if (saleType === 'auction') {
+            priceSection.style.display = 'flex';
+            document.getElementById('price').setAttribute('required', 'required');
+            document.querySelector('label[for="price"]').textContent = 'Preço Inicial (€) *';
+          } else {
+            priceSection.style.display = 'flex';
+            document.getElementById('price').setAttribute('required', 'required');
+            document.querySelector('label[for="price"]').textContent = 'Preço (€) *';
+          }
+        });
+      });
+      
+      // Image upload handling
+      const imageUpload = document.getElementById('imageUpload');
+      const imageInput = document.getElementById('imageInput');
+      const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+      const progressContainer = document.getElementById('progressContainer');
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      
+      let uploadedImages = [];
+      
+      imageUpload.addEventListener('click', function() {
+        imageInput.click();
+      });
+      
+      imageUpload.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        // ERRO CORRIGIDO: Referência direta à variável CSS substituída
+        imageUpload.style.borderColor = '#e74c3c';
+        imageUpload.style.backgroundColor = 'rgba(231, 76, 60, 0.05)';
+      });
+      
+      imageUpload.addEventListener('dragleave', function() {
+        imageUpload.style.borderColor = '#ddd';
+        imageUpload.style.backgroundColor = 'transparent';
+      });
+      
+      imageUpload.addEventListener('drop', function(e) {
+        e.preventDefault();
+        imageUpload.style.borderColor = '#ddd';
+        imageUpload.style.backgroundColor = 'transparent';
+        
+        if (e.dataTransfer.files.length > 0) {
+          handleFiles(e.dataTransfer.files);
+        }
+      });
+      
+      imageInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+          handleFiles(this.files);
+        }
+      });
+      
+      function handleFiles(files) {
+        // Check if adding these files exceeds the maximum of 6
+        if (uploadedImages.length + files.length > 6) {
+          alert('Pode fazer upload de no máximo 6 imagens.');
+          return;
+        }
+        
+        // Show progress container
+        progressContainer.classList.remove('d-none');
+        
+        // Simulate upload progress
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 5;
+          progressFill.style.width = `${progress}%`;
+          progressText.textContent = `A carregar imagens... ${progress}%`;
+          
+          if (progress >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+              progressContainer.classList.add('d-none');
+              progressText.textContent = '';
+            }, 500);
+            
+            // After "upload" is complete, add files to preview
+            Array.from(files).forEach(file => {
+              if (uploadedImages.length < 6) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                  const imageUrl = e.target.result;
+                  uploadedImages.push({
+                    file: file,
+                    url: imageUrl
+                  });
+                  
+                  addImagePreview(imageUrl);
+                };
+                
+                reader.readAsDataURL(file);
+              }
+            });
+          }
+        }, 50);
+      }
+      
+      function addImagePreview(imageUrl) {
+        const imagePreview = document.createElement('div');
+        imagePreview.className = 'image-preview';
+        
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.innerHTML = '✕';
+        deleteBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          // Find the index of this image
+          const index = Array.from(imagePreviewContainer.children).indexOf(imagePreview);
+          if (index !== -1) {
+            // Remove from array and DOM
+            uploadedImages.splice(index, 1);
+            imagePreview.remove();
+          }
+        });
+        
+        imagePreview.appendChild(img);
+        imagePreview.appendChild(deleteBtn);
+        imagePreviewContainer.appendChild(imagePreview);
+      }
+      
+      // Form validation with Bootstrap
+      const sellForm = document.getElementById('sellForm');
+      
+      sellForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!sellForm.checkValidity()) {
+          e.stopPropagation();
+          sellForm.classList.add('was-validated');
+          return;
+        }
+        
+        if (uploadedImages.length === 0) {
+          alert('Por favor, faça upload de pelo menos uma imagem.');
+          return;
+        }
+        
+        // Get the active sale type
+        const activeType = document.querySelector('.sale-type-option.active').getAttribute('data-type');
+        
+        // Gather form data
+        const formData = new FormData(sellForm);
+        formData.append('saleType', activeType);
+        formData.append('imageCount', uploadedImages.length);
+        
+        // In real implementation, you would upload images to Firebase Storage
+        // and save listing data to Firestore
+        
+        // Simulating submission
+        alert('O seu anúncio está a ser processado. Numa implementação real, os dados seriam enviados para o Firebase.');
+        console.log('Form data:', Object.fromEntries(formData));
+        console.log('Images:', uploadedImages);
+        
+        // Here you would typically:
+        // 1. Upload images to Firebase Storage
+        // 2. Get the download URLs
+        // 3. Create a new document in Firestore with all listing data and image URLs
+        // 4. Redirect user to their listings page or show success message
+      });
+    });
+  </script>
+  <script type="module" src="vender.js"></script>
+</body>
+</html>

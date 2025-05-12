@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResellSneakers - Entrar ou Registar</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <!-- Custom Styles -->
+  <style>
+    /* Custom variables and overrides */
+    :root {
+      --primary-color: #ff6b6b;
+      --secondary-color: #0a2463;
+      --light-gray: #f8f9fa;
+      --dark-gray: #343a40;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-gray);
+    }
+    
+    /* Header & Navbar */
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.8rem;
+    }
+    
+    .navbar-brand span {
+      color: var(--primary-color);
+    }
+    
+    .nav-link {
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.7) !important;
+    }
+    
+    .nav-link:hover {
+      color: var(--primary-color) !important;
+    }
+    
+    /* Auth Cards */
+    .auth-container {
+      min-height: calc(100vh - 76px);
+      display: flex;
+      align-items: center;
+      padding: 2rem 0;
+    }
+    
+    .auth-card {
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .auth-card .card-header {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 600;
+      padding: 1.5rem;
+      border-bottom: none;
+    }
+    
+    .auth-card .card-body {
+      padding: 2rem;
+    }
+    
+    .auth-img {
+      background: linear-gradient(135deg, var(--secondary-color) 0%, #3e92cc 100%);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      text-align: center;
+      height: 100%;
+    }
+    
+    .auth-img h2 {
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+    
+    .auth-img p {
+      font-size: 1.1rem;
+      max-width: 80%;
+    }
+    
+    .form-control {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(255, 107, 107, 0.25);
+    }
+    
+    .form-label {
+      font-weight: 600;
+      color: #495057;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      border-radius: 8px;
+    }
+    
+    .btn-primary:hover, .btn-primary:focus {
+      background-color: #fa5252;
+      border-color: #fa5252;
+    }
+    
+    .btn-outline-primary {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      border-radius: 8px;
+    }
+    
+    .btn-outline-primary:hover {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .social-login {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .social-btn {
+      flex: 1;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+      background-color: white;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .social-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .social-btn i {
+      margin-right: 0.5rem;
+    }
+    
+    .social-btn.google i {
+      color: #ea4335;
+    }
+    
+    .social-btn.facebook i {
+      color: #1877f2;
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 1.5rem 0;
+      color: #6c757d;
+    }
+    
+    .divider::before, .divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .divider span {
+      padding: 0 1rem;
+    }
+    
+    .form-check-input:checked {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .auth-footer {
+      font-size: 0.9rem;
+      color: #6c757d;
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    
+    .auth-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .auth-link:hover {
+      text-decoration: underline;
+    }
+    
+    /* Success page */
+    .success-container {
+      min-height: calc(100vh - 76px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 0;
+      text-align: center;
+    }
+    
+    .success-icon {
+      font-size: 5rem;
+      color: #28a745;
+      margin-bottom: 1.5rem;
+    }
+    
+    /* Tabs */
+    .nav-tabs {
+      border-bottom: none;
+      margin-bottom: 1.5rem;
+    }
+    
+    .nav-tabs .nav-link {
+      font-weight: 600;
+      color: #6c757d;
+      border: none;
+      padding: 1rem 1.5rem;
+    }
+    
+    .nav-tabs .nav-link.active {
+      color: var(--primary-color);
+      background-color: transparent;
+      border-bottom: 3px solid var(--primary-color);
+    }
+    
+    .tab-content {
+      padding-top: 1rem;
+    }
+    
+    /* Footer */
+    footer {
+      background-color: var(--dark-gray);
+      color: #dee2e6;
+      padding: 1rem 0;
+      text-align: center;
+    }
+    
+    footer a {
+      color: #adb5bd;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    footer a:hover {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+    .social-btn.github i {
+  color: #333;
+}
+
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <nav class="navbar navbar-light bg-white shadow-sm py-3">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">Resell<span>Sneakers</span></a>
+      </div>
+    </nav>
+  </header>
+  
+  <!-- Authentication Container -->
+  <div class="auth-container">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <div class="card auth-card">
+            <div class="row g-0">
+              <!-- Authentication Forms -->
+              <div class="col-md-7 order-md-2">
+                <div class="card-body">
+                  <!-- Tabs for Login/Register -->
+                  <ul class="nav nav-tabs" id="authTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab" aria-controls="login" aria-selected="true">Entrar</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab" aria-controls="register" aria-selected="false">Registar</button>
+                    </li>
+                  </ul>
+                  
+                  <div class="tab-content" id="authTabsContent">
+                    <!-- Login Tab -->
+                    <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
+                      <h3 class="mb-4">Bem-vindo de volta!</h3>
+                      
+                      <!-- Social Login Buttons -->
+                      <div class="social-login">
+                        <button type="button" class="social-btn google">
+                          <i class="fab fa-google"></i> Google
+                        </button>
+                        
+                        <button class="social-btn facebook">
+                          <i class="fab fa-facebook-f"></i> Facebook
+                        </button>
+                      </div>
+                      
+                      <!-- Divider -->
+                      <div class="divider">
+                        <span>ou</span>
+                      </div>
+                      
+                      <!-- Login Form -->
+                      <form id="form-login">
+                        <div class="mb-3">
+                          <label for="loginEmail" class="form-label">Email</label>
+                          <input type="email" class="form-control" id="loginEmail" placeholder="O seu endereço de email">
+                        </div>
+                        <div class="mb-3">
+                          <label for="loginPassword" class="form-label">Palavra-passe</label>
+                          <input type="password" class="form-control" id="loginPassword" placeholder="A sua palavra-passe">
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">
+                              Lembrar-me
+                            </label>
+                          </div>
+                          <a href="#" class="auth-link">Esqueceu a palavra-passe?</a>
+                        </div>
+                        <button type="submit" id="btn-login" class="btn btn-primary w-100">Entrar</button>
+                        <div id="msg-erro" class="text-danger mt-2"></div>
+                      </form>
+                      
+                      <div class="auth-footer">
+                        Não tem uma conta? <a href="#" class="auth-link" id="showRegister">Registar-se</a>
+                      </div>
+                    </div>
+                    
+                    <!-- Register Tab -->
+                    <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
+                      <h3 class="mb-4">Criar uma conta</h3>
+                      
+                     <!-- Botões de login social -->
+<div class="social-login">
+  <button type="button" class="social-btn google" id="googleLoginBtn">
+    <i class="fab fa-google"></i> Google
+  </button>
+
+  <button type="button" class="social-btn github" id="githubLoginBtn">
+    <i class="fab fa-github"></i> GitHub
+  </button>
+</div>
+
+                      
+                      <!-- Divider -->
+                      <div class="divider">
+                        <span>ou</span>
+                      </div>
+                      
+                      <!-- Register Form -->
+                      <form id="form-register">
+                        <div class="row">
+                          <div class="col-md-6 mb-3">
+                            <label for="firstName" class="form-label">Nome</label>
+                            <input type="text" class="form-control" id="firstName" placeholder="O seu nome">
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <label for="lastName" class="form-label">Apelido</label>
+                            <input type="text" class="form-control" id="lastName" placeholder="O seu apelido">
+                          </div>
+                        </div>
+                        <div class="mb-3">
+                          <label for="username" class="form-label">Nome de utilizador</label>
+                          <div class="input-group">
+                            <span class="input-group-text">@</span>
+                            <input type="text" class="form-control" id="username" placeholder="O seu nome de utilizador">
+                          </div>
+                        </div>
+                        <div class="mb-3">
+                          <label for="registerEmail" class="form-label">Email</label>
+                          <input type="email" class="form-control" id="registerEmail" placeholder="O seu endereço de email">
+                        </div>
+                        <div class="mb-3">
+                          <label for="registerPassword" class="form-label">Palavra-passe</label>
+                          <input type="password" class="form-control" id="registerPassword" placeholder="Escolha uma palavra-passe">
+                        </div>
+                        <div class="mb-4">
+                          <label for="confirmPassword" class="form-label">Confirmar palavra-passe</label>
+                          <input type="password" class="form-control" id="confirmPassword" placeholder="Confirme a sua palavra-passe">
+                        </div>
+                        <div class="form-check mb-4">
+                          <input class="form-check-input" type="checkbox" id="termsCheck">
+                          <label class="form-check-label" for="termsCheck">
+                            Aceito os <a href="#" class="auth-link">Termos de Serviço</a> e a <a href="#" class="auth-link">Política de Privacidade</a>.
+                          </label>
+                        </div>
+                        <button type="submit" id="btn-register" class="btn btn-primary w-100">Criar conta</button>
+                      </form>
+                      
+                      <div class="auth-footer">
+                        Já tem uma conta? <a href="#" class="auth-link" id="showLogin">Entrar</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Authentication Image Section -->
+              <div class="col-md-5 order-md-1">
+                <div class="auth-img">
+                  <img src="/api/placeholder/250/250" alt="Sneakers" class="img-fluid mb-4" style="max-width: 250px;">
+                  <h2>Junte-se à comunidade ResellSneakers</h2>
+                  <p>Compre, venda e troque sapatilhas autênticas com entusiastas como você.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Registration Success Page (Hidden by default) -->
+  <div class="success-container" style="display: none;">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+          <i class="fas fa-check-circle success-icon"></i>
+          <h2 class="mb-3">Registo Concluído com Sucesso!</h2>
+          <p class="lead mb-4">Enviámos um email de confirmação para o seu endereço. Por favor, verifique a sua caixa de entrada e confirme o seu email para ativar a sua conta.</p>
+          <div class="d-grid gap-2">
+            <a href="home.html" class="btn btn-primary">Ir para a página inicial</a>
+            <small class="mt-3">Não recebeu o email? <a href="#" class="auth-link">Reenviar</a></small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <footer class="py-3">
+    <div class="container">
+      <p class="mb-0">© 2025 ResellSneakers. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Custom Script -->
+  <script>
+    // Toggle between login and register tabs
+    document.getElementById('showRegister').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.getElementById('register-tab').click();
+    });
+    
+    document.getElementById('showLogin').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.getElementById('login-tab').click();
+    });
+  </script>
+
+  <script type="module" src="script.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getAuth,
+      GithubAuthProvider,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      fetchSignInMethodsForEmail
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  
+    const firebaseConfig = {
+      apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
+      authDomain: "resalesneakers-e17cb.firebaseapp.com",
+      projectId: "resalesneakers-e17cb",
+      storageBucket: "resalesneakers-e17cb.appspot.com",
+      messagingSenderId: "698715655625",
+      appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
+    };
+    
+    const githubProvider = new GithubAuthProvider();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const githubBtn = document.getElementById("githubLoginBtn");
+    if (githubBtn) {
+  githubBtn.addEventListener("click", async () => {
+    try {
+      const result = await signInWithPopup(auth, githubProvider);
+      const user = result.user;
+      console.log("Login com GitHub:", user);
+      window.location.href = "home.html"; // Redireciona após login
+    } catch (error) {
+      alert("Erro no login com GitHub: " + error.message);
+    }
+  });
+}
+    // Mostra carregamento no botão
+    const setLoading = (btn, isLoading) => {
+      if (isLoading) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> A entrar...`;
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fab fa-google"></i> Google`;
+      }
+    };
+  
+    // Login com Google
+    document.querySelectorAll(".social-btn.google").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        setLoading(btn, true);
+        try {
+          await signInWithPopup(auth, provider);
+          window.location.href = "home.html";
+        } catch (error) {
+          if (error.code === "auth/account-exists-with-different-credential") {
+            const email = error.customData?.email;
+            const methods = await fetchSignInMethodsForEmail(auth, email);
+            alert(`Esse email já está registado com: ${methods[0]}. Tente usar esse método.`);
+          } else {
+            alert("Erro ao fazer login com Google: " + error.message);
+          }
+        } finally {
+          setLoading(btn, false);
+        }
+      });
+    });
+  
+    // Login com email/senha
+    const formLogin = document.getElementById("form-login");
+    if (formLogin) {
+      formLogin.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("loginEmail").value;
+        const senha = document.getElementById("loginPassword").value;
+  
+        try {
+          await signInWithEmailAndPassword(auth, email, senha);
+          window.location.href = "home.html";
+        } catch (error) {
+          alert("Erro: " + error.message);
+        }
+      });
+    }
+  
+    // Registo com email/senha
+    const formRegister = document.getElementById("form-register");
+    if (formRegister) {
+      formRegister.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("registerEmail").value;
+        const senha = document.getElementById("registerPassword").value;
+        const confirmar = document.getElementById("confirmPassword").value;
+  
+        if (senha !== confirmar) {
+          alert("As palavras-passe não coincidem.");
+          return;
+        }
+  
+        try {
+          await createUserWithEmailAndPassword(auth, email, senha);
+          window.location.href = "home.html";
+        } catch (error) {
+          alert("Erro ao criar conta: " + error.message);
+        }
+      });
+    }
+  </script> 
+</body>
+</html>

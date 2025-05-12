@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResellSneakers - O Meu Perfil</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.1/firebase-app.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.1/firebase-auth.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.1/firebase-firestore.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.1/firebase-storage.min.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        :root {
+            --primary-color: #ff5a5f;
+            --secondary-color: #484848;
+            --accent-color: #767676;
+            --background-color: #f7f7f7;
+            --card-background: #ffffff;
+            --success-color: #4CAF50;
+            --warning-color: #FFC107;
+            --danger-color: #f44336;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--secondary-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+        }
+
+        .nav-links a {
+            margin-left: 20px;
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .nav-links a.active {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--card-background);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 30px;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-info h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .profile-stats {
+            display: flex;
+            margin-top: 15px;
+        }
+
+        .stat {
+            margin-right: 25px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--accent-color);
+        }
+
+        .wallet-info {
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .wallet-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--success-color);
+        }
+
+        .wallet-label {
+            font-size: 14px;
+            color: var(--accent-color);
+        }
+
+        .add-funds-btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--primary-color);
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .status-active {
+            background-color: var(--success-color);
+        }
+
+        .status-sold {
+            background-color: var(--warning-color);
+            color: #333;
+        }
+
+        .status-pending {
+            background-color: var(--accent-color);
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .product-price {
+            color: var(--primary-color);
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .product-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .product-action-btn {
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .edit-btn {
+            background-color: #e1e1e1;
+            color: var(--secondary-color);
+        }
+
+        .delete-btn {
+            background-color: #ffebee;
+            color: var(--danger-color);
+        }
+
+        .edit-btn:hover {
+            background-color: #d1d1d1;
+        }
+
+        .delete-btn:hover {
+            background-color: #ffdde1;
+        }
+
+        .transaction-list {
+            margin-top: 20px;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .transaction-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-right: 15px;
+        }
+
+        .transaction-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .transaction-details {
+            flex: 1;
+        }
+
+        .transaction-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .transaction-date {
+            font-size: 12px;
+            color: var(--accent-color);
+        }
+
+        .transaction-amount {
+            margin-left: auto;
+            font-weight: bold;
+        }
+
+        .amount-positive {
+            color: var(--success-color);
+        }
+
+        .amount-negative {
+            color: var(--danger-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--accent-color);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .action-btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+        }
+
+        .action-btn:hover {
+            background-color: #e54a4f;
+        }
+
+        .settings-section {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-section h3 {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .save-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .save-btn:hover {
+            background-color: #e54a4f;
+        }
+
+        .danger-zone {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #fff8f8;
+            border-radius: 8px;
+            border: 1px solid #ffebee;
+        }
+
+        .danger-zone h3 {
+            color: var(--danger-color);
+        }
+
+        .danger-btn {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .danger-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            animation: fadeInOut 3s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Modal para adicionar fundos */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: var(--card-background);
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .close-modal {
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin-left: 10px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .modal-cancel {
+            background-color: #e1e1e1;
+            color: var(--secondary-color);
+        }
+
+        .modal-confirm {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-avatar {
+                margin: 0 auto 20px;
+            }
+
+            .profile-stats {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .wallet-info {
+                margin: 20px auto 0;
+                text-align: center;
+            }
+
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="logo">ResellSneakers</a>
+            <div class="nav-links">
+                <a href="index.html">Início</a>
+                <a href="listings.html">Produtos</a>
+                <a href="mensagens.html">Mensagens</a>
+                <a href="meu-perfil.html" class="active">Perfil</a>
+            </div>
+        </header>
+
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <img id="profile-avatar" src="/api/placeholder/120/120" alt="Avatar do Utilizador">
+            </div>
+            <div class="profile-info">
+                <h1 id="profile-name">A carregar...</h1>
+                <p id="profile-email">email@exemplo.com</p>
+                <p id="profile-joined">Membro desde <span id="join-date">...</span></p>
+
+                <div class="profile-stats">
+                    <div class="stat">
+                        <div class="stat-number" id="listings-count">0</div>
+                        <div class="stat-label">Produtos</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" id="sales-count">0</div>
+                        <div class="stat-label">Vendas</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" id="purchase-count">0</div>
+                        <div class="stat-label">Compras</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" id="rating">0.0</div>
+                        <div class="stat-label">Classificação</div>
+                    </div>
+                </div>
+            </div>
+            <div class="wallet-info">
+                <div class="wallet-label">Saldo na Carteira</div>
+                <div class="wallet-amount" id="wallet-balance">€0.00</div>
+                <button class="add-funds-btn" id="add-funds-btn">Adicionar Fundos</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="my-listings">Os Meus Produtos</div>
+            <div class="tab" data-tab="purchases">Compras</div>
+            <div class="tab" data-tab="trades">Trocas</div>
+            <div class="tab" data-tab="transactions">Transações</div>
+            <div class="tab" data-tab="settings">Definições</div>
+        </div>
+
+        <!-- Meus Produtos -->
+        <div class="tab-content active" id="my-listings">
+            <h2>Os Meus Produtos</h2>
+            <div class="grid-container" id="listings-container">
+                <!-- Produtos serão carregados aqui -->
+                <div class="empty-state" id="empty-listings">
+                    <i>👟</i>
+                    <h3>Sem Produtos Publicados</h3>
+                    <p>Comece a vender os seus sapatilhas favoritos.</p>
+                    <a href="add-listing.html" class="action-btn">Adicionar Produto</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compras -->
+        <div class="tab-content" id="purchases">
+            <h2>As Minhas Compras</h2>
+            <div class="grid-container" id="purchases-container">
+                <!-- Compras serão carregadas aqui -->
+                <div class="empty-state" id="empty-purchases">
+                    <i>🛒</i>
+                    <h3>Sem Compras</h3>
+                    <p>Os produtos que comprar aparecerão aqui.</p>
+                    <a href="listings.html" class="action-btn">Explorar Produtos</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trocas -->
+        <div class="tab-content" id="trades">
+            <h2>As Minhas Trocas</h2>
+            <div class="grid-container" id="trades-container">
+                <!-- Trocas serão carregadas aqui -->
+                <div class="empty-state" id="empty-trades">
+                    <i>🔄</i>
+                    <h3>Sem Trocas</h3>
+                    <p>O histórico das suas trocas aparecerá aqui.</p>
+                    <a href="listings.html" class="action-btn">Explorar Produtos</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transações -->
+        <div class="tab-content" id="transactions">
+            <h2>Transações da Carteira</h2>
+            <div class="transaction-list" id="transactions-container">
+                <!-- Transações serão carregadas aqui -->
+                <div class="empty-state" id="empty-transactions">
+                    <i>💰</i>
+                    <h3>Sem Transações</h3>
+                    <p>O histórico das suas transações aparecerá aqui.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Definições -->
+        <div class="tab-content" id="settings">
+            <h2>Definições da Conta</h2>
+            
+            <div class="settings-section">
+                <h3>Informações Pessoais</h3>
+                <div class="form-group">
+                    <label for="display-name">Nome de Apresentação</label>
+                    <input type="text" id="display-name" placeholder="O seu nome">
+                </div>
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" placeholder="O seu e-mail" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Telefone</label>
+                    <input type="tel" id="phone" placeholder="O seu número de telefone">
+                </div>
+                <div class="form-group">
+                    <label for="location">Localização</label>
+                    <input type="text" id="location" placeholder="A sua cidade/região">
+                </div>
+                <button class="save-btn" id="save-info-btn">Guardar Alterações</button>
+            </div>
+
+            <div class="settings-section">
+                <h3>Alterar Fotografia</h3>
+                <div class="form-group">
+                    <label for="avatar-upload">Carregar Nova Fotografia</label>
+                    <input type="file" id="avatar-upload" accept="image/*">
+                </div>
+                <button class="save-btn" id="save-avatar-btn">Atualizar Fotografia</button>
+            </div>
+
+            <div class="settings-section">
+                <h3>Preferências</h3>
+                <div class="form-group">
+                    <label for="notification-preference">Notificações</label>
+                    <select id="notification-preference">
+                        <option value="all">Todas as notificações</option>
+                        <option value="important">Apenas importantes</option>
+                        <option value="none">Sem notificações</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="language-preference">Idioma</label>
+                    <select id="language-preference">
+                        <option value="pt">Português</option>
+                        <option value="en">English</option>
+                        <option value="es">Español</option>
+                    </select>
+                </div>
+                <button class="save-btn" id="save-preferences-btn">Guardar Preferências</button>
+            </div>
+
+            <div class="settings-section">
+                <h3>Segurança</h3>
+                <div class="form-group">
+                    <label for="current-password">Password Atual</label>
+                    <input type="password" id="current-password" placeholder="Introduza a sua password atual">
+                </div>
+                <div class="form-group">
+                    <label for="new-password">Nova Password</label>
+                    <input type="password" id="new-password" placeholder="Introduza a nova password">
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirmar Password</label>
+                    <input type="password" id="confirm-password" placeholder="Confirme a nova password">
+                </div>
+                <button class="save-btn" id="change-password-btn">Atualizar Password</button>
+            </div>
+
+            <div class="settings-section danger-zone">
+                <h3>Zona de Perigo</h3>
+                <p>As ações abaixo são permanentes e não podem ser desfeitas.</p>
+                <div style="margin-top: 20px;">
+                    <button class="danger-btn" id="delete-account-btn">Eliminar Conta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar fundos -->
+    <div id="add-funds-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Adicionar Fundos</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="form-group">
+                <label for="funds-amount">Montante (€)</label>
+                <input type="number" id="funds-amount" min="1" max="1000" step="1" value="50">
+            </div>
+            <div class="form-group">
+                <label for="payment-method">Método de Pagamento</label>
+                <select id="payment-method">
+                    <option value="card">Cartão de Crédito/Débito</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="mbway">MB WAY</option>
+                    <option value="transfer">Transferência Bancária</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-cancel" id="cancel-add-funds">Cancelar</button>
+                <button class="modal-btn modal-confirm" id="confirm-add-funds">Adicionar Fundos</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para confirmar eliminação da conta -->
+    <div id="delete-account-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Eliminar Conta</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <p>Tem certeza que deseja eliminar permanentemente a sua conta? Esta ação não pode ser desfeita.</p>
+            <div class="form-group">
+                <label for="delete-confirm-password">Introduza a sua password para confirmar</label>
+                <input type="password" id="delete-confirm-password" placeholder="A sua password">
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-cancel" id="cancel-delete-account">Cancelar</button>
+                <button class="modal-btn modal-confirm" id="confirm-delete-account" style="background-color: var(--danger-color);">Eliminar Permanentemente</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast-message"></div>
+
+    <script>
+        // Inicializar Firebase a partir do arquivo firebase-config.js
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // Verificar autenticação
+        document.addEventListener('DOMContentLoaded', function() {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    // Utilizador autenticado, carregar dados
+                    loadUserProfile(user);
+                    loadUserListings(user.uid);
+                    loadUserPurchases(user.uid);
+                    loadUserTrades(user.uid);
+                    loadUserTransactions(user.uid);
+                } else {
+                    // Utilizador não autenticado, redirecionar para login
+                    window.location.href = 'login.html';
+                }
+            });
+
+            // Setup dos tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Atualizar classes ativas
+                    document.querySelector('.tab.active').classList.remove('active');
+                    tab.classList.add('active');
+                    
+                    // Mostrar conteúdo correspondente
+                    const tabId = tab.getAttribute('data-tab');
+                    document.querySelector('.tab-content.active').classList.remove('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // Setup dos botões de guardar e outras ações
+            document.getElementById('save-info-btn').addEventListener('click', saveUserInfo);
+            document.getElementById('save-avatar-btn').addEventListener('click', updateUserAvatar);
+            document.getElementById('save-preferences-btn').addEventListener('click', saveUserPreferences);
+            document.getElementById('change-password-btn').addEventListener('click', changeUserPassword);
+            document.getElementById('delete-account-btn').addEventListener('click', showDeleteConfirmation);
+            document.getElementById('add-funds-btn').addEventListener('click', showAddFundsDialog);
+            
+            // Setup dos modais
+            setupModals();
+        });
+
+        // Carregar perfil do utilizador
+        function loadUserProfile(user) {
+            db.collection('users').doc(user.uid).get().then(doc => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    
+                    // Preencher informações de perfil
+                    document.getElementById('profile-name').textContent = userData.displayName || 'Utilizador';
+                    document.getElementById('profile-email').textContent = user.email;
+                    
+                    // Formatar data de registo
+                    const joinDate = userData.createdAt ? 
+                        new Date(userData.createdAt.toDate()).toLocaleDateString('pt-PT', {
+                            day: 'numeric', 
+                            month: 'long', 
+                            year: 'numeric'
+                        }) : 'N/A';
+                    document.getElementById('join-date').textContent = joinDate;
+                    
+                    // Avatar
+                    if (userData.avatarUrl) {
+                        document.getElementById('profile-avatar').src = userData.avatarUrl;
+                    }
+                    
+                    // Estatísticas
+                    document.getElementById('listings-count').textContent = userData.listingsCount || 0;
+                    document.getElementById('sales-count').textContent = userData.salesCount || 0;
+                    document.getElementById('purchase-count').textContent = userData.purchaseCount || 0;
+                    document.getElementById('rating').textContent = userData.rating ? userData.rating.toFixed(1) : '0.0';
+                    
+                    // Saldo da carteira
+                    document.getElementById('wallet-balance').textContent = 
+                        '€' + (userData.walletBalance ? userData.walletBalance.toFixed(2) : '0.00');
+                    
+                    // Preencher campos de definições
+                    document.getElementById('display-name').value = userData.displayName || '';
+                    document.getElementById('email').value = user.email;
+                    document.getElementById('phone').value = userData.phone || '';
+                    document.getElementById('location').value = userData.location || '';
+                    
+                    // Preencher preferências
+                    if (userData.preferences) {
+                        document.getElementById('notification-preference').value = userData.preferences.notifications || 'all';
+                        document.getElementById('language-preference').value = userData.preferences.language || 'pt';
+                    }
+                } else {
+                    // Criar documento de usuário se não existir
+                    db.collection('users').doc(user.uid).set({
+                        displayName: user.displayName || 'Utilizador',
+                        email: user.email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        walletBalance: 0,
+                        listingsCount: 0,
+                        salesCount: 0,
+                        purchaseCount: 0,
+                        rating: 0,
+                        preferences: {
+                            notifications: 'all',
+                            language: 'pt'
+                        }
+                    });
+                }
+            }).catch(error => {
+                showToast('Erro ao carregar dados: ' + error.message);
+            });
+        }
+
+        // Carregar produtos do utilizador
+        function loadUserListings(userId) {
+            db.collection('listings')
+                .where('sellerId', '==', userId)
+                .orderBy('createdAt', 'desc')
+                .get()
+                .then(snapshot => {
+                    const container = document.getElementById('listings-container');
+                    const emptyState = document.getElementById('empty-listings');
+                    
+                    if (snapshot.empty) {
+                        emptyState.style.display = 'block';
+                        return;
+                    }
+                    
+                    emptyState.style.display = 'none';
+                    container.innerHTML = '';
+                    
+                    snapshot.forEach(doc => {
+                        const listing = doc.data();
+                        const listingId = doc.id;
+                        
+                        const statusClass = listing.status === 'active' ? 'status-active' : 
+                                           (listing.status === 'sold' ? 'status-sold' : 'status-pending');
+                        const statusText = listing.status === 'active' ? 'Ativo' : 
+                                          (listing.status === 'sold' ? 'Vendido' : 'Pendente');
+                        
+                        const productCard = document.createElement('div');
+                        productCard.className = 'product-card';
+                        productCard.innerHTML = `
+                            <div class="product-image">
+                                <img src="${listing.imageUrl || '/api/placeholder/280/200'}" alt="${listing.title}">
+                                <div class="product-status ${statusClass}">${statusText}</div>
+                            </div>
+                            <div class="product-info">
+                                <div class="product-title">${listing.title}</div>
+                                <div class="product-price">€${listing.price.toFixed(2)}</div>
+                                <div style="font-size: 12px; color: var(--accent-color);">
+                                    ${listing.brand} • Tamanho ${listing.size}
+                                </div>
+                                <div class="product-actions">
+                                    <button class="product-action-btn edit-btn" data-id="${listingId}">Editar</button>
+                                    <button class="product-action-btn delete-btn" data-id="${listingId}">Eliminar</button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        container.appendChild(productCard);
+                        
+                        // Adicionar event listeners para os botões
+                        productCard.querySelector('.edit-btn').addEventListener('click', function() {
+                            window.location.href = `edit-listing.html?id=${listingId}`;
+                        });
+                        
+                        productCard.querySelector('.delete-btn').addEventListener('click', function() {
+                            deleteListing(listingId);
+                        });
+                    });
+                })
+                .catch(error => {
+                    showToast('Erro ao carregar produtos: ' + error.message);
+                });
+        }
+
+        // Carregar compras do utilizador
+        function loadUserPurchases(userId) {
+            db.collection('purchases')
+                .where('buyerId', '==', userId)
+                .orderBy('purchaseDate', 'desc')
+                .get()
+                .then(snapshot => {
+                    const container = document.getElementById('purchases-container');
+                    const emptyState = document.getElementById('empty-purchases');
+                    
+                    if (snapshot.empty) {
+                        emptyState.style.display = 'block';
+                        return;
+                    }
+                    
+                    emptyState.style.display = 'none';
+                    container.innerHTML = '';
+                    
+                    snapshot.forEach(doc => {
+                        const purchase = doc.data();
+                        
+                        // Carregar informações do produto
+                        db.collection('listings').doc(purchase.listingId).get().then(listingDoc => {
+                            if (listingDoc.exists) {
+                                const listing = listingDoc.data();
+                                
+                                const productCard = document.createElement('div');
+                                productCard.className = 'product-card';
+                                productCard.innerHTML = `
+                                    <div class="product-image">
+                                        <img src="${listing.imageUrl || '/api/placeholder/280/200'}" alt="${listing.title}">
+                                        <div class="product-status status-sold">Comprado</div>
+                                    </div>
+                                    <div class="product-info">
+                                        <div class="product-title">${listing.title}</div>
+                                        <div class="product-price">€${listing.price.toFixed(2)}</div>
+                                        <div style="font-size: 12px; color: var(--accent-color);">
+                                            Comprado em ${new Date(purchase.purchaseDate.toDate()).toLocaleDateString('pt-PT')}
+                                        </div>
+                                    </div>
+                                `;
+                                
+                                container.appendChild(productCard);
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    showToast('Erro ao carregar compras: ' + error.message);
+                });
+        }
+
+        // Carregar trocas do utilizador
+        function loadUserTrades(userId) {
+            db.collection('trades')
+                .where('participants', 'array-contains', userId)
+                .orderBy('createdAt', 'desc')
+                .get()
+                .then(snapshot => {
+                    const container = document.getElementById('trades-container');
+                    const emptyState = document.getElementById('empty-trades');
+                    
+                    if (snapshot.empty) {
+                        emptyState.style.display = 'block';
+                        return;
+                    }
+                    
+                    emptyState.style.display = 'none';
+                    container.innerHTML = '';
+                    
+                    snapshot.forEach(doc => {
+                        const trade = doc.data();
+                        const tradeId = doc.id;
+                        
+                        const statusClass = trade.status === 'pending' ? 'status-pending' : 
+                                          (trade.status === 'completed' ? 'status-active' : 'status-sold');
+                        const statusText = trade.status === 'pending' ? 'Pendente' : 
+                                          (trade.status === 'completed' ? 'Concluída' : 'Cancelada');
+                        
+                        // Determinar se o utilizador é o iniciador ou o receptor
+                        const isInitiator = trade.initiatorId === userId;
+                        const otherUserId = isInitiator ? trade.receiverId : trade.initiatorId;
+                        
+                        // Carregar informações do outro utilizador
+                        db.collection('users').doc(otherUserId).get().then(userDoc => {
+                            if (userDoc.exists) {
+                                const otherUser = userDoc.data();
+                                
+                                const tradeCard = document.createElement('div');
+                                tradeCard.className = 'product-card';
+                                tradeCard.innerHTML = `
+                                    <div class="product-image">
+                                        <img src="${trade.imageUrl || '/api/placeholder/280/200'}" alt="Troca">
+                                        <div class="product-status ${statusClass}">${statusText}</div>
+                                    </div>
+                                    <div class="product-info">
+                                        <div class="product-title">Troca com ${otherUser.displayName || 'Utilizador'}</div>
+                                        <div style="font-size: 14px;">${isInitiator ? 'Você ofereceu' : 'Recebeu oferta de'}: ${trade.offerDescription}</div>
+                                        <div style="font-size: 12px; color: var(--accent-color);">
+                                            Criado em ${new Date(trade.createdAt.toDate()).toLocaleDateString('pt-PT')}
+                                        </div>
+                                        ${trade.status === 'pending' ? `
+                                        <div class="product-actions">
+                                            <button class="product-action-btn edit-btn" data-id="${tradeId}">Ver Detalhes</button>
+                                            ${!isInitiator ? `
+                                            <button class="product-action-btn accept-btn" data-id="${tradeId}">Aceitar</button>
+                                            ` : ''}
+                                            <button class="product-action-btn delete-btn" data-id="${tradeId}">Recusar</button>
+                                        </div>
+                                        ` : ''}
+                                    </div>
+                                `;
+                                
+                                container.appendChild(tradeCard);
+                                
+                                // Adicionar event listeners para os botões
+                                if (trade.status === 'pending') {
+                                    tradeCard.querySelector('.edit-btn').addEventListener('click', function() {
+                                        window.location.href = `trade-details.html?id=${tradeId}`;
+                                    });
+                                    
+                                    if (!isInitiator) {
+                                        tradeCard.querySelector('.accept-btn').addEventListener('click', function() {
+                                            acceptTrade(tradeId);
+                                        });
+                                    }
+                                    
+                                    tradeCard.querySelector('.delete-btn').addEventListener('click', function() {
+                                        rejectTrade(tradeId);
+                                    });
+                                }
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    showToast('Erro ao carregar trocas: ' + error.message);
+                });
+        }
+
+        // Carregar transações do utilizador
+        function loadUserTransactions(userId) {
+            db.collection('transactions')
+                .where('userId', '==', userId)
+                .orderBy('date', 'desc')
+                .get()
+                .then(snapshot => {
+                    const container = document.getElementById('transactions-container');
+                    const emptyState = document.getElementById('empty-transactions');
+                    
+                    if (snapshot.empty) {
+                        emptyState.style.display = 'block';
+                        return;
+                    }
+                    
+                    emptyState.style.display = 'none';
+                    container.innerHTML = '';
+                    
+                    snapshot.forEach(doc => {
+                        const transaction = doc.data();
+                        
+                        const isPositive = transaction.type === 'deposit' || transaction.type === 'sale';
+                        const amountClass = isPositive ? 'amount-positive' : 'amount-negative';
+                        const amountPrefix = isPositive ? '+' : '-';
+                        
+                        let description = '';
+                        let iconSrc = '';
+                        
+                        switch(transaction.type) {
+                            case 'deposit':
+                                description = 'Depósito de fundos';
+                                iconSrc = '/api/placeholder/60/60'; // Placeholder para ícone de depósito
+                                break;
+                            case 'withdrawal':
+                                description = 'Levantamento de fundos';
+                                iconSrc = '/api/placeholder/60/60'; // Placeholder para ícone de levantamento
+                                break;
+                            case 'purchase':
+                                description = `Compra: ${transaction.itemName || 'Produto'}`;
+                                iconSrc = transaction.itemImage || '/api/placeholder/60/60';
+                                break;
+                            case 'sale':
+                                description = `Venda: ${transaction.itemName || 'Produto'}`;
+                                iconSrc = transaction.itemImage || '/api/placeholder/60/60';
+                                break;
+                            default:
+                                description = 'Transação';
+                                iconSrc = '/api/placeholder/60/60';
+                        }
+                        
+                        const transactionItem = document.createElement('div');
+                        transactionItem.className = 'transaction-item';
+                        transactionItem.innerHTML = `
+                            <div class="transaction-image">
+                                <img src="${iconSrc}" alt="${description}">
+                            </div>
+                            <div class="transaction-details">
+                                <div class="transaction-title">${description}</div>
+                                <div class="transaction-date">${new Date(transaction.date.toDate()).toLocaleDateString('pt-PT', {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}</div>
+                            </div>
+                            <div class="transaction-amount ${amountClass}">${amountPrefix}€${Math.abs(transaction.amount).toFixed(2)}</div>
+                        `;
+                        
+                        container.appendChild(transactionItem);
+                    });
+                })
+                .catch(error => {
+                    showToast('Erro ao carregar transações: ' + error.message);
+                });
+        }
+
+        // Salvar informações pessoais
+        function saveUserInfo() {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            const displayName = document.getElementById('display-name').value;
+            const phone = document.getElementById('phone').value;
+            const location = document.getElementById('location').value;
+            
+            db.collection('users').doc(user.uid).update({
+                displayName: displayName,
+                phone: phone,
+                location: location,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                // Atualizar exibição do nome no perfil
+                document.getElementById('profile-name').textContent = displayName;
+                showToast('Informações atualizadas com sucesso!');
+            }).catch(error => {
+                showToast('Erro ao salvar informações: ' + error.message);
+            });
+        }
+
+        // Atualizar avatar do utilizador
+        function updateUserAvatar() {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            const fileInput = document.getElementById('avatar-upload');
+            if (fileInput.files.length === 0) {
+                showToast('Selecione uma imagem para atualizar.');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            
+            // Validar tipo de arquivo
+            if (!file.type.match('image.*')) {
+                showToast('Por favor, selecione uma imagem válida.');
+                return;
+            }
+            
+            // Criar referência no storage e fazer upload
+            const storageRef = storage.ref();
+            const avatarRef = storageRef.child(`user-avatars/${user.uid}`);
+            
+            avatarRef.put(file).then(snapshot => {
+                // Obter URL do arquivo enviado
+                return snapshot.ref.getDownloadURL();
+            }).then(downloadURL => {
+                // Atualizar URL do avatar no documento do utilizador
+                return db.collection('users').doc(user.uid).update({
+                    avatarUrl: downloadURL,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }).then(() => {
+                // Atualizar avatar na interface
+                document.getElementById('profile-avatar').src = URL.createObjectURL(file);
+                showToast('Fotografia atualizada com sucesso!');
+                fileInput.value = '';
+            }).catch(error => {
+                showToast('Erro ao atualizar fotografia: ' + error.message);
+            });
+        }
+
+        // Salvar preferências do utilizador
+        function saveUserPreferences() {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            const notificationPref = document.getElementById('notification-preference').value;
+            const languagePref = document.getElementById('language-preference').value;
+            
+            db.collection('users').doc(user.uid).update({
+                'preferences.notifications': notificationPref,
+                'preferences.language': languagePref,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                showToast('Preferências atualizadas com sucesso!');
+            }).catch(error => {
+                showToast('Erro ao salvar preferências: ' + error.message);
+            });
+        }
+
+        // Alterar password do utilizador
+        function changeUserPassword() {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            // Validar inputs
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showToast('Preencha todos os campos de password.');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showToast('As passwords não coincidem.');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showToast('A nova password deve ter pelo menos 6 caracteres.');
+                return;
+            }
+            
+            // Reautenticar utilizador
+            const credential = firebase.auth.EmailAuthProvider.credential(
+                user.email, 
+                currentPassword
+            );
+            
+            user.reauthenticateWithCredential(credential).then(() => {
+                // Atualizar password
+                return user.updatePassword(newPassword);
+            }).then(() => {
+                showToast('Password atualizada com sucesso!');
+                
+                // Limpar campos
+                document.getElementById('current-password').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-password').value = '';
+            }).catch(error => {
+                showToast('Erro: ' + error.message);
+            });
+        }
+
+        // Eliminar produto
+        function deleteListing(listingId) {
+            if (confirm('Tem certeza que deseja eliminar este produto?')) {
+                db.collection('listings').doc(listingId).delete().then(() => {
+                    showToast('Produto eliminado com sucesso!');
+                    
+                    // Atualizar contagem de produtos
+                    const user = auth.currentUser;
+                    db.collection('users').doc(user.uid).get().then(doc => {
+                        if (doc.exists) {
+                            const userData = doc.data();
+                            const newCount = Math.max(0, (userData.listingsCount || 1) - 1);
+                            
+                            db.collection('users').doc(user.uid).update({
+                                listingsCount: newCount
+                            });
+                            
+                            document.getElementById('listings-count').textContent = newCount;
+                        }
+                    });
+                    
+                    // Recarregar produtos
+                    loadUserListings(auth.currentUser.uid);
+                }).catch(error => {
+                    showToast('Erro ao eliminar produto: ' + error.message);
+                });
+            }
+        }
+
+        // Aceitar troca
+        function acceptTrade(tradeId) {
+            db.collection('trades').doc(tradeId).update({
+                status: 'completed',
+                completedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                showToast('Troca aceite com sucesso!');
+                loadUserTrades(auth.currentUser.uid);
+            }).catch(error => {
+                showToast('Erro ao aceitar troca: ' + error.message);
+            });
+        }
+
+        // Recusar troca
+        function rejectTrade(tradeId) {
+            db.collection('trades').doc(tradeId).update({
+                status: 'rejected',
+                rejectedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                showToast('Troca recusada.');
+                loadUserTrades(auth.currentUser.uid);
+            }).catch(error => {
+                showToast('Erro ao recusar troca: ' + error.message);
+            });
+        }
+
+        // Configurar modais
+        function setupModals() {
+            // Modal de adicionar fundos
+            const addFundsModal = document.getElementById('add-funds-modal');
+            const closeAddFunds = addFundsModal.querySelector('.close-modal');
+            const cancelAddFunds = document.getElementById('cancel-add-funds');
+            const confirmAddFunds = document.getElementById('confirm-add-funds');
+            
+            closeAddFunds.addEventListener('click', () => {
+                addFundsModal.style.display = 'none';
+            });
+            
+            cancelAddFunds.addEventListener('click', () => {
+                addFundsModal.style.display = 'none';
+            });
+            
+            confirmAddFunds.addEventListener('click', addFunds);
+            
+            // Modal de eliminar conta
+            const deleteAccountModal = document.getElementById('delete-account-modal');
+            const closeDeleteAccount = deleteAccountModal.querySelector('.close-modal');
+            const cancelDeleteAccount = document.getElementById('cancel-delete-account');
+            const confirmDeleteAccount = document.getElementById('confirm-delete-account');
+            
+            closeDeleteAccount.addEventListener('click', () => {
+                deleteAccountModal.style.display = 'none';
+            });
+            
+            cancelDeleteAccount.addEventListener('click', () => {
+                deleteAccountModal.style.display = 'none';
+            });
+            
+            confirmDeleteAccount.addEventListener('click', deleteAccount);
+            
+            // Fechar modais ao clicar fora
+            window.addEventListener('click', (event) => {
+                if (event.target === addFundsModal) {
+                    addFundsModal.style.display = 'none';
+                }
+                if (event.target === deleteAccountModal) {
+                    deleteAccountModal.style.display = 'none';
+                }
+            });
+        }
+
+        // Mostrar modal de adicionar fundos
+        function showAddFundsDialog() {
+            const modal = document.getElementById('add-funds-modal');
+            modal.style.display = 'block';
+        }
+
+        // Adicionar fundos à carteira
+        function addFunds() {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            const amount = parseFloat(document.getElementById('funds-amount').value);
+            const paymentMethod = document.getElementById('payment-method').value;
+            
+            if (isNaN(amount) || amount <= 0) {
+                showToast('Por favor, introduza um valor válido.');
+                return;
+            }
+            
+            // Em produção, aqui seria feita a integração com um gateway de pagamento
+            // Para este exemplo, adicionamos fundos diretamente
+            
+            // Obter saldo atual
+            db.collection('users').doc(user.uid).get().then(doc => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    const currentBalance = userData.walletBalance || 0;
+                    const newBalance = currentBalance + amount;
+                    
+                    // Atualizar saldo
+                    return db.collection('users').doc(user.uid).update({
+                        walletBalance: newBalance,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            }).then(() => {
+                // Criar registo de transação
+                return db.collection('transactions').add({
+                    userId: user.uid,
+                    type: 'deposit',
+                    amount: amount,
+                    paymentMethod: paymentMethod,
+                    date: firebase.firestore.FieldValue.serverTimestamp(),
+                    description: 'Depósito de fundos'
+                });
+            }).then(() => {
+                // Fechar modal e mostrar mensagem
+                document.getElementById('add-funds-modal').style.display = 'none';
+                showToast('Fundos adicionados com sucesso!');
+                
+                // Atualizar saldo exibido
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        document.getElementById('wallet-balance').textContent = 
+                            '€' + (userData.walletBalance ? userData.walletBalance.toFixed(2) : '0.00');
+                    }
+                });
+                
+                // Recarregar transações
+                loadUserTransactions(user.uid);
+            }).catch(error => {
+                showToast('Erro ao adicionar fundos: ' + error.message);
+            });
+        }
+
+        // Mostrar confirmação de eliminação de conta
+        function showDeleteConfirmation() {
+            const modal = document.getElementById('delete-account-modal');
+            modal.style.display = 'block';
+        }
+
+        // Eliminar conta de utilizador
+        function deleteAccount() {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            const password = document.getElementById('delete-confirm-password').value;
+            
+            if (!password) {
+                showToast('Introduza a sua password para confirmar.');
+                return;
+            }
+            
+            // Reautenticar utilizador
+            const credential = firebase.auth.EmailAuthProvider.credential(
+                user.email, 
+                password
+            );
+            
+            user.reauthenticateWithCredential(credential).then(() => {
+                // Eliminar dados do utilizador
+                const batch = db.batch();
+                
+                // Referências para documentos a eliminar
+                const userRef = db.collection('users').doc(user.uid);
+                
+                // Adicionar operação de eliminação ao batch
+                batch.delete(userRef);
+                
+                // Commit do batch
+                return batch.commit();
+            }).then(() => {
+                // Eliminar conta do Firebase Auth
+                return user.delete();
+            }).then(() => {
+                alert('A sua conta foi eliminada com sucesso. Vai ser redirecionado para a página inicial.');
+                window.location.href = 'index.html';
+            }).catch(error => {
+                showToast('Erro ao eliminar conta: ' + error.message);
+            });
+        }
+
+        // Mostrar mensagens toast
+        function showToast(message) {
+            const toast = document.getElementById('toast-message');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
