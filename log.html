@@ -497,96 +497,33 @@
       messagingSenderId: "698715655625",
       appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
     };
-    
-    const githubProvider = new GithubAuthProvider();
+  
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-
-    const githubBtn = document.getElementById("githubLoginBtn");
-    if (githubBtn) {
-  githubBtn.addEventListener("click", async () => {
-    try {
-      const result = await signInWithPopup(auth, githubProvider);
-      const user = result.user;
-      console.log("Login com GitHub:", user);
-      window.location.href = "home.html"; // Redireciona após login
-    } catch (error) {
-      alert("Erro no login com GitHub: " + error.message);
-    }
-  });
-}
-    // Mostra carregamento no botão
-    const setLoading = (btn, isLoading) => {
-      if (isLoading) {
-        btn.disabled = true;
-        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> A entrar...`;
-      } else {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fab fa-google"></i> Google`;
-      }
-    };
+    const googleProvider = new GoogleAuthProvider();
+    const githubProvider = new GithubAuthProvider();
   
-    // Login com Google
-    document.querySelectorAll(".social-btn.google").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        setLoading(btn, true);
-        try {
-          await signInWithPopup(auth, provider);
-          window.location.href = "home.html";
-        } catch (error) {
-          if (error.code === "auth/account-exists-with-different-credential") {
-            const email = error.customData?.email;
-            const methods = await fetchSignInMethodsForEmail(auth, email);
-            alert(`Esse email já está registado com: ${methods[0]}. Tente usar esse método.`);
-          } else {
-            alert("Erro ao fazer login com Google: " + error.message);
-          }
-        } finally {
-          setLoading(btn, false);
-        }
-      });
+    // Botão Google
+    document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        console.log("Usuário Google logado:", result.user);
+        window.location.href = "home.html";
+      } catch (error) {
+        console.error("Erro no login com Google:", error.message);
+      }
     });
   
-    // Login com email/senha
-    const formLogin = document.getElementById("form-login");
-    if (formLogin) {
-      formLogin.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const email = document.getElementById("loginEmail").value;
-        const senha = document.getElementById("loginPassword").value;
-  
-        try {
-          await signInWithEmailAndPassword(auth, email, senha);
-          window.location.href = "home.html";
-        } catch (error) {
-          alert("Erro: " + error.message);
-        }
-      });
-    }
-  
-    // Registo com email/senha
-    const formRegister = document.getElementById("form-register");
-    if (formRegister) {
-      formRegister.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const email = document.getElementById("registerEmail").value;
-        const senha = document.getElementById("registerPassword").value;
-        const confirmar = document.getElementById("confirmPassword").value;
-  
-        if (senha !== confirmar) {
-          alert("As palavras-passe não coincidem.");
-          return;
-        }
-  
-        try {
-          await createUserWithEmailAndPassword(auth, email, senha);
-          window.location.href = "home.html";
-        } catch (error) {
-          alert("Erro ao criar conta: " + error.message);
-        }
-      });
-    }
-  </script> 
+    // Botão GitHub
+    document.getElementById("githubLoginBtn").addEventListener("click", async () => {
+      try {
+        const result = await signInWithPopup(auth, githubProvider);
+        console.log("Usuário GitHub logado:", result.user);
+        window.location.href = "home.html";
+      } catch (error) {
+        console.error("Erro no login com GitHub:", error.message);
+      }
+    });
+  </script>  
 </body>
 </html>
