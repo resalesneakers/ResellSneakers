@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Produto - ResellSneakers</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding-top: 2rem;
+    }
+    .container {
+      max-width: 600px;
+    }
+    .preview-multiplas-imagens {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .preview-multiplas-imagens img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2 class="mb-4">Adicionar Novo Produto</h2>
+    <form id="formAdicionarProduto">
+      <div class="mb-3">
+        <label for="nome" class="form-label">Nome do Produto</label>
+        <input type="text" class="form-control" id="nome" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="preco" class="form-label">Preço (€)</label>
+        <input type="number" class="form-control" id="preco" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="condicao" class="form-label">Condição</label>
+        <select class="form-select" id="condicao" required>
+          <option value="">Seleciona...</option>
+          <option value="Novo">Novo</option>
+          <option value="Usado - Excelente">Usado - Excelente</option>
+          <option value="Usado - Bom">Usado - Bom</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="disponibilidade" class="form-label">Disponibilidade</label>
+        <select class="form-select" id="disponibilidade" required>
+          <option value="">Seleciona...</option>
+          <option value="venda">Venda</option>
+          <option value="troca">Troca</option>
+          <option value="venda e troca">Venda e Troca</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="imagemProduto" class="form-label">Imagens (até 6)</label>
+        <input type="file" class="form-control" id="imagemProduto" accept="image/*" multiple required>
+        <div class="preview-multiplas-imagens" id="previewContainer"></div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Adicionar Produto</button>
+    </form>
+
+    <div id="mensagem" class="mt-3 text-success fw-bold"></div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
+      authDomain: "resalesneakers-e17cb.firebaseapp.com",
+      projectId: "resalesneakers-e17cb",
+      storageBucket: "resalesneakers-e17cb.appspot.com",
+      messagingSenderId: "698715655625",
+      appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    const imagemInput = document.getElementById("imagemProduto");
+    const previewContainer = document.getElementById("previewContainer");
+
+    imagemInput.addEventListener("change", () => {
+      previewContainer.innerHTML = "";
+      const files = Array.from(imagemInput.files).slice(0, 6);
+
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          previewContainer.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    document.getElementById("formAdicionarProduto").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const user = auth.currentUser;
+      if (!user) {
+        alert("É necessário estar autenticado.");
+        return;
+      }
+
+      const nome = document.getElementById("nome").value;
+      const preco = parseFloat(document.getElementById("preco").value);
+      const condicao = document.getElementById("condicao").value;
+      const disponibilidade = document.getElementById("disponibilidade").value;
+      const imagens = Array.from(imagemInput.files).slice(0, 6);
+
+      if (imagens.length === 0) {
+        alert("Por favor, selecione pelo menos uma imagem.");
+        return;
+      }
+
+      try {
+        const urls = [];
+
+        for (const img of imagens) {
+          const nomeImagem = `${Date.now()}_${img.name}`;
+          const storageRef = storage.ref().child(`produtos/${user.uid}/${nomeImagem}`);
+          const snapshot = await storageRef.put(img);
+          const url = await snapshot.ref.getDownloadURL();
+          urls.push(url);
+        }
+
+        await db.collection("produtos").add({
+          nome,
+          preco,
+          condicao,
+          disponibilidade,
+          imagemPrincipal: urls[0],
+          imagens: urls,
+          vendedorId: user.uid,
+          data: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        document.getElementById("mensagem").textContent = "Produto adicionado com sucesso!";
+        document.getElementById("formAdicionarProduto").reset();
+        previewContainer.innerHTML = "";
+      } catch (error) {
+        alert("Erro ao adicionar produto: " + error.message);
+      }
+    });
+  </script>
+
+</body>
+</html>
