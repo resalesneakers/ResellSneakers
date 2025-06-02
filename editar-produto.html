@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Produto - ResellSneakers</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding-top: 2rem;
+    }
+    .container {
+      max-width: 600px;
+    }
+    #previewImagem {
+      max-width: 100%;
+      height: auto;
+      margin-top: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2 class="mb-4">Editar Produto</h2>
+  <form id="formEditarProduto">
+    <div id="mensagem"></div>
+    <div class="mb-3">
+      <label for="nome" class="form-label">Nome do Produto</label>
+      <input type="text" class="form-control" id="nome" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="preco" class="form-label">Preço (€)</label>
+      <input type="number" class="form-control" id="preco" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="condicao" class="form-label">Condição</label>
+      <select class="form-select" id="condicao" required>
+        <option value="">Seleciona...</option>
+        <option value="Novo">Novo</option>
+        <option value="Usado - Excelente">Usado - Excelente</option>
+        <option value="Usado - Bom">Usado - Bom</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="disponibilidade" class="form-label">Disponibilidade</label>
+      <select class="form-select" id="disponibilidade" required>
+        <option value="">Seleciona...</option>
+        <option value="venda">Venda</option>
+        <option value="troca">Troca</option>
+        <option value="venda e troca">Venda e Troca</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Imagem Atual</label>
+      <img id="previewImagem" src="#" alt="Imagem atual">
+    </div>
+
+    <div class="mb-3">
+      <label for="imagemProduto" class="form-label">Substituir Imagem</label>
+      <input type="file" class="form-control" id="imagemProduto" accept="image/*">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar Alteracões</button>
+  </form>
+  <div id="mensagem" class="mt-3 text-success fw-bold"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
+    authDomain: "resalesneakers-e17cb.firebaseapp.com",
+    projectId: "resalesneakers-e17cb",
+    storageBucket: "resalesneakers-e17cb.appspot.com",
+    messagingSenderId: "698715655625",
+    appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+
+  const params = new URLSearchParams(window.location.search);
+  const produtoId = params.get("id");
+
+  const imagemInput = document.getElementById("imagemProduto");
+  const previewImagem = document.getElementById("previewImagem");
+
+  let imagemAnterior = null;
+
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) return window.location.href = "log.html";
+
+    const doc = await db.collection("produtos").doc(produtoId).get();
+    if (!doc.exists) {
+      alert("Produto não encontrado.");
+      return;
+    }
+
+    const produto = doc.data();
+    document.getElementById("nome").value = produto.nome || "";
+    document.getElementById("preco").value = produto.preco || "";
+    document.getElementById("condicao").value = produto.condicao || "";
+    document.getElementById("disponibilidade").value = produto.disponibilidade || "";
+
+    if (produto.imagemPrincipal) {
+      previewImagem.src = produto.imagemPrincipal;
+      previewImagem.style.display = "block";
+      imagemAnterior = produto.imagemPrincipal;
+    }
+  });
+
+  document.getElementById("formEditarProduto").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const user = auth.currentUser;
+    if (!user) return alert("Autenticação necessária.");
+
+    const nome = document.getElementById("nome").value;
+    const preco = parseFloat(document.getElementById("preco").value);
+    const condicao = document.getElementById("condicao").value;
+    const disponibilidade = document.getElementById("disponibilidade").value;
+    const imagemNova = imagemInput.files[0];
+
+    let novaURL = imagemAnterior;
+
+    if (imagemNova) {
+      const refAntigo = storage.refFromURL(imagemAnterior);
+      await refAntigo.delete();
+
+      const nomeImagem = `${Date.now()}_${imagemNova.name}`;
+      const novaRef = storage.ref().child(`produtos/${user.uid}/${nomeImagem}`);
+      const snap = await novaRef.put(imagemNova);
+      novaURL = await snap.ref.getDownloadURL();
+    }
+
+    await db.collection("produtos").doc(produtoId).update({
+      nome,
+      preco,
+      condicao,
+      disponibilidade,
+      imagemPrincipal: novaURL,
+      dataAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    document.getElementById("mensagem").textContent = "Produto atualizado com sucesso!";
+  });
+</script>
+<script>
+  const form = document.getElementById('formEditarProduto');
+  const mensagemEl = document.getElementById('mensagem');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Botão de envio
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    mensagemEl.textContent = '';
+    mensagemEl.className = '';
+
+    const nome = document.getElementById("nome").value.trim();
+    const preco = parseFloat(document.getElementById("preco").value);
+    const condicao = document.getElementById("condicao").value;
+    const disponibilidade = document.getElementById("disponibilidade").value;
+
+    if (nome.length < 3) {
+      mostrarMensagem("O nome deve ter pelo menos 3 caracteres.", "danger");
+      submitBtn.disabled = false;
+      return;
+    }
+
+    if (isNaN(preco) || preco <= 0) {
+      mostrarMensagem("O preço deve ser maior que 0.", "danger");
+      submitBtn.disabled = false;
+      return;
+    }
+
+    if (!condicao || !disponibilidade) {
+      mostrarMensagem("Por favor, preencha todos os campos obrigatórios.", "danger");
+      submitBtn.disabled = false;
+      return;
+    }
+
+    // Continuação do envio (esta parte já está no teu script original)
+    try {
+      // Verifica se há nova imagem para upload
+      const novaImagem = document.getElementById("imagemProduto").files[0];
+      let imagemURL = produtoAtual.imagemPrincipal;
+
+      if (novaImagem) {
+        // Apagar imagem antiga se existir
+        if (produtoAtual.imagemPrincipal) {
+          try {
+            const antigaRef = storage.refFromURL(produtoAtual.imagemPrincipal);
+            await antigaRef.delete();
+          } catch (err) {
+            console.warn("Não foi possível apagar a imagem anterior:", err);
+          }
+        }
+
+        const nomeImagem = `${Date.now()}_${novaImagem.name}`;
+        const storageRef = storage.ref().child(`produtos/${user.uid}/${nomeImagem}`);
+        const uploadResult = await storageRef.put(novaImagem);
+        imagemURL = await uploadResult.ref.getDownloadURL();
+      }
+
+      await db.collection("produtos").doc(produtoId).update({
+        nome,
+        preco,
+        condicao,
+        disponibilidade,
+        imagemPrincipal: imagemURL,
+        ultimaAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      mostrarMensagem("Produto atualizado com sucesso!", "success");
+    } catch (error) {
+      console.error("Erro ao atualizar produto:", error);
+      mostrarMensagem("Erro ao atualizar o produto. Tente novamente.", "danger");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  function mostrarMensagem(texto, tipo) {
+    mensagemEl.textContent = texto;
+    mensagemEl.className = `alert alert-${tipo} mt-3`;
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes do Produto - ResellSneakers</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .product-image {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    .badge {
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+    }
+    .product-meta {
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+    .seller-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .seller-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <div id="produtoContainer" class="row g-4">
+      <!-- Conteúdo do produto será carregado aqui -->
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
+      authDomain: "resalesneakers-e17cb.firebaseapp.com",
+      projectId: "resalesneakers-e17cb",
+      storageBucket: "resalesneakers-e17cb.appspot.com",
+      messagingSenderId: "698715655625",
+      appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const container = document.getElementById('produtoContainer');
+
+    async function carregarProduto() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+
+      if (!id) {
+        container.innerHTML = '<div class="col-12"><div class="alert alert-danger">Produto não encontrado.</div></div>';
+        return;
+      }
+
+      try {
+        const doc = await db.collection('produtos').doc(id).get();
+        if (!doc.exists) {
+          container.innerHTML = '<div class="col-12"><div class="alert alert-warning">Produto não encontrado.</div></div>';
+          return;
+        }
+
+        const produto = doc.data();
+
+        const html = `
+          <div class="col-md-6">
+            <img src="${produto.imagemPrincipal}" alt="${produto.nome}" class="product-image">
+          </div>
+          <div class="col-md-6">
+            <h1>${produto.nome}</h1>
+            <h4 class="text-success">${produto.preco} €</h4>
+            <span class="badge bg-primary">${produto.condicao}</span>
+            <span class="badge bg-secondary">${produto.disponibilidade}</span>
+            <p class="product-meta mt-3">
+              Publicado em: ${produto.data?.toDate().toLocaleDateString('pt-PT') || 'Indisponível'}
+            </p>
+
+            <div class="seller-info">
+              <img src="${produto.fotoVendedor || 'https://via.placeholder.com/40'}" alt="Avatar" class="seller-avatar">
+              <span>${produto.nomeVendedor || 'Vendedor'}</span>
+            </div>
+
+            <a href="#" class="btn btn-outline-primary mt-4" disabled>
+              <i class="fas fa-comment-alt me-2"></i>
+              Falar com o vendedor (em breve)
+            </a>
+          </div>
+        `;
+
+        container.innerHTML = html;
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = '<div class="col-12"><div class="alert alert-danger">Erro ao carregar os detalhes do produto.</div></div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', carregarProduto);
+  </script>
+</body>
+</html>

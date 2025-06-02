@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ResellSneakers - Home</title>
-  <!-- Bootstrap e FontAwesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
 </head>
 <body>
-  <!-- Navbar simplificada com autenticação -->
+  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3">
     <div class="container">
       <a class="navbar-brand" href="#">Resell<span style="color:#ff6b6b">Sneakers</span></a>
@@ -17,7 +16,7 @@
         <a href="log.html" class="btn btn-outline-primary">Começar</a>
       </div>
       <div class="dropdown d-none" id="userDropdown">
-        <button class="btn dropdown-toggle d-flex align-items-center" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="btn dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown">
           <img src="" alt="User" id="userAvatar" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
           <span id="userName">Utilizador</span>
         </button>
@@ -32,21 +31,21 @@
     </div>
   </nav>
 
+  <!-- Conteúdo -->
   <section class="container py-5">
     <h1>Bem-vindo ao ResellSneakers</h1>
     <p id="userInfo" class="lead text-muted"></p>
-    <p id="welcomeUserName" class="h4"></p> <!-- Corrigido: elemento agora existe -->
+    <p id="welcomeUserName" class="h4"></p>
   </section>
 
-  <!-- Firebase (compat) -->
+  <!-- Firebase SDK (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <!-- Bootstrap -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Firebase Config + Auth -->
   <script>
+    // Configuração Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
       authDomain: "resalesneakers-e17cb.firebaseapp.com",
@@ -55,30 +54,38 @@
       messagingSenderId: "698715655625",
       appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
     };
+
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
     auth.onAuthStateChanged(async (user) => {
-      if (!user) return window.location.href = 'log.html';
+      if (!user) {
+        window.location.href = "log.html";
+        return;
+      }
 
-      document.getElementById('authButtons').classList.add('d-none');
-      document.getElementById('userDropdown').classList.remove('d-none');
+      // Mostrar dropdown e esconder botão "Começar"
+      document.getElementById("authButtons").classList.add("d-none");
+      document.getElementById("userDropdown").classList.remove("d-none");
 
-      const docRef = db.collection('users').doc(user.uid);
-      const snap = await docRef.get();
-      const data = snap.data();
+      try {
+        const docSnap = await db.collection("users").doc(user.uid).get();
+        const data = docSnap.data();
 
-      document.getElementById('userName').textContent = data?.nome || user.email;
-      const welcomeEl = document.getElementById('welcomeUserName');
-      if (welcomeEl) welcomeEl.textContent = data?.nome || 'Utilizador';
-      document.getElementById('userAvatar').src = data?.foto || 'https://via.placeholder.com/32';
-      document.getElementById('userInfo').textContent = `Está logado como ${data?.email || user.email}`;
+        document.getElementById("userName").textContent = data?.nome || user.email;
+        document.getElementById("welcomeUserName").textContent = `Olá, ${data?.nome || "Utilizador"}!`;
+        document.getElementById("userAvatar").src = data?.foto || "https://via.placeholder.com/32";
+        document.getElementById("userInfo").textContent = `Está logado como ${data?.email || user.email}`;
+      } catch (e) {
+        console.error("Erro ao obter dados do utilizador:", e);
+      }
     });
 
-    document.getElementById('btn-logout').addEventListener('click', () => {
+    // Logout
+    document.getElementById("btn-logout").addEventListener("click", () => {
       auth.signOut().then(() => {
-        window.location.href = 'log.html';
+        window.location.href = "log.html";
       });
     });
   </script>
