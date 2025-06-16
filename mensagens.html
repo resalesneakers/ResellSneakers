@@ -1,297 +1,250 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ResellSneakers - Chat</title>
+  
+  <!-- Ícones e Estilos -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+
   <style>
-        :root {
-            --primary-color: #ff5a5f;
-            --secondary-color: #484848;
-            --accent-color: #767676;
-            --background-color: #f7f7f7;
-            --chat-sender: #e6f7ff;
-            --chat-receiver: #f0f0f0;
-        }
+    :root {
+      --primary-color: #ff5a5f;
+      --secondary-color: #484848;
+      --accent-color: #767676;
+      --background-color: #f7f7f7;
+      --chat-sender: #e6f7ff;
+      --chat-receiver: #f0f0f0;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        body {
-            background-color: var(--background-color);
-        }
+    body {
+      background-color: var(--background-color);
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #ddd;
-        }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #ddd;
+    }
 
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
 
-        .nav-links {
-            display: flex;
-        }
+    .nav-links a {
+      margin-left: 20px;
+      color: var(--secondary-color);
+      text-decoration: none;
+    }
 
-        .nav-links a {
-            margin-left: 20px;
-            color: var(--secondary-color);
-            text-decoration: none;
-        }
+    .chat-container {
+      display: flex;
+      height: calc(100vh - 120px);
+      margin-top: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
 
-        .chat-container {
-            display: flex;
-            height: calc(100vh - 100px);
-            margin-top: 20px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+    .conversations {
+      width: 30%;
+      background-color: white;
+      border-right: 1px solid #ddd;
+      overflow-y: auto;
+    }
 
-        .conversations {
-            width: 30%;
-            background-color: white;
-            border-right: 1px solid #ddd;
-            overflow-y: auto;
-        }
+    .conversation {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
 
-        .conversation {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+    .conversation:hover, .conversation.active {
+      background-color: #f0f0f0;
+    }
 
-        .conversation:hover, .conversation.active {
-            background-color: #f0f0f0;
-        }
+    .user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #ddd;
+      margin-right: 15px;
+      overflow: hidden;
+    }
 
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #ddd;
-            margin-right: 15px;
-            overflow: hidden;
-        }
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    .conversation-info {
+      flex: 1;
+    }
 
-        .conversation-info {
-            flex: 1;
-        }
+    .user-name {
+      font-weight: bold;
+    }
 
-        .user-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
+    .last-message {
+      font-size: 14px;
+      color: var(--accent-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-        .last-message {
-            color: var(--accent-color);
-            font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 180px;
-        }
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: white;
+    }
 
-        .time-stamp {
-            font-size: 12px;
-            color: var(--accent-color);
-        }
+    .chat-header {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
 
-        .chat-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: white;
-        }
+    .product-info {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+      padding: 5px 10px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      font-size: 14px;
+    }
 
-        .chat-header {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            background-color: white;
-        }
+    .product-info img {
+      width: 30px;
+      height: 30px;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
 
-        .product-info {
-            display: flex;
-            align-items: center;
-            margin-left: 20px;
-            padding: 5px 10px;
-            background-color: #f5f5f5;
-            border-radius: 4px;
-            font-size: 14px;
-        }
+    .messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .product-info img {
-            width: 30px;
-            height: 30px;
-            border-radius: 4px;
-            margin-right: 10px;
-        }
+    .message {
+      max-width: 70%;
+      padding: 10px 15px;
+      margin-bottom: 15px;
+      border-radius: 18px;
+      word-wrap: break-word;
+    }
 
-        .messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
+    .sender {
+      align-self: flex-end;
+      background-color: var(--chat-sender);
+      border-bottom-right-radius: 5px;
+    }
 
-        .message {
-            max-width: 70%;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            border-radius: 18px;
-            position: relative;
-            word-wrap: break-word;
-        }
+    .receiver {
+      align-self: flex-start;
+      background-color: var(--chat-receiver);
+      border-bottom-left-radius: 5px;
+    }
 
-        .sender {
-            align-self: flex-end;
-            background-color: var(--chat-sender);
-            border-bottom-right-radius: 5px;
-        }
+    .input-area {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border-top: 1px solid #eee;
+    }
 
-        .receiver {
-            align-self: flex-start;
-            background-color: var(--chat-receiver);
-            border-bottom-left-radius: 5px;
-        }
+    .image-upload {
+      position: relative;
+      overflow: hidden;
+    }
 
-        .message-time {
-            font-size: 11px;
-            color: var(--accent-color);
-            margin-top: 5px;
-            text-align: right;
-        }
+    .image-upload input {
+      position: absolute;
+      top: 0;
+      right: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
 
-        .message-image {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
+    #message-input {
+      flex: 1;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      padding: 10px 15px;
+      margin: 0 10px;
+    }
 
-        .input-area {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border-top: 1px solid #eee;
-            background-color: white;
-        }
+    #send-button {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--accent-color);
+    }
 
-        .input-area button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px;
-            color: var(--accent-color);
-            font-size: 20px;
-            transition: color 0.2s;
-        }
+    #send-button:hover {
+      color: var(--primary-color);
+    }
 
-        .input-area button:hover {
-            color: var(--primary-color);
-        }
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      color: var(--accent-color);
+      text-align: center;
+    }
 
-        #message-input {
-            flex: 1;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            padding: 10px 15px;
-            margin: 0 10px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
+    @media (max-width: 768px) {
+      .chat-container {
+        flex-direction: column;
+        height: auto;
+      }
 
-        #message-input:focus {
-            border-color: var(--primary-color);
-        }
+      .conversations {
+        width: 100%;
+        height: 200px;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+      }
 
-        .image-upload {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .image-upload input {
-            position: absolute;
-            top: 0;
-            right: 0;
-            margin: 0;
-            padding: 0;
-            font-size: 20px;
-            cursor: pointer;
-            opacity: 0;
-            filter: alpha(opacity=0);
-        }
-
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            text-align: center;
-            color: var(--accent-color);
-            padding: 20px;
-        }
-
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-
-        .empty-state p {
-            font-size: 16px;
-            max-width: 300px;
-        }
-
-        @media (max-width: 768px) {
-            .chat-container {
-                flex-direction: column;
-                height: calc(100vh - 70px);
-            }
-
-            .conversations {
-                width: 100%;
-                height: 30%;
-                border-right: none;
-                border-bottom: 1px solid #ddd;
-            }
-
-            .chat-area {
-                height: 70%;
-            }
-        }
-    </style>
+      .chat-area {
+        height: auto;
+      }
+    }
+  </style>
 </head>
+
 <body>
   <div class="container">
     <header>
@@ -305,11 +258,10 @@
     </header>
 
     <div class="chat-container">
-      <div class="conversations" id="conversation-list"></div>
-
-      <div class="chat-area" id="chat-area">
+    <div class="conversations" id="conversation-list"></div>
+     <div class="chat-area" id="chat-area">
         <div class="empty-state" id="empty-chat">
-          <i>💬</i>
+          <i class="fas fa-comments fa-2x"></i>
           <h3>As Suas Mensagens</h3>
           <p>Selecione uma conversa ou inicie uma nova a partir de um produto.</p>
         </div>
@@ -344,244 +296,175 @@
     </div>
   </div>
 
-  <!-- Firebase & lógica -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
   <script src="firebase-config.js"></script>
 
-  <!-- Script específico -->
-  <script>
-    const conversationList = document.getElementById('conversation-list');
-    const messagesContainer = document.getElementById('messages-container');
-    const messageInput = document.getElementById('message-input');
-    const sendButton = document.getElementById('send-button');
-    const imageUpload = document.getElementById('image-upload');
-    const emptyChat = document.getElementById('empty-chat');
-    const activeChat = document.getElementById('active-chat');
-    const chatUserName = document.getElementById('chat-user-name');
-    const chatUserAvatar = document.getElementById('chat-user-avatar');
-    const chatUserStatus = document.getElementById('chat-user-status');
-    const productImage = document.getElementById('product-image');
-    const productName = document.getElementById('product-name');
-    const productInfo = document.getElementById('product-info');
+<script>
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const storage = firebase.storage();
 
-    let currentUser, currentChatId, currentReceiverId;
+  const messagesContainer = document.getElementById("messages");
+  const messageInput = document.getElementById("messageInput");
+  const sendButton = document.getElementById("sendButton");
+  const imageUpload = document.getElementById("imageUpload");
+  const chatHeader = document.getElementById("chat-header");
+  const conversationsList = document.getElementById("conversations");
 
-    auth.onAuthStateChanged(async (user) => {
-  if (!user) return (window.location.href = "log.html");
-  currentUser = user;
+  let currentUser = null;
+  let currentChatId = null;
+  let currentReceiverId = null;
 
-  const params = new URLSearchParams(window.location.search);
-  const produtoId = params.get("produtoId");
-  const vendedorId = params.get("vendedorId");
-
-  if (produtoId && vendedorId && vendedorId !== currentUser.uid) {
-    const conversaExistente = await db.collection("conversations")
-      .where("participants", "array-contains", currentUser.uid)
-      .get();
-
-    let chatEncontrado = null;
-
-    for (const doc of conversaExistente.docs) {
-      const data = doc.data();
-      if (
-        data.productId === produtoId &&
-        data.participants.includes(vendedorId)
-      ) {
-        chatEncontrado = doc;
-        break;
-      }
-    }
-
-    if (chatEncontrado) {
-      const vendedorDoc = await db.collection("users").doc(vendedorId).get();
-      abrirConversa(chatEncontrado.id, vendedorId, vendedorDoc.data(), produtoId);
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      currentUser = user;
+      carregarConversas();
     } else {
-      const newConversa = await db.collection("conversations").add({
-        participants: [currentUser.uid, vendedorId],
-        productId: produtoId,
-        lastMessage: "",
-        lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      await db.collection("chats").doc(newConversa.id).set({
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      const vendedorDoc = await db.collection("users").doc(vendedorId).get();
-      abrirConversa(newConversa.id, vendedorId, vendedorDoc.data(), produtoId);
+      window.location.href = "log.html";
     }
+  });
+
+  function carregarConversas() {
+    db.collection("conversations")
+      .where("participants", "array-contains", currentUser.uid)
+      .orderBy("lastMessageTime", "desc")
+      .onSnapshot(snapshot => {
+        conversationsList.innerHTML = "";
+        snapshot.forEach(async doc => {
+          const conversa = doc.data();
+          const otherUserId = conversa.participants.find(uid => uid !== currentUser.uid);
+          const produtoId = conversa.produtoId;
+
+          const li = document.createElement("li");
+          li.classList.add("conversation");
+          li.setAttribute("data-chat-id", doc.id);
+          li.setAttribute("data-receiver-id", otherUserId);
+
+          const produtoDoc = await db.collection("produtos").doc(produtoId).get();
+          const produto = produtoDoc.exists ? produtoDoc.data() : null;
+
+          const img = document.createElement("img");
+          img.classList.add("product-img");
+          img.src = produto?.imagemPrincipal || "https://via.placeholder.com/30";
+          img.alt = "Produto";
+
+          const span = document.createElement("span");
+          span.textContent = produto?.nome || "Produto";
+
+          li.appendChild(img);
+          li.appendChild(span);
+          conversationsList.appendChild(li);
+        });
+      });
   }
 
-  carregarConversas();
-});
+  conversationsList.addEventListener("click", async (e) => {
+    const li = e.target.closest("li.conversation");
+    if (!li) return;
 
-    function carregarConversas() {
-      db.collection('conversations')
-        .where('participants', 'array-contains', currentUser.uid)
-        .orderBy('lastMessageTime', 'desc')
-        .onSnapshot(async snapshot => {
-          conversationList.innerHTML = '';
-          if (snapshot.empty) {
-            conversationList.innerHTML = `<div class="empty-state"><i>💬</i><h3>Sem Conversas</h3><p>Inicie uma conversa.</p></div>`;
-            return;
-          }
+    currentChatId = li.getAttribute("data-chat-id");
+    currentReceiverId = li.getAttribute("data-receiver-id");
 
-          for (const doc of snapshot.docs) {
-            const conversation = doc.data();
-            const otherUserId = conversation.participants.find(id => id !== currentUser.uid);
-            const userDoc = await db.collection('users').doc(otherUserId).get();
-            const userData = userDoc.data();
+    chatHeader.innerHTML = ""; // limpa o cabeçalho
 
-            const item = document.createElement('div');
-            item.className = 'conversation';
-            item.innerHTML = `
-              <div class="user-avatar"><img src="${userData?.foto || 'https://via.placeholder.com/50'}"></div>
-              <div class="conversation-info">
-                <div class="user-name">${userData?.nome || 'Utilizador'}</div>
-                <div class="last-message">${conversation.lastMessage || ''}</div>
-              </div>
-            `;
-            item.onclick = () => abrirConversa(doc.id, otherUserId, userData, conversation.productId);
-            conversationList.appendChild(item);
-          }
-        });
+    const chatDoc = await db.collection("conversations").doc(currentChatId).get();
+    const produtoId = chatDoc.data().produtoId;
+
+    const produtoDoc = await db.collection("produtos").doc(produtoId).get();
+    const produto = produtoDoc.exists ? produtoDoc.data() : null;
+
+    if (produto) {
+      const productImage = document.createElement("img");
+      productImage.src = produto.imagemPrincipal || 'https://via.placeholder.com/30';
+      productImage.alt = "Produto";
+      productImage.classList.add("product-img");
+
+      const productName = document.createElement("span");
+      productName.textContent = produto.nome || "Produto";
+
+      chatHeader.appendChild(productImage);
+      chatHeader.appendChild(productName);
     }
 
-    function abrirConversa(chatId, receiverId, receiverData, productId) {
-      currentChatId = chatId;
-      currentReceiverId = receiverId;
-      emptyChat.style.display = 'none';
-      activeChat.style.display = 'flex';
-
-      chatUserName.textContent = receiverData?.nome || 'Utilizador';
-      chatUserAvatar.src = receiverData?.foto || 'https://via.placeholder.com/50';
-      chatUserStatus.textContent = receiverData?.online ? 'Online' : 'Offline';
-
-      if (productId) {
-        db.collection('produtos').doc(productId).get().then(doc => {
-          const data = doc.data();
-          productImage.src = data?.imagemPrincipal || 'https://via.placeholder.com/30';
-          productName.textContent = data?.nome || 'Produto';
-        });
-      }
-
-      carregarMensagens(chatId);
-
-    }
-
-    sendButton.addEventListener('click', async () => {
-      const text = messageInput.value.trim();
-      const file = imageUpload.files[0];
-      if (!text && !file) return;
-
-      let imageUrl = null;
-
-      if (file) {
-        const ref = storage.ref(`chat_images/${currentChatId}/${Date.now()}_${file.name}`);
-        await ref.put(file);
-        imageUrl = await ref.getDownloadURL();
-        imageUpload.value = '';
-      }
-
-      await db.collection('chats').doc(currentChatId).collection('messages').add({
-        senderId: currentUser.uid,
-        text,
-        imageUrl,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        read: false
-      });
-
-      await db.collection('conversations').doc(currentChatId).update({
-        lastMessage: text || '📷 Imagem',
-        lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      messageInput.value = '';
-      messageInput.placeholder = 'Escreva uma mensagem...';
-    });
-
-    imageUpload.addEventListener('change', () => {
-      if (imageUpload.files[0]) {
-        messageInput.placeholder = `Pronto a enviar: ${imageUpload.files[0].name}`;
-      }
-    });
-
-    messageInput.addEventListener('keypress', e => {
-      if (e.key === 'Enter') sendButton.click();
-    });
-
-    function carregarMensagens(chatId) {
-  const messagesContainer = document.getElementById("messages");
-  
-  db.collection("chats").doc(chatId).collection("messages").orderBy("timestamp")
-    .onSnapshot(snapshot => {
-      messagesContainer.innerHTML = "";
-
-      snapshot.forEach(doc => {
-        const m = doc.data();
-        const msgDiv = document.createElement("div");
-        msgDiv.className = `message ${m.senderId === currentUser.uid ? "sender" : "receiver"}`;
-
-        if (m.imageUrl) {
-          msgDiv.innerHTML += `<img src="${m.imageUrl}" class="message-image">`;
-        }
-
-        if (m.text) {
-          msgDiv.innerHTML += `<p>${m.text}</p>`;
-        }
-
-        if (m.timestamp) {
-          const date = m.timestamp.toDate();
-          msgDiv.innerHTML += `<div class="message-time">${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>`;
-        }
-
-        messagesContainer.appendChild(msgDiv);
-      });
-
-      // Rolar automaticamente para a última mensagem
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    });
-}
-function carregarMensagens(chatId) {
-  const messagesContainer = document.getElementById("messages");
-
-  try {
-    db.collection("chats").doc(chatId).collection("messages").orderBy("timestamp")
+    // Carrega as mensagens
+    db.collection("conversations").doc(currentChatId)
+      .collection("messages")
+      .orderBy("timestamp")
       .onSnapshot(snapshot => {
         messagesContainer.innerHTML = "";
-
         snapshot.forEach(doc => {
-          const m = doc.data();
-          const msgDiv = document.createElement("div");
-          msgDiv.className = `message ${m.senderId === currentUser.uid ? "sender" : "receiver"}`;
+          const msg = doc.data();
+          const div = document.createElement("div");
+          div.classList.add("message", msg.senderId === currentUser.uid ? "sender" : "receiver");
 
-          if (m.imageUrl) {
-            msgDiv.innerHTML += `<img src="${m.imageUrl}" class="message-image">`;
+          if (msg.imageUrl) {
+            div.innerHTML = `<img src="${msg.imageUrl}" alt="imagem" style="max-width: 200px; border-radius: 10px;">`;
+          } else {
+            div.textContent = msg.text;
           }
 
-          if (m.text) {
-            msgDiv.innerHTML += `<p>${m.text}</p>`;
-          }
-
-          if (m.timestamp) {
-            const date = m.timestamp.toDate();
-            msgDiv.innerHTML += `<div class="message-time">${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>`;
-          }
-
-          messagesContainer.appendChild(msgDiv);
+          messagesContainer.appendChild(div);
         });
-
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
       });
-  } catch (error) {
-    console.error("Erro ao carregar mensagens:", error);
-  }
-}
+  });
+
+  sendButton.addEventListener("click", async () => {
+    const texto = messageInput.value.trim();
+    if (!texto || !currentChatId || !currentReceiverId) return;
+
+    await db.collection("conversations").doc(currentChatId)
+      .collection("messages").add({
+        senderId: currentUser.uid,
+        receiverId: currentReceiverId,
+        text: texto,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+    await db.collection("conversations").doc(currentChatId).update({
+      lastMessage: texto,
+      lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    messageInput.value = "";
+  });
+
+  imageUpload.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file || !currentChatId || !currentReceiverId) return;
+
+    const imgRef = storage.ref().child(`chat-images/${currentChatId}/${Date.now()}_${file.name}`);
+    await imgRef.put(file);
+    const imageUrl = await imgRef.getDownloadURL();
+
+    await db.collection("conversations").doc(currentChatId)
+      .collection("messages").add({
+        senderId: currentUser.uid,
+        receiverId: currentReceiverId,
+        imageUrl,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+    await db.collection("conversations").doc(currentChatId).update({
+      lastMessage: "📷 Imagem",
+      lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    imageUpload.value = ""; // limpa o input
+  });
+
+  // Enviar com Enter
+  messageInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendButton.click();
+    }
+  });
 
   </script>
 </body>
 </html>
-
