@@ -69,7 +69,6 @@ async function carregarTodosProdutos() {
     container.innerHTML += cardHTML;
   });
 }
-
 // Função para criar um card de produto
 function criarCardProduto(produto, id) {
   const verificadoBadge = produto.verificado ? 
@@ -105,7 +104,27 @@ function criarCardProduto(produto, id) {
   `;
 }
 
-// Função para configurar filtros
+// Função para aplicar filtro por disponibilidade
+async function aplicarFiltroDisponibilidade(disponibilidade) {
+  const container = document.querySelector('#produtosContainer');
+  let q;
+
+  if (disponibilidade === 'todos') {
+    q = query(collection(db, "produtos"), orderBy("dataCriacao", "desc"));
+  } else {
+    q = query(collection(db, "produtos"), where("disponibilidade", "==", disponibilidade), orderBy("dataCriacao", "desc"));
+  }
+
+  const querySnapshot = await getDocs(q);
+  container.innerHTML = '';
+  querySnapshot.forEach((doc) => {
+    const produto = doc.data();
+    const cardHTML = criarCardProduto(produto, doc.id);
+    container.innerHTML += cardHTML;
+  });
+}
+
+// Função para configurar filtros por marca
 function configurarFiltros() {
   const filtros = document.querySelectorAll('.filter-pills .badge');
 
@@ -117,30 +136,45 @@ function configurarFiltros() {
       filtro.classList.remove('badge-light');
 
       const marca = filtro.dataset.brand;
+      const container = document.querySelector('#popularProducts');
+      let q;
 
       if (marca === 'all') {
-        await carregarProdutosTrending();
-        return;
+        q = query(collection(db, "produtos"), orderBy("visualizacoes", "desc"), limit(8));
+      } else {
+        q = query(collection(db, "produtos"), where("marca", "==", marca), orderBy("visualizacoes", "desc"), limit(8));
       }
 
-      try {
-        const trendingContainer = document.querySelector('#popularProducts');
-        const q = query(collection(db, "produtos"), where("marca", "==", marca), limit(8));
-        const querySnapshot = await getDocs(q);
-
-        trendingContainer.innerHTML = '';
-
-        querySnapshot.forEach((doc) => {
-          const produto = doc.data();
-          const cardHTML = criarCardProduto(produto, doc.id);
-          trendingContainer.innerHTML += cardHTML;
-        });
-      } catch (error) {
-        console.error("Erro ao filtrar produtos:", error);
-      }
+      const querySnapshot = await getDocs(q);
+      container.innerHTML = '';
+      querySnapshot.forEach((doc) => {
+        const produto = doc.data();
+        const cardHTML = criarCardProduto(produto, doc.id);
+        container.innerHTML += cardHTML;
+      });
     });
   });
 }
+// Função de pesquisa por nome ou marca
+document.querySelector('#barraPesquisa').addEventListener('input', async (e) => {
+  const termo = e.target.value.toLowerCase();
+  const container = document.querySelector('#produtosContainer');
+
+  const q = query(collection(db, "produtos"));
+  const querySnapshot = await getDocs(q);
+  container.innerHTML = '';
+
+  querySnapshot.forEach((doc) => {
+    const produto = doc.data();
+    const nome = (produto.nome || '').toLowerCase();
+    const marca = (produto.marca || '').toLowerCase();
+
+    if (nome.includes(termo) || marca.includes(termo)) {
+      const cardHTML = criarCardProduto(produto, doc.id);
+      container.innerHTML += cardHTML;
+    }
+  });
+});
 
 // Alternar favorito (fictício)
 window.toggleFavorito = async function(produtoId) {
@@ -230,3 +264,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     exibirResultadosPesquisa(filtrados);
   });
 });
+// Lógica do filtro de disponibilidade
+document.querySelector('#filtroDisponibilidade').addEventListener('change', (e) => {
+  aplicarFiltroDisponibilidade(e.target.value);
+});
+// Inicialização ao carregar a página
+window.addEventListener('DOMContentLoaded', async () => {
+  await carregarProdutosRecomendados();
+  await carregarProdutosTrending();
+  await carregarTodosProdutos();
+  configurarFiltros();
+});
+
+
