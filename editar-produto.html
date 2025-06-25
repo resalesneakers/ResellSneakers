@@ -8,7 +8,7 @@
   <style>
     body {
       background-color: #f8f9fa;
-      padding-top: 2rem;
+      padding-top: 4.5rem;
     }
     .container {
       max-width: 600px;
@@ -22,6 +22,25 @@
   </style>
 </head>
 <body>
+
+<!-- Barra de Navegação -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="home.html">ResellSneakers</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
+        <li class="nav-item"><a class="nav-link" href="editar-perfil.html">Editar Perfil</a></li>
+        <li class="nav-item"><a class="nav-link" href="favoritos.html">Favoritos</a></li>
+        <li class="nav-item"><a class="nav-link" href="produtos.html">Produtos</a></li>
+        <li class="nav-item"><a class="nav-link text-danger" href="#" id="logoutBtn">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
 
 <div class="container">
   <h2 class="mb-4">Editar Produto</h2>
@@ -67,15 +86,17 @@
       <input type="file" class="form-control" id="imagemProduto" accept="image/*">
     </div>
 
-    <button type="submit" class="btn btn-primary">Guardar Alteracões</button>
+    <button type="submit" class="btn btn-primary">Guardar Alterações</button>
   </form>
-  <div id="mensagem" class="mt-3 text-success fw-bold"></div>
+  <div id="mensagem" class="mt-3 fw-bold"></div>
 </div>
 
+<!-- Firebase & Bootstrap -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
 <script>
   const firebaseConfig = {
@@ -94,78 +115,37 @@
 
   const params = new URLSearchParams(window.location.search);
   const produtoId = params.get("id");
-
   const imagemInput = document.getElementById("imagemProduto");
   const previewImagem = document.getElementById("previewImagem");
-
-  let imagemAnterior = null;
-
-  auth.onAuthStateChanged(async (user) => {
-    if (!user) return window.location.href = "log.html";
-
-    const doc = await db.collection("produtos").doc(produtoId).get();
-    if (!doc.exists) {
-      alert("Produto não encontrado.");
-      return;
-    }
-
-    const produto = doc.data();
-    document.getElementById("nome").value = produto.nome || "";
-    document.getElementById("preco").value = produto.preco || "";
-    document.getElementById("condicao").value = produto.condicao || "";
-    document.getElementById("disponibilidade").value = produto.disponibilidade || "";
-
-    if (produto.imagemPrincipal) {
-      previewImagem.src = produto.imagemPrincipal;
-      previewImagem.style.display = "block";
-      imagemAnterior = produto.imagemPrincipal;
-    }
-  });
-
-  document.getElementById("formEditarProduto").addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const user = auth.currentUser;
-    if (!user) return alert("Autenticação necessária.");
-
-    const nome = document.getElementById("nome").value;
-    const preco = parseFloat(document.getElementById("preco").value);
-    const condicao = document.getElementById("condicao").value;
-    const disponibilidade = document.getElementById("disponibilidade").value;
-    const imagemNova = imagemInput.files[0];
-
-    let novaURL = imagemAnterior;
-
-    if (imagemNova) {
-      const refAntigo = storage.refFromURL(imagemAnterior);
-      await refAntigo.delete();
-
-      const nomeImagem = `${Date.now()}_${imagemNova.name}`;
-      const novaRef = storage.ref().child(`produtos/${user.uid}/${nomeImagem}`);
-      const snap = await novaRef.put(imagemNova);
-      novaURL = await snap.ref.getDownloadURL();
-    }
-
-    await db.collection("produtos").doc(produtoId).update({
-      nome,
-      preco,
-      condicao,
-      disponibilidade,
-      imagemPrincipal: novaURL,
-      dataAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    document.getElementById("mensagem").textContent = "Produto atualizado com sucesso!";
-  });
-</script>
-<script>
   const form = document.getElementById('formEditarProduto');
   const mensagemEl = document.getElementById('mensagem');
 
+  let produtoAtual = null;
+  let imagemAnterior = null;
+  let user = null;
+
+  auth.onAuthStateChanged(async (u) => {
+    if (!u) return window.location.href = "log.html";
+    user = u;
+
+    const doc = await db.collection("produtos").doc(produtoId).get();
+    if (!doc.exists) return alert("Produto não encontrado.");
+
+    produtoAtual = doc.data();
+    document.getElementById("nome").value = produtoAtual.nome || "";
+    document.getElementById("preco").value = produtoAtual.preco || "";
+    document.getElementById("condicao").value = produtoAtual.condicao || "";
+    document.getElementById("disponibilidade").value = produtoAtual.disponibilidade || "";
+
+    if (produtoAtual.imagemPrincipal) {
+      previewImagem.src = produtoAtual.imagemPrincipal;
+      previewImagem.style.display = "block";
+      imagemAnterior = produtoAtual.imagemPrincipal;
+    }
+  });
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    // Botão de envio
     const submitBtn = form.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
     mensagemEl.textContent = '';
@@ -176,38 +156,21 @@
     const condicao = document.getElementById("condicao").value;
     const disponibilidade = document.getElementById("disponibilidade").value;
 
-    if (nome.length < 3) {
-      mostrarMensagem("O nome deve ter pelo menos 3 caracteres.", "danger");
-      submitBtn.disabled = false;
-      return;
-    }
+    if (nome.length < 3) return mostrarMensagem("O nome deve ter pelo menos 3 caracteres.", "danger", submitBtn);
+    if (isNaN(preco) || preco <= 0) return mostrarMensagem("O preço deve ser maior que 0.", "danger", submitBtn);
+    if (!condicao || !disponibilidade) return mostrarMensagem("Preencha todos os campos obrigatórios.", "danger", submitBtn);
 
-    if (isNaN(preco) || preco <= 0) {
-      mostrarMensagem("O preço deve ser maior que 0.", "danger");
-      submitBtn.disabled = false;
-      return;
-    }
-
-    if (!condicao || !disponibilidade) {
-      mostrarMensagem("Por favor, preencha todos os campos obrigatórios.", "danger");
-      submitBtn.disabled = false;
-      return;
-    }
-
-    // Continuação do envio (esta parte já está no teu script original)
     try {
-      // Verifica se há nova imagem para upload
-      const novaImagem = document.getElementById("imagemProduto").files[0];
       let imagemURL = produtoAtual.imagemPrincipal;
+      const novaImagem = imagemInput.files[0];
 
       if (novaImagem) {
-        // Apagar imagem antiga se existir
-        if (produtoAtual.imagemPrincipal) {
+        if (imagemAnterior) {
           try {
-            const antigaRef = storage.refFromURL(produtoAtual.imagemPrincipal);
+            const antigaRef = storage.refFromURL(imagemAnterior);
             await antigaRef.delete();
           } catch (err) {
-            console.warn("Não foi possível apagar a imagem anterior:", err);
+            console.warn("Erro ao apagar imagem anterior:", err);
           }
         }
 
@@ -226,19 +189,23 @@
         ultimaAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      mostrarMensagem("Produto atualizado com sucesso!", "success");
+      mostrarMensagem("Produto atualizado com sucesso!", "success", submitBtn);
     } catch (error) {
-      console.error("Erro ao atualizar produto:", error);
-      mostrarMensagem("Erro ao atualizar o produto. Tente novamente.", "danger");
-    } finally {
-      submitBtn.disabled = false;
+      console.error("Erro ao atualizar:", error);
+      mostrarMensagem("Erro ao atualizar o produto.", "danger", submitBtn);
     }
   });
 
-  function mostrarMensagem(texto, tipo) {
+  function mostrarMensagem(texto, tipo, btn) {
     mensagemEl.textContent = texto;
     mensagemEl.className = `alert alert-${tipo} mt-3`;
+    if (btn) btn.disabled = false;
   }
+
+  // Botão logout
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    auth.signOut().then(() => window.location.href = "log.html");
+  });
 </script>
 </body>
 </html>
