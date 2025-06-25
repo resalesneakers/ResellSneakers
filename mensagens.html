@@ -250,10 +250,10 @@
     <header>
       <div class="logo">ResellSneakers</div>
       <div class="nav-links">
-        <a href="index.html">Início</a>
-        <a href="listings.html">Produtos</a>
+        <a href="home.html">Início</a>
+        <a href="produto.html">Produtos</a>
         <a href="mensagens.html" class="active">Mensagens</a>
-        <a href="profile.html">Perfil</a>
+        <a href="perfil.html">Perfil</a>
       </div>
     </header>
 
@@ -308,12 +308,19 @@
   const db = firebase.firestore();
   const storage = firebase.storage();
 
-  const messagesContainer = document.getElementById("messages");
-  const messageInput = document.getElementById("messageInput");
-  const sendButton = document.getElementById("sendButton");
-  const imageUpload = document.getElementById("imageUpload");
-  const chatHeader = document.getElementById("chat-header");
-  const conversationsList = document.getElementById("conversations");
+  const conversationsList = document.getElementById("conversation-list");
+  const messagesContainer = document.getElementById("messages-container");
+  const messageInput = document.getElementById("message-input");
+  const sendButton = document.getElementById("send-button");
+  const imageUpload = document.getElementById("image-upload");
+
+  const emptyChat = document.getElementById("empty-chat");
+  const activeChat = document.getElementById("active-chat");
+  const chatUserAvatar = document.getElementById("chat-user-avatar");
+  const chatUserName = document.getElementById("chat-user-name");
+  const chatUserStatus = document.getElementById("chat-user-status");
+  const productImage = document.getElementById("product-image");
+  const productName = document.getElementById("product-name");
 
   let currentUser = null;
   let currentChatId = null;
@@ -336,62 +343,51 @@
         conversationsList.innerHTML = "";
         snapshot.forEach(async doc => {
           const conversa = doc.data();
+          const chatId = doc.id;
           const otherUserId = conversa.participants.find(uid => uid !== currentUser.uid);
-          const produtoId = conversa.produtoId;
 
-          const li = document.createElement("li");
-          li.classList.add("conversation");
-          li.setAttribute("data-chat-id", doc.id);
-          li.setAttribute("data-receiver-id", otherUserId);
+          const userDoc = await db.collection("users").doc(otherUserId).get();
+          const userData = userDoc.exists ? userDoc.data() : { nome: "Utilizador", avatar: "" };
 
-          const produtoDoc = await db.collection("produtos").doc(produtoId).get();
-          const produto = produtoDoc.exists ? produtoDoc.data() : null;
+          const produtoDoc = await db.collection("produtos").doc(conversa.produtoId).get();
+          const produto = produtoDoc.exists ? produtoDoc.data() : { nome: "Produto", imagemPrincipal: "" };
 
-          const img = document.createElement("img");
-          img.classList.add("product-img");
-          img.src = produto?.imagemPrincipal || "https://via.placeholder.com/30";
-          img.alt = "Produto";
+          const div = document.createElement("div");
+          div.classList.add("conversation");
+          div.dataset.chatId = chatId;
+          div.dataset.receiverId = otherUserId;
 
-          const span = document.createElement("span");
-          span.textContent = produto?.nome || "Produto";
+          div.innerHTML = `
+            <div class="user-avatar">
+              <img src="${userData.avatar || 'https://via.placeholder.com/50'}" alt="Avatar">
+            </div>
+            <div class="conversation-info">
+              <div class="user-name">${userData.nome}</div>
+              <div class="last-message">${conversa.lastMessage || ''}</div>
+            </div>
+          `;
 
-          li.appendChild(img);
-          li.appendChild(span);
-          conversationsList.appendChild(li);
+          div.addEventListener("click", () => abrirConversa(chatId, otherUserId, userData, produto));
+          conversationsList.appendChild(div);
         });
       });
   }
 
-  conversationsList.addEventListener("click", async (e) => {
-    const li = e.target.closest("li.conversation");
-    if (!li) return;
+  function abrirConversa(chatId, receiverId, userData, produto) {
+    currentChatId = chatId;
+    currentReceiverId = receiverId;
 
-    currentChatId = li.getAttribute("data-chat-id");
-    currentReceiverId = li.getAttribute("data-receiver-id");
+    emptyChat.style.display = "none";
+    activeChat.style.display = "flex";
 
-    chatHeader.innerHTML = ""; // limpa o cabeçalho
+    chatUserAvatar.src = userData.avatar || 'https://via.placeholder.com/50';
+    chatUserName.textContent = userData.nome || "Utilizador";
+    chatUserStatus.textContent = "Online agora";
+    productImage.src = produto.imagemPrincipal || 'https://via.placeholder.com/30';
+    productName.textContent = produto.nome || "Produto";
 
-    const chatDoc = await db.collection("conversations").doc(currentChatId).get();
-    const produtoId = chatDoc.data().produtoId;
-
-    const produtoDoc = await db.collection("produtos").doc(produtoId).get();
-    const produto = produtoDoc.exists ? produtoDoc.data() : null;
-
-    if (produto) {
-      const productImage = document.createElement("img");
-      productImage.src = produto.imagemPrincipal || 'https://via.placeholder.com/30';
-      productImage.alt = "Produto";
-      productImage.classList.add("product-img");
-
-      const productName = document.createElement("span");
-      productName.textContent = produto.nome || "Produto";
-
-      chatHeader.appendChild(productImage);
-      chatHeader.appendChild(productName);
-    }
-//  
-    // Carrega as mensagens
-    db.collection("conversations").doc(currentChatId)
+    // Carregar mensagens
+    db.collection("conversations").doc(chatId)
       .collection("messages")
       .orderBy("timestamp")
       .onSnapshot(snapshot => {
@@ -411,7 +407,7 @@
         });
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
       });
-  });
+  }
 
   sendButton.addEventListener("click", async () => {
     const texto = messageInput.value.trim();
@@ -454,17 +450,15 @@
       lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    imageUpload.value = ""; // limpa o input
+    imageUpload.value = "";
   });
 
-  // Enviar com Enter
   messageInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       sendButton.click();
     }
   });
-
-  </script>
+</script>
 </body>
 </html>
