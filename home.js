@@ -55,6 +55,20 @@ async function carregarProdutosTrending() {
     console.error("Erro ao carregar produtos trending:", error);
   }
 }
+// Função para carregar todos os produtos (exibição inicial)
+async function carregarTodosProdutos() {
+  const container = document.querySelector('#produtosContainer');
+  const q = query(collection(db, "produtos"), orderBy("dataCriacao", "desc")); // se não tiver "dataCriacao", tira o orderBy
+  const querySnapshot = await getDocs(q);
+
+  container.innerHTML = '';
+
+  querySnapshot.forEach((doc) => {
+    const produto = doc.data();
+    const cardHTML = criarCardProduto(produto, doc.id);
+    container.innerHTML += cardHTML;
+  });
+}
 
 // Função para criar um card de produto
 function criarCardProduto(produto, id) {
@@ -68,13 +82,13 @@ function criarCardProduto(produto, id) {
       <div class="card product-card h-100" data-id="${id}">
         <div class="position-relative">
           <img src="${produto.imagemPrincipal || 'https://via.placeholder.com/400x320'}" class="card-img-top product-img" alt="${produto.nome}">
-          <a href="#" class="wishlist-icon" onclick="toggleFavorito('${id}')">
+          <span class="wishlist-icon" onclick="toggleFavorito('${id}')">
             <i class="${heartIcon}"></i>
-          </a>
+          </span>
         </div>
         <div class="card-body">
           <div class="product-brand">${produto.marca || 'Marca'}</div>
-          <h5 class="product-name">${produto.nome || 'Produto'}</h5>
+          <h5 class="product-name">${produto.nome || 'Produto'} ${verificadoBadge}</h5>
           <div class="d-flex justify-content-between align-items-center mt-2">
             <div class="product-price">${produto.preco || '0'}€</div>
             <div class="product-condition">${produto.condicao || 'Usado'}</div>
@@ -82,6 +96,9 @@ function criarCardProduto(produto, id) {
           <div class="mt-1">
             <span class="badge bg-secondary">${disponibilidade}</span>
           </div>
+          <a href="produto-detalhe.html?id=${id}" class="btn btn-sm btn-outline-primary mt-2 w-100">
+            Ver detalhes
+          </a>
         </div>
       </div>
     </div>
@@ -141,14 +158,75 @@ window.toggleFavorito = async function(produtoId) {
 window.abrirChat = function(vendedor) {
   alert(`Abrindo chat com ${vendedor}. Esta funcionalidade será implementada em breve.`);
 };
+// Função para pesquisar produtos por nome ou marca
+async function pesquisarProdutos(termo) {
+  const produtosRef = collection(db, "produtos");
+  const snapshot = await getDocs(produtosRef);
+  const resultados = [];
 
-// Inicialização
+  snapshot.forEach(doc => {
+    const dados = doc.data();
+    const nome = dados.nome?.toLowerCase() || '';
+    const marca = dados.marca?.toLowerCase() || '';
+    if (nome.includes(termo) || marca.includes(termo)) {
+      resultados.push({ id: doc.id, ...dados });
+    }
+  });
+
+  exibirResultadosPesquisa(resultados);
+}
+
+// Função para exibir os resultados
+function exibirResultadosPesquisa(produtos) {
+  const container = document.querySelector('#produtosContainer');
+  container.innerHTML = '';
+
+  if (produtos.length === 0) {
+    container.innerHTML = '<p class="text-muted">Nenhum produto encontrado.</p>';
+    return;
+  }
+
+  produtos.forEach(produto => {
+    const cardHTML = criarCardProduto(produto, produto.id);
+    container.innerHTML += cardHTML;
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     await carregarProdutosRecomendados();
     await carregarProdutosTrending();
+    await carregarTodosProdutos(); // mostra todos os produtos inicialmente
     configurarFiltros();
   } catch (error) {
     console.error("Erro ao inicializar a página:", error);
   }
+
+  const barraPesquisa = document.getElementById("barraPesquisa");
+  barraPesquisa.addEventListener("input", (e) => {
+    const termo = e.target.value.trim().toLowerCase();
+    if (termo.length === 0) {
+      carregarProdutosTrending(); // se apagar a pesquisa, volta ao padrão
+    } else {
+      pesquisarProdutos(termo);
+    }
+  });
+
+  // Filtro por disponibilidade
+  const filtroDisponibilidade = document.getElementById("filtroDisponibilidade");
+  filtroDisponibilidade.addEventListener("change", async () => {
+    const valor = filtroDisponibilidade.value;
+    const produtosRef = collection(db, "produtos");
+    const snapshot = await getDocs(produtosRef);
+
+    const filtrados = [];
+    snapshot.forEach(doc => {
+      const dados = doc.data();
+      if (valor === "todos" || dados.disponibilidade?.toLowerCase() === valor.toLowerCase()) {
+        filtrados.push({ id: doc.id, ...dados });
+      }
+    });
+
+    exibirResultadosPesquisa(filtrados);
+  });
 });

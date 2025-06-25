@@ -1,95 +1,113 @@
-<!-- produto-detalhe.html atualizado com vendedor e chat -->
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Detalhes do Produto - ResellSneakers</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detalhes do Produto</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    body { background-color: #f5f6fa; }
-    .product-image { width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; }
-    .chat-btn {
-      background-color: #0d6efd;
-      color: white;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 30px;
-      display: inline-flex;
-      align-items: center;
+    .product-details {
+      max-width: 800px;
+      margin: 40px auto;
     }
-    .chat-btn i { margin-right: 0.5rem; }
-    .badge-condicao { font-size: 0.85rem; padding: 0.4rem 0.75rem; }
-    .badge-disponibilidade { font-size: 0.85rem; padding: 0.4rem 0.75rem; }
+    .product-image {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+    }
+    .badge-disponivel {
+      background-color: #28a745;
+    }
+    .badge-indisponivel {
+      background-color: #dc3545;
+    }
   </style>
 </head>
 <body>
-  <div class="container py-5">
-    <div id="produtoContainer" class="row g-4"></div>
+
+  <div class="container product-details">
+    <div class="row">
+      <div class="col-md-6">
+        <img id="imagemProduto" src="" alt="Imagem do Produto" class="product-image rounded shadow-sm"/>
+      </div>
+      <div class="col-md-6">
+        <h1 id="nomeProduto" class="h3 fw-bold"></h1>
+        <p id="precoProduto" class="h4 text-success fw-semibold"></p>
+        <p><strong>Marca:</strong> <span id="marcaProduto"></span></p>
+        <p><strong>Condição:</strong> <span id="condicaoProduto"></span></p>
+        <p>
+          <strong>Disponibilidade:</strong>
+          <span id="disponibilidadeProduto" class="badge"></span>
+        </p>
+        <hr/>
+        <p id="descricaoProduto"></p>
+        <a href="index.html" class="btn btn-outline-primary mt-3">Voltar à loja</a>
+      </div>
+    </div>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script>
+  <!-- Firebase + Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
       authDomain: "resalesneakers-e17cb.firebaseapp.com",
+      databaseURL: "https://resalesneakers-e17cb-default-rtdb.firebaseio.com",
       projectId: "resalesneakers-e17cb",
       storageBucket: "resalesneakers-e17cb.appspot.com",
       messagingSenderId: "698715655625",
-      appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
+      appId: "1:698715655625:web:fde7f7a7f2da0037792c18",
+      measurementId: "G-WVNMT06HJS"
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
 
-    async function carregarProduto() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const id = urlParams.get("id");
-      if (!id) return;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-      try {
-        const doc = await db.collection("produtos").doc(id).get();
-        if (!doc.exists) throw new Error("Produto não encontrado");
-        const produto = doc.data();
-
-        const vendedorSnap = await db.collection("users").doc(produto.vendedorId).get();
-        const vendedor = vendedorSnap.exists ? vendedorSnap.data() : {};
-
-        document.title = produto.nome + " - ResellSneakers";
-
-        const container = document.getElementById("produtoContainer");
-        container.innerHTML = `
-          <div class="col-md-6">
-            <img src="${produto.imagemPrincipal || 'https://via.placeholder.com/400x300'}" class="product-image" alt="${produto.nome}">
-          </div>
-          <div class="col-md-6">
-            <h2>${produto.nome}</h2>
-            <p class="text-muted">Marca: ${produto.marca || 'N/A'}</p>
-            <h4 class="text-primary fw-bold">${produto.preco ? produto.preco + '€' : 'Preço indisponível'}</h4>
-            <span class="badge bg-info badge-condicao">${produto.condicao}</span>
-            <span class="badge bg-success badge-disponibilidade">${produto.disponibilidade}</span>
-            <hr>
-            <div class="d-flex align-items-center mt-4">
-              <img src="${vendedor.foto || 'https://via.placeholder.com/40'}" class="rounded-circle me-2" width="40" height="40">
-              <div>
-                <strong>${vendedor.nome || 'Vendedor'}</strong><br>
-                <small>${vendedor.email || ''}</small>
-              </div>
-            </div>
-            <a href="mensagens.html?produtoId=ID_DO_PRODUTO&vendedorId=ID_DO_VENDEDOR" class="btn btn-primary">
-              <i class="fas fa-comment"></i> Chat com o vendedor
-            </a>
-          </div>
-        `;
-      } catch (err) {
-        document.getElementById("produtoContainer").innerHTML = `<div class="col-12 alert alert-danger">Erro ao carregar produto.</div>`;
-        console.error(err);
-      }
+    function obterIdProduto() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('id');
     }
 
-    document.addEventListener("DOMContentLoaded", carregarProduto);
+    function exibirDetalhesProduto(produto) {
+      document.getElementById('imagemProduto').src = produto.imagemPrincipal || 'https://via.placeholder.com/600x400';
+      document.getElementById('nomeProduto').textContent = produto.nome || 'Produto';
+      document.getElementById('precoProduto').textContent = `${produto.preco || 0} €`;
+      document.getElementById('descricaoProduto').textContent = produto.descricao || 'Sem descrição';
+      document.getElementById('marcaProduto').textContent = produto.marca || 'Marca desconhecida';
+      document.getElementById('condicaoProduto').textContent = produto.condicao || 'Usado';
+
+      const disponibilidadeElem = document.getElementById('disponibilidadeProduto');
+      const disponibilidade = produto.disponibilidade?.toLowerCase() || 'indefinido';
+
+      disponibilidadeElem.textContent = disponibilidade.charAt(0).toUpperCase() + disponibilidade.slice(1);
+      disponibilidadeElem.className = 'badge ' + 
+        (disponibilidade === 'disponível' ? 'badge-disponivel' : 'badge-indisponivel');
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const produtoId = obterIdProduto();
+      if (!produtoId) {
+        alert("ID do produto não especificado.");
+        return;
+      }
+
+      try {
+        const docRef = doc(db, "produtos", produtoId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const produto = docSnap.data();
+          exibirDetalhesProduto(produto);
+        } else {
+          alert("Produto não encontrado.");
+        }
+      } catch (error) {
+        console.error("Erro ao carregar detalhes do produto:", error);
+      }
+    });
   </script>
 </body>
 </html>
