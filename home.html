@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ResellSneakers - Home</title>
 
   <!-- Bootstrap e FontAwesome -->
@@ -26,6 +26,7 @@
     }
     .product-card {
       transition: transform 0.2s;
+      position: relative;
     }
     .product-card:hover {
       transform: scale(1.02);
@@ -69,52 +70,53 @@
 </head>
 <body>
   <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="home.html">ResellSneakers</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link active" href="home.html">Início</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="produtos.html">Produtos</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="favoritos.html">Favoritos</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="adicionar.html">Adicionar Produto</a>
-        </li>
-      </ul>
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" href="perfil.html"><i class="fas fa-user"></i> Perfil</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="editarPerfil.html"><i class="fas fa-edit"></i> Editar Perfil</a>
-        </li>
-        <li class="nav-item">
-          <button id="logoutBtn" class="btn btn-outline-light ms-2">Logout</button>
-        </li>
-      </ul>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="home.html">ResellSneakers</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link active" href="home.html">Início</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="produtos.html">Produtos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="favoritos.html">Favoritos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="adicionar.html">Adicionar Produto</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="perfil.html"><i class="fas fa-user"></i> Perfil</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="editarPerfil.html"><i class="fas fa-edit"></i> Editar Perfil</a>
+          </li>
+          <li class="nav-item">
+            <button id="logoutBtn" class="btn btn-outline-light ms-2">Logout</button>
+          </li>
+        </ul>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
+
   <!-- Carrossel de Banners -->
   <div id="carouselBanners" class="carousel slide mb-5" data-bs-ride="carousel">
     <div class="carousel-inner rounded shadow">
       <div class="carousel-item active">
-        <img src="https://images.unsplash.com/photo-1585386959984-a4155222d8b0?auto=format&fit=crop&w=1200&q=80" class="d-block w-100" alt="Banner 1">
+        <img src="https://images.unsplash.com/photo-1585386959984-a4155222d8b0?auto=format&fit=crop&w=1200&q=80" class="d-block w-100" alt="Banner 1" />
       </div>
       <div class="carousel-item">
-        <img src="https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=1200&q=80" class="d-block w-100" alt="Banner 2">
+        <img src="https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=1200&q=80" class="d-block w-100" alt="Banner 2" />
       </div>
       <div class="carousel-item">
-        <img src="https://images.unsplash.com/photo-1618354691211-fd04f82b6de0?auto=format&fit=crop&w=1200&q=80" class="d-block w-100" alt="Banner 3">
+        <img src="https://images.unsplash.com/photo-1618354691211-fd04f82b6de0?auto=format&fit=crop&w=1200&q=80" class="d-block w-100" alt="Banner 3" />
       </div>
     </div>
     <button class="carousel-control-prev" type="button" data-bs-target="#carouselBanners" data-bs-slide="prev">
@@ -125,23 +127,24 @@
     </button>
   </div>
 
-    <!-- Pesquisa -->
-    <div class="mb-4">
-      <input id="barraPesquisa" type="text" class="form-control" placeholder="Pesquisar por nome ou marca...">
-    </div>
+  <!-- Pesquisa -->
+  <div class="mb-4 container">
+    <input id="barraPesquisa" type="text" class="form-control" placeholder="Pesquisar por nome ou marca..." />
+  </div>
 
-    <!-- Filtro de disponibilidade -->
-    <div class="mb-4">
-      <label class="form-label">Filtrar por disponibilidade:</label>
-      <select id="filtroDisponibilidade" class="form-select w-auto d-inline-block">
-        <option value="todos">Todos</option>
-        <option value="troca">Troca</option>
-        <option value="venda">Venda</option>
-        <option value="venda e troca">Venda e Troca</option>
-      </select>
-    </div>
+  <!-- Filtro de disponibilidade -->
+  <div class="mb-4 container">
+    <label class="form-label">Filtrar por disponibilidade:</label>
+    <select id="filtroDisponibilidade" class="form-select w-auto d-inline-block">
+      <option value="todos">Todos</option>
+      <option value="troca">Troca</option>
+      <option value="venda">Venda</option>
+      <option value="venda e troca">Venda e Troca</option>
+    </select>
+  </div>
 
-    <!-- Produtos Recomendados -->
+  <!-- Produtos Recomendados -->
+  <div class="container">
     <h4 class="mb-3">Recomendados para ti</h4>
     <div id="featuredProducts" class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 mb-5"></div>
 
@@ -169,6 +172,8 @@
 
   <!-- Scripts personalizados -->
   <script type="module" src="home.js"></script>
+
+  <!-- Script de autenticação e logout -->
   <script type="module">
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -182,9 +187,12 @@
     });
 
     onAuthStateChanged(auth, (user) => {
-      if (!user) window.location.href = "log.html";
+      if (!user) {
+        window.location.href = "log.html";
+      }
     });
   </script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

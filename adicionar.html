@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Adicionar Produto - ResellSneakers</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     body {
       background-color: #f8f9fa;
@@ -26,6 +26,9 @@
       border-radius: 4px;
       border: 1px solid #ccc;
     }
+    #mensagem {
+      min-height: 1.5em;
+    }
   </style>
 </head>
 <body>
@@ -35,12 +38,12 @@
     <form id="formAdicionarProduto">
       <div class="mb-3">
         <label for="nome" class="form-label">Nome do Produto</label>
-        <input type="text" class="form-control" id="nome" required>
+        <input type="text" class="form-control" id="nome" required />
       </div>
 
       <div class="mb-3">
         <label for="preco" class="form-label">Preço (€)</label>
-        <input type="number" class="form-control" id="preco" required>
+        <input type="number" class="form-control" id="preco" min="0" step="0.01" required />
       </div>
 
       <div class="mb-3">
@@ -65,23 +68,23 @@
 
       <div class="mb-3">
         <label for="imagemProduto" class="form-label">Imagens (até 6)</label>
-        <input type="file" class="form-control" id="imagemProduto" accept="image/*" multiple required>
+        <input type="file" class="form-control" id="imagemProduto" accept="image/*" multiple required />
         <div class="preview-multiplas-imagens" id="previewContainer"></div>
       </div>
 
-      <button type="submit" class="btn btn-primary">Adicionar Produto</button>
+      <button type="submit" class="btn btn-primary" id="btnEnviar">Adicionar Produto</button>
     </form>
 
-    <div id="mensagem" class="mt-3 text-success fw-bold"></div>
+    <div id="mensagem" class="mt-3 fw-bold"></div>
   </div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <!-- Firebase SDKs modular -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
-  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
       authDomain: "resalesneakers-e17cb.firebaseapp.com",
@@ -91,14 +94,19 @@
       appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+    // Inicializa Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
 
     const imagemInput = document.getElementById("imagemProduto");
     const previewContainer = document.getElementById("previewContainer");
+    const form = document.getElementById("formAdicionarProduto");
+    const mensagem = document.getElementById("mensagem");
+    const btnEnviar = document.getElementById("btnEnviar");
 
+    // Preview das imagens
     imagemInput.addEventListener("change", () => {
       previewContainer.innerHTML = "";
       const files = Array.from(imagemInput.files).slice(0, 6);
@@ -114,53 +122,79 @@
       });
     });
 
-    document.getElementById("formAdicionarProduto").addEventListener("submit", async (e) => {
+    // Verifica se usuário está autenticado ao carregar a página
+    let usuarioAtual = null;
+    onAuthStateChanged(auth, (user) => {
+      usuarioAtual = user;
+      if (!user) {
+        mensagem.textContent = "Por favor, faça login para adicionar produtos.";
+        mensagem.classList.remove("text-success");
+        mensagem.classList.add("text-danger");
+        btnEnviar.disabled = true;
+      } else {
+        mensagem.textContent = "";
+        btnEnviar.disabled = false;
+      }
+    });
+
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const user = auth.currentUser;
-      if (!user) {
-        alert("É necessário estar autenticado.");
+      if (!usuarioAtual) {
+        alert("É necessário estar autenticado para adicionar produtos.");
         return;
       }
 
-      const nome = document.getElementById("nome").value;
-      const preco = parseFloat(document.getElementById("preco").value);
-      const condicao = document.getElementById("condicao").value;
-      const disponibilidade = document.getElementById("disponibilidade").value;
-      const imagens = Array.from(imagemInput.files).slice(0, 6);
-
-      if (imagens.length === 0) {
-        alert("Por favor, selecione pelo menos uma imagem.");
-        return;
-      }
+      // Desabilita botão para evitar múltiplos cliques
+      btnEnviar.disabled = true;
+      mensagem.textContent = "Carregando... Por favor, aguarde.";
+      mensagem.classList.remove("text-danger");
+      mensagem.classList.remove("text-success");
 
       try {
-        const urls = [];
+        const nome = form.nome.value.trim();
+        const preco = parseFloat(form.preco.value);
+        const condicao = form.condicao.value;
+        const disponibilidade = form.disponibilidade.value;
+        const imagens = Array.from(imagemInput.files).slice(0, 6);
+
+        if (imagens.length === 0) throw new Error("Selecione pelo menos uma imagem.");
+
+        // Upload imagens e coleta caminhos
+        const caminhosImagens = [];
 
         for (const img of imagens) {
           const nomeImagem = `${Date.now()}_${img.name}`;
-          const storageRef = storage.ref().child(`produtos/${user.uid}/${nomeImagem}`);
-          const snapshot = await storageRef.put(img);
-          const url = await snapshot.ref.getDownloadURL();
-          urls.push(url);
+          const caminhoImagem = `produtos/${usuarioAtual.uid}/${nomeImagem}`;
+          const storageRef = ref(storage, caminhoImagem);
+          await uploadBytes(storageRef, img);
+          caminhosImagens.push(caminhoImagem);
         }
 
-        await db.collection("produtos").add({
+        // Salvar produto no Firestore
+        await addDoc(collection(db, "produtos"), {
           nome,
           preco,
           condicao,
           disponibilidade,
-          imagemPrincipal: urls[0],
-          imagens: urls,
-          vendedorId: user.uid,
-          data: firebase.firestore.FieldValue.serverTimestamp()
+          imagemPrincipal: caminhosImagens[0],
+          imagens: caminhosImagens,
+          vendedorId: usuarioAtual.uid,
+          data: serverTimestamp()
         });
 
-        document.getElementById("mensagem").textContent = "Produto adicionado com sucesso!";
-        document.getElementById("formAdicionarProduto").reset();
+        mensagem.textContent = "Produto adicionado com sucesso!";
+        mensagem.classList.remove("text-danger");
+        mensagem.classList.add("text-success");
+
+        form.reset();
         previewContainer.innerHTML = "";
       } catch (error) {
-        alert("Erro ao adicionar produto: " + error.message);
+        mensagem.textContent = "Erro ao adicionar produto: " + error.message;
+        mensagem.classList.remove("text-success");
+        mensagem.classList.add("text-danger");
+      } finally {
+        btnEnviar.disabled = false;
       }
     });
   </script>

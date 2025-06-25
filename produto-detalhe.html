@@ -3,110 +3,170 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Detalhes do Produto</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <title>ResellSneakers - Home</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
-    .product-details {
-      max-width: 800px;
-      margin: 40px auto;
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f5f5f5;
     }
-    .product-image {
+
+    h1, h2 {
+      color: #333;
+    }
+
+    #user-info {
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    #user-info img {
+      width: 60px;
+      border-radius: 50%;
+      margin-top: 10px;
+    }
+
+    #logout {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background-color: #d9534f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #product-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .product {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      max-width: 250px;
       width: 100%;
-      max-height: 400px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .product img {
+      width: 100%;
+      border-radius: 8px;
       object-fit: cover;
-    }
-    .badge-disponivel {
-      background-color: #28a745;
-    }
-    .badge-indisponivel {
-      background-color: #dc3545;
+      max-height: 200px;
     }
   </style>
 </head>
 <body>
+  <h1>Bem-vindo à ResellSneakers</h1>
 
-  <div class="container product-details">
-    <div class="row">
-      <div class="col-md-6">
-        <img id="imagemProduto" src="" alt="Imagem do Produto" class="product-image rounded shadow-sm"/>
-      </div>
-      <div class="col-md-6">
-        <h1 id="nomeProduto" class="h3 fw-bold"></h1>
-        <p id="precoProduto" class="h4 text-success fw-semibold"></p>
-        <p><strong>Marca:</strong> <span id="marcaProduto"></span></p>
-        <p><strong>Condição:</strong> <span id="condicaoProduto"></span></p>
-        <p>
-          <strong>Disponibilidade:</strong>
-          <span id="disponibilidadeProduto" class="badge"></span>
-        </p>
-        <hr/>
-        <p id="descricaoProduto"></p>
-        <a href="index.html" class="btn btn-outline-primary mt-3">Voltar à loja</a>
-      </div>
-    </div>
+  <!-- Informações do utilizador -->
+  <div id="user-info">
+    <p><strong>Nome:</strong> <span id="user-name"></span></p>
+    <p><strong>Email:</strong> <span id="user-email"></span></p>
+    <img id="user-photo" alt="Foto do utilizador" />
+    <br>
+    <button id="logout">Logout</button>
   </div>
 
-  <!-- Firebase + Script -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  <h2>Produtos disponíveis</h2>
+  <div id="product-list"></div>
 
+  <!-- Firebase SDKs -->
+  <script type="module">
+    // Importações Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+    // Configuração Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
       authDomain: "resalesneakers-e17cb.firebaseapp.com",
       databaseURL: "https://resalesneakers-e17cb-default-rtdb.firebaseio.com",
       projectId: "resalesneakers-e17cb",
-      storageBucket: "resalesneakers-e17cb.appspot.com",
+      storageBucket: "resalesneakers-e17cb.firebasestorage.app",
       messagingSenderId: "698715655625",
       appId: "1:698715655625:web:fde7f7a7f2da0037792c18",
       measurementId: "G-WVNMT06HJS"
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
-    function obterIdProduto() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('id');
-    }
+    const userName = document.getElementById('user-name');
+    const userEmail = document.getElementById('user-email');
+    const userPhoto = document.getElementById('user-photo');
+    const logoutBtn = document.getElementById('logout');
+    const productList = document.getElementById('product-list');
 
-    function exibirDetalhesProduto(produto) {
-      document.getElementById('imagemProduto').src = produto.imagemPrincipal || 'https://via.placeholder.com/600x400';
-      document.getElementById('nomeProduto').textContent = produto.nome || 'Produto';
-      document.getElementById('precoProduto').textContent = `${produto.preco || 0} €`;
-      document.getElementById('descricaoProduto').textContent = produto.descricao || 'Sem descrição';
-      document.getElementById('marcaProduto').textContent = produto.marca || 'Marca desconhecida';
-      document.getElementById('condicaoProduto').textContent = produto.condicao || 'Usado';
-
-      const disponibilidadeElem = document.getElementById('disponibilidadeProduto');
-      const disponibilidade = produto.disponibilidade?.toLowerCase() || 'indefinido';
-
-      disponibilidadeElem.textContent = disponibilidade.charAt(0).toUpperCase() + disponibilidade.slice(1);
-      disponibilidadeElem.className = 'badge ' + 
-        (disponibilidade === 'disponível' ? 'badge-disponivel' : 'badge-indisponivel');
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      const produtoId = obterIdProduto();
-      if (!produtoId) {
-        alert("ID do produto não especificado.");
-        return;
-      }
-
-      try {
-        const docRef = doc(db, "produtos", produtoId);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          const produto = docSnap.data();
-          exibirDetalhesProduto(produto);
+    // Verifica se o utilizador está autenticado
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        userName.textContent = user.displayName || "Sem nome";
+        userEmail.textContent = user.email;
+        if (user.photoURL) {
+          userPhoto.src = user.photoURL;
         } else {
-          alert("Produto não encontrado.");
+          userPhoto.src = "default-avatar.png";
         }
-      } catch (error) {
-        console.error("Erro ao carregar detalhes do produto:", error);
+
+        // Carrega produtos do Firestore
+        try {
+          const produtosRef = collection(db, "produtos");
+          const querySnapshot = await getDocs(produtosRef);
+
+          querySnapshot.forEach(async (doc) => {
+            const data = doc.data();
+
+            const div = document.createElement('div');
+            div.className = 'product';
+            
+            let imagemUrl = '';
+            if (data.imagemPrincipal) {
+              try {
+                const imageRef = ref(storage, data.imagemPrincipal);
+                imagemUrl = await getDownloadURL(imageRef);
+              } catch (error) {
+                console.warn("Erro ao buscar imagem:", error);
+              }
+            }
+
+            div.innerHTML = `
+              <img src="${imagemUrl}" alt="Imagem do produto">
+              <h3>${data.nome}</h3>
+              <p><strong>Preço:</strong> €${data.preco}</p>
+              <p><strong>Condição:</strong> ${data.condicao}</p>
+              <p><strong>Disponibilidade:</strong> ${data.disponibilidade}</p>
+            `;
+
+            productList.appendChild(div);
+          });
+        } catch (error) {
+          console.error("Erro ao carregar produtos:", error);
+        }
+
+      } else {
+        // Se não estiver logado, redireciona para login
+        window.location.href = "log.html";
       }
+    });
+
+    // Logout
+    logoutBtn.addEventListener('click', () => {
+      signOut(auth).then(() => {
+        window.location.href = "log.html";
+      });
     });
   </script>
 </body>
