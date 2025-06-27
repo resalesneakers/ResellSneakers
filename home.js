@@ -43,7 +43,7 @@ function criarCardProduto(produto, id) {
           <a href="produto-detalhe.html?id=${id}" class="btn btn-sm btn-outline-primary mt-2 w-100">
             Ver detalhes
           </a>
-          <button class="btn btn-outline-secondary btn-sm mt-2 w-100" onclick="abrirChatComVendedor('${id}')">
+          <button class="btn btn-outline-secondary btn-sm mt-2 w-100" onclick="abrirChatComVendedor('${id}', '${produto.uid}')">
             <i class="bi bi-chat-dots"></i> Chat
           </button>
         </div>
@@ -171,9 +171,14 @@ window.toggleFavorito = async function(produtoId) {
   }
 };
 
-window.abrirChatComVendedor = function(produtoId) {
-  window.location.href = `chat.html?produto=${produtoId}`;
+window.abrirChatComVendedor = function(produtoId, vendedorId) {
+  if (!vendedorId) {
+    alert("Vendedor n\u00e3o identificado.");
+    return;
+  }
+  window.location.href = `chat.html?produto=${produtoId}&vendedor=${vendedorId}`;
 };
+
 
 document.addEventListener('DOMContentLoaded', async () => {
   await carregarProdutosRecomendados();
