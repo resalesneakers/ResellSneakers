@@ -6,48 +6,91 @@
   <title>Meus Produtos - ResellSneakers</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <!-- Estilos mantidos como no original -->
-  <style>/* (os estilos permanecem inalterados aqui) */</style>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    .main-container {
+      padding: 20px;
+    }
+    .product-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background: #f0f0f0;
+    }
+    .product-card {
+      border-radius: 15px;
+      overflow: hidden;
+      border: 1px solid #ddd;
+      transition: transform 0.3s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+    .product-actions button {
+      margin-right: 10px;
+    }
+  </style>
 </head>
 <body>
   <div class="main-container">
-    <div class="header-section">
-      <div class="header-content">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <div>
-            <h1 class="mb-2">
-              <i class="fas fa-box-open me-3"></i>
-              Os Meus Produtos
-            </h1>
-            <p class="mb-0 opacity-75">Gerencie todos os seus produtos de forma simples e eficiente</p>
-            <p class="mb-0"><strong id="nomeUtilizador">Utilizador</strong> <img id="avatarUtilizador" src="" alt="Avatar" class="rounded-circle" width="32" height="32"></p>
-          </div>
-          <div>
-            <a href="adicionar-produto.html" class="btn btn-light btn-lg">
-              <i class="fas fa-plus me-2"></i>
-              Adicionar Produto
-            </a>
-            <button id="btn-logout" class="btn btn-outline-danger ms-3">Sair</button>
-          </div>
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="text-white">
+          <i class="fas fa-box-open me-2"></i> Os Meus Produtos
+        </h2>
+        <p class="text-white-50">Gerencie seus produtos de forma simples</p>
+        <div class="d-flex align-items-center gap-2">
+          <img id="avatarUtilizador" src="" alt="Avatar" class="rounded-circle" width="40" height="40">
+          <span id="nomeUtilizador" class="text-white fw-bold">Utilizador</span>
         </div>
-        <div class="stats-grid" id="statsGrid">
-          <!-- (estatísticas mantidas como antes) -->
-        </div>
+      </div>
+      <div>
+        <a href="vender.html" class="btn btn-light">
+          <i class="fas fa-plus me-2"></i> Adicionar Produto
+        </a>
+        <button id="btn-logout" class="btn btn-outline-danger ms-2">
+          <i class="fas fa-sign-out-alt me-1"></i> Sair
+        </button>
       </div>
     </div>
 
-    <!-- Produtos e filtros (inalterado) -->
-    <div class="products-section">
-      <!-- (filtros, grid, empty state e modal deletar permanecem iguais) -->
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <input id="searchInput" type="text" class="form-control" placeholder="Pesquisar por nome ou marca...">
+      </div>
+      <div class="col-md-4">
+        <select id="conditionFilter" class="form-select">
+          <option value="">Todas as condições</option>
+          <option value="Novo">Novo</option>
+          <option value="Usado">Usado</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <select id="availabilityFilter" class="form-select">
+          <option value="">Todas as disponibilidades</option>
+          <option value="venda">Venda</option>
+          <option value="troca">Troca</option>
+          <option value="revenda">Revenda</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="meusProdutosContainer" class="row g-4"></div>
+    <div id="nenhumProduto" class="text-center text-white mt-5 d-none">
+      <i class="fas fa-box-open fa-2x mb-3"></i>
+      <p>Nenhum produto encontrado</p>
     </div>
   </div>
 
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
@@ -62,36 +105,83 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    let produtos = [];
-    let produtosFiltrados = [];
-    let produtoParaEliminar = null;
-
     const container = document.getElementById('meusProdutosContainer');
     const nenhumProduto = document.getElementById('nenhumProduto');
-    const loadingSpinner = document.getElementById('loadingSpinner');
     const searchInput = document.getElementById('searchInput');
     const conditionFilter = document.getElementById('conditionFilter');
     const availabilityFilter = document.getElementById('availabilityFilter');
 
+    let produtos = [];
+
     auth.onAuthStateChanged(async (user) => {
       if (!user) return window.location.href = "log.html";
 
-      // Mostra nome e avatar do utilizador
-      const docRef = db.collection("users").doc(user.uid);
-      const snap = await docRef.get();
-      const data = snap.data();
-      document.getElementById("nomeUtilizador").textContent = data?.nome || user.email;
-      document.getElementById("avatarUtilizador").src = data?.foto || "https://via.placeholder.com/32";
+      const userSnap = await db.collection("users").doc(user.uid).get();
+      const userData = userSnap.data();
 
-      await carregarProdutos(user.uid);
+      document.getElementById("nomeUtilizador").textContent = userData?.nome || user.email;
+      document.getElementById("avatarUtilizador").src = userData?.foto || "https://via.placeholder.com/32";
+
+      const snapshot = await db.collection("produtos").where("userId", "==", user.uid).orderBy("dataCriacao", "desc").get();
+      produtos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderizarProdutos(produtos);
     });
+
+    function renderizarProdutos(lista) {
+      container.innerHTML = "";
+      if (!lista.length) return nenhumProduto.classList.remove("d-none");
+      nenhumProduto.classList.add("d-none");
+
+      lista.forEach(produto => {
+        const col = document.createElement("div");
+        col.className = "col-md-4";
+        col.innerHTML = `
+          <div class="card product-card">
+            <img src="${produto.imagemPrincipal}" class="product-image" alt="${produto.nome}">
+            <div class="card-body">
+              <h5 class="card-title">${produto.nome}</h5>
+              <p class="card-text">${produto.marca} • ${produto.condicao}</p>
+              <p class="card-text fw-bold text-success">${produto.preco}€</p>
+              <div class="d-flex justify-content-between">
+                <a href="editar-produto.html?id=${produto.id}" class="btn btn-primary btn-sm">Editar</a>
+                <button class="btn btn-danger btn-sm" onclick="removerProduto('${produto.id}')">Eliminar</button>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(col);
+      });
+    }
 
     document.getElementById("btn-logout").addEventListener("click", async () => {
       await auth.signOut();
       window.location.href = "log.html";
     });
 
-    // (funções carregarProdutos, atualizarEstatisticas, renderizarProdutos, filtros etc. permanecem inalteradas)
+    [searchInput, conditionFilter, availabilityFilter].forEach(el => {
+      el.addEventListener("input", () => {
+        const termo = searchInput.value.toLowerCase();
+        const condicao = conditionFilter.value;
+        const dispo = availabilityFilter.value;
+
+        const filtrados = produtos.filter(p => {
+          return (
+            (p.nome.toLowerCase().includes(termo) || p.marca.toLowerCase().includes(termo)) &&
+            (!condicao || p.condicao === condicao) &&
+            (!dispo || p.disponibilidade === dispo)
+          );
+        });
+
+        renderizarProdutos(filtrados);
+      });
+    });
+
+    async function removerProduto(id) {
+      if (!confirm("Tens certeza que queres remover este produto?")) return;
+      await db.collection("produtos").doc(id).delete();
+      produtos = produtos.filter(p => p.id !== id);
+      renderizarProdutos(produtos);
+    }
   </script>
 </body>
 </html>

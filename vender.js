@@ -1,4 +1,7 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+// vender.js compatível com home.js
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getStorage,
   ref,
@@ -8,76 +11,79 @@ import {
 import {
   getFirestore,
   collection,
-  addDoc
+  addDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-// Configuração Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
-    authDomain: "resalesneakers-e17cb.firebaseapp.com",
-    databaseURL: "https://resalesneakers-e17cb-default-rtdb.firebaseio.com",
-    projectId: "resalesneakers-e17cb",
-    storageBucket: "resalesneakers-e17cb.firebasestorage.app",
-    messagingSenderId: "698715655625",
-    appId: "1:698715655625:web:fde7f7a7f2da0037792c18",
-    measurementId: "G-WVNMT06HJS"
-  };
+  apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
+  authDomain: "resalesneakers-e17cb.firebaseapp.com",
+  databaseURL: "https://resalesneakers-e17cb-default-rtdb.firebaseio.com",
+  projectId: "resalesneakers-e17cb",
+  storageBucket: "resalesneakers-e17cb.appspot.com",
+  messagingSenderId: "698715655625",
+  appId: "1:698715655625:web:fde7f7a7f2da0037792c18",
+  measurementId: "G-WVNMT06HJS"
+};
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
+const auth = getAuth(app);
 
-// Preview das imagens
-const input = document.getElementById('imagemInput');
-const preview = document.getElementById('preview');
-let imagensSelecionadas = [];
+const form = document.getElementById("sellForm");
+const imageInput = document.getElementById("imageInput");
 
-input.addEventListener('change', () => {
-  preview.innerHTML = '';
-  imagensSelecionadas = Array.from(input.files).slice(0, 6); // Limita a 6
+onAuthStateChanged(auth, (user) => {
+  if (!user) return window.location.href = "log.html";
 
-  imagensSelecionadas.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = document.createElement('img');
-      img.src = e.target.result;
-      img.className = 'preview-img';
-      preview.appendChild(img);
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const files = imageInput.files;
+    if (!files.length) return alert("Selecione pelo menos uma imagem.");
+
+    const formData = new FormData(form);
+    const urls = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const storageRef = ref(storage, `produtos/${user.uid}/${Date.now()}-${files[i].name}`);
+      await uploadBytes(storageRef, files[i]);
+      const url = await getDownloadURL(storageRef);
+      urls.push(url);
+    }
+
+    const produto = {
+      nome: formData.get("title"),
+      marca: formData.get("brand"),
+      modelo: formData.get("model"),
+      tamanho: formData.get("size"),
+      condicao: formData.get("condition"),
+      preco: parseFloat(formData.get("price")) || 0,
+      negociavel: formData.get("negotiable") === "yes",
+      disponibilidade: formData.get("saleType") || "venda",
+      descricao: formData.get("description"),
+      localizacao: formData.get("location"),
+      imagemPrincipal: urls[0],
+      imagens: urls,
+      visualizacoes: 0,
+      favorito: false,
+      verificado: false,
+      dataCriacao: serverTimestamp(),
+      userId: user.uid
     };
-    reader.readAsDataURL(file);
+
+    try {
+      await addDoc(collection(db, "produtos"), produto);
+      alert("Produto publicado com sucesso!");
+      window.location.href = "meus-produtos.html";
+    } catch (error) {
+      console.error("Erro ao publicar produto:", error);
+      alert("Erro ao publicar produto.");
+    }
   });
 });
-if (!nome || !estado || imagensSelecionadas.length === 0) {
-    alert("Preenche todos os campos obrigatórios e seleciona ao menos 1 imagem.");
-    return;
-  }
-  
-
-// Envio do produto 
-async function enviarProduto() {
-  if (imagensSelecionadas.length === 0) {
-    alert("Seleciona pelo menos uma imagem.");
-    return;
-  }
-
-  const urls = [];
-
-  for (const img of imagensSelecionadas) {
-    const imgRef = ref(storage, `produtos/${Date.now()}_${img.name}`);
-    await uploadBytes(imgRef, img);
-    const url = await getDownloadURL(imgRef);
-    urls.push(url);
-  }
-
-  await addDoc(collection(db, "produtos"), {
-    nome: "Exemplo de produto",
-    estado: "Novo",
-    disponibilidade: "Venda",
-    imagens: urls,
-    data: new Date()
-  });
-
-  alert("Produto publicado com sucesso!");
-  input.value = "";
-  preview.innerHTML = "";
-}

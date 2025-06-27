@@ -5,90 +5,509 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Editar Produto - ResellSneakers</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      background-color: #f8f9fa;
+      background: linear-gradient(135deg, #dc2626 0%, #991b1b 50%, #7f1d1d 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       padding-top: 4.5rem;
     }
-    .container {
-      max-width: 600px;
+
+    /* Navbar Styling */
+    .navbar {
+      background: rgba(0, 0, 0, 0.95) !important;
+      backdrop-filter: blur(20px);
+      border-bottom: 2px solid #dc2626;
+      box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
     }
+
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: #dc2626 !important;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .navbar-brand:hover {
+      color: #f87171 !important;
+      transform: scale(1.05);
+    }
+
+    .nav-link {
+      color: #f3f4f6 !important;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      margin: 0 5px;
+      border-radius: 8px;
+      padding: 8px 15px !important;
+    }
+
+    .nav-link:hover {
+      color: #dc2626 !important;
+      background: rgba(220, 38, 38, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .nav-link.text-danger {
+      color: #ef4444 !important;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .nav-link.text-danger:hover {
+      background: #ef4444 !important;
+      color: white !important;
+    }
+
+    /* Container Styling */
+    .container {
+      max-width: 700px;
+      margin-top: 2rem;
+    }
+
+    /* Main Form Card */
+    .form-container {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 40px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .form-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #dc2626, #ef4444, #f87171);
+    }
+
+    /* Header Styling */
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .page-header h2 {
+      color: #dc2626;
+      font-weight: 700;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-header p {
+      color: #6b7280;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    /* Form Elements */
+    .form-label {
+      color: #374151;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    .form-control, .form-select {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 15px 20px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #fafafa;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.15);
+      background: white;
+      transform: translateY(-2px);
+    }
+
+    .form-control:hover, .form-select:hover {
+      border-color: #f87171;
+      background: white;
+    }
+
+    /* File Input Styling */
+    .file-input-container {
+      position: relative;
+      overflow: hidden;
+      border: 2px dashed #dc2626;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      background: linear-gradient(45deg, rgba(220, 38, 38, 0.05), rgba(248, 113, 113, 0.05));
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .file-input-container:hover {
+      border-color: #991b1b;
+      background: linear-gradient(45deg, rgba(220, 38, 38, 0.1), rgba(248, 113, 113, 0.1));
+      transform: scale(1.02);
+    }
+
+    .file-input-container input[type="file"] {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .file-input-text {
+      color: #dc2626;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .file-input-icon {
+      font-size: 2rem;
+      color: #dc2626;
+      margin-bottom: 10px;
+    }
+
+    /* Image Preview */
     #previewImagem {
       max-width: 100%;
       height: auto;
       margin-top: 1rem;
       display: none;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border: 3px solid white;
+      transition: transform 0.3s ease;
+    }
+
+    #previewImagem:hover {
+      transform: scale(1.05);
+    }
+
+    .image-preview-container {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .image-label {
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 15px;
+      box-shadow: 0 5px 15px rgba(220, 38, 38, 0.3);
+    }
+
+    /* Button Styling */
+    .btn-primary {
+      background: linear-gradient(135deg, #dc2626, #991b1b);
+      border: none;
+      border-radius: 15px;
+      padding: 15px 40px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #991b1b, #7f1d1d);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(220, 38, 38, 0.4);
+    }
+
+    .btn-primary:disabled {
+      background: #9ca3af;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Alert Messages */
+    .alert {
+      border: none;
+      border-radius: 15px;
+      padding: 20px 25px;
+      font-weight: 600;
+      margin-top: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .alert-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border-left: 5px solid #047857;
+    }
+
+    .alert-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      border-left: 5px solid #991b1b;
+    }
+
+    /* Form Groups */
+    .form-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .form-group i {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #dc2626;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-container {
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    /* Loading State */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(220, 38, 38, 0.1);
+      backdrop-filter: blur(5px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(220, 38, 38, 0.3);
+      border-top: 4px solid #dc2626;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        margin: 1rem;
+        max-width: calc(100% - 2rem);
+      }
+
+      .form-container {
+        padding: 25px;
+        border-radius: 20px;
+      }
+
+      .page-header h2 {
+        font-size: 2rem;
+      }
+
+      .btn-primary {
+        width: 100%;
+        padding: 18px;
+      }
+
+      .navbar-collapse {
+        background: rgba(0, 0, 0, 0.95);
+        border-radius: 10px;
+        margin-top: 10px;
+        padding: 15px;
+      }
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #dc2626, #991b1b);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #991b1b, #7f1d1d);
     }
   </style>
 </head>
 <body>
 
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+</div>
+
 <!-- Barra de Navegação -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="home.html">ResellSneakers</a>
+    <a class="navbar-brand" href="home.html">
+      <i class="fas fa-sneaker-glow me-2"></i>
+      ResellSneakers
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
-        <li class="nav-item"><a class="nav-link" href="editar-perfil.html">Editar Perfil</a></li>
-        <li class="nav-item"><a class="nav-link" href="favoritos.html">Favoritos</a></li>
-        <li class="nav-item"><a class="nav-link" href="produtos.html">Produtos</a></li>
-        <li class="nav-item"><a class="nav-link text-danger" href="#" id="logoutBtn">Logout</a></li>
+        <li class="nav-item">
+          <a class="nav-link" href="perfil.html">
+            <i class="fas fa-user me-1"></i>Perfil
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="editar-perfil.html">
+            <i class="fas fa-edit me-1"></i>Editar Perfil
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="favoritos.html">
+            <i class="fas fa-heart me-1"></i>Favoritos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="produtos.html">
+            <i class="fas fa-box me-1"></i>Produtos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-danger" href="#" id="logoutBtn">
+            <i class="fas fa-sign-out-alt me-1"></i>Logout
+          </a>
+        </li>
       </ul>
     </div>
   </div>
 </nav>
+<div class="container mt-4">
+  <a href="meus-produtos.html" class="btn btn-outline-light">
+    <i class="fas fa-arrow-left me-2"></i>Voltar para Meus Produtos
+  </a>
+</div>
 
 <div class="container">
-  <h2 class="mb-4">Editar Produto</h2>
-  <form id="formEditarProduto">
-    <div id="mensagem"></div>
-    <div class="mb-3">
-      <label for="nome" class="form-label">Nome do Produto</label>
-      <input type="text" class="form-control" id="nome" required>
+  <div class="form-container">
+    <div class="page-header">
+      <h2><i class="fas fa-edit me-3"></i>Editar Produto</h2>
+      <p>Atualize as informações do seu produto</p>
     </div>
 
-    <div class="mb-3">
-      <label for="preco" class="form-label">Preço (€)</label>
-      <input type="number" class="form-control" id="preco" required>
-    </div>
+    <form id="formEditarProduto">
+      <div id="mensagem"></div>
+      
+      <div class="form-group">
+        <label for="nome" class="form-label">
+          <i class="fas fa-tag me-2"></i>Nome do Produto
+        </label>
+        <input type="text" class="form-control" id="nome" required placeholder="Ex: Air Jordan 1 Retro High">
+        <i class="fas fa-sneaker-glow"></i>
+      </div>
 
-    <div class="mb-3">
-      <label for="condicao" class="form-label">Condição</label>
-      <select class="form-select" id="condicao" required>
-        <option value="">Seleciona...</option>
-        <option value="Novo">Novo</option>
-        <option value="Usado - Excelente">Usado - Excelente</option>
-        <option value="Usado - Bom">Usado - Bom</option>
-      </select>
-    </div>
+      <div class="form-group">
+        <label for="preco" class="form-label">
+          <i class="fas fa-euro-sign me-2"></i>Preço (€)
+        </label>
+        <input type="number" class="form-control" id="preco" required placeholder="0.00">
+        <i class="fas fa-money-bill-wave"></i>
+      </div>
 
-    <div class="mb-3">
-      <label for="disponibilidade" class="form-label">Disponibilidade</label>
-      <select class="form-select" id="disponibilidade" required>
-        <option value="">Seleciona...</option>
-        <option value="venda">Venda</option>
-        <option value="troca">Troca</option>
-        <option value="venda e troca">Venda e Troca</option>
-      </select>
-    </div>
+      <div class="form-group">
+        <label for="condicao" class="form-label">
+          <i class="fas fa-star me-2"></i>Condição
+        </label>
+        <select class="form-select" id="condicao" required>
+          <option value="">Seleciona a condição...</option>
+          <option value="Novo">🌟 Novo</option>
+          <option value="Usado - Excelente">💎 Usado - Excelente</option>
+          <option value="Usado - Bom">✨ Usado - Bom</option>
+        </select>
+        <i class="fas fa-check-circle"></i>
+      </div>
 
-    <div class="mb-3">
-      <label class="form-label">Imagem Atual</label>
-      <img id="previewImagem" src="#" alt="Imagem atual">
-    </div>
+      <div class="form-group">
+        <label for="disponibilidade" class="form-label">
+          <i class="fas fa-handshake me-2"></i>Disponibilidade
+        </label>
+        <select class="form-select" id="disponibilidade" required>
+          <option value="">Seleciona a disponibilidade...</option>
+          <option value="venda">💰 Venda</option>
+          <option value="troca">🔄 Troca</option>
+          <option value="venda e troca">💰🔄 Venda e Troca</option>
+        </select>
+        <i class="fas fa-shopping-cart"></i>
+      </div>
 
-    <div class="mb-3">
-      <label for="imagemProduto" class="form-label">Substituir Imagem</label>
-      <input type="file" class="form-control" id="imagemProduto" accept="image/*">
-    </div>
+      <div class="form-group">
+        <div class="image-preview-container">
+          <div class="image-label">
+            <i class="fas fa-image me-2"></i>Imagem Atual
+          </div>
+          <img id="previewImagem" src="#" alt="Imagem atual">
+        </div>
+      </div>
 
-    <button type="submit" class="btn btn-primary">Guardar Alterações</button>
-  </form>
-  <div id="mensagem" class="mt-3 fw-bold"></div>
+      <div class="form-group">
+        <label for="imagemProduto" class="form-label">
+          <i class="fas fa-camera me-2"></i>Substituir Imagem
+        </label>
+        <div class="file-input-container" onclick="document.getElementById('imagemProduto').click()">
+          <div class="file-input-icon">
+            <i class="fas fa-cloud-upload-alt"></i>
+          </div>
+          <div class="file-input-text">
+            Clique para selecionar uma nova imagem
+          </div>
+          <small class="text-muted">Formatos suportados: JPG, PNG, GIF</small>
+        </div>
+        <input type="file" class="form-control" id="imagemProduto" accept="image/*">
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="fas fa-save me-2"></i>
+        Guardar Alterações
+      </button>
+    </form>
+    
+    <div id="mensagem" class="mt-3 fw-bold"></div>
+  </div>
 </div>
 
 <!-- Firebase & Bootstrap -->
@@ -119,17 +538,32 @@
   const previewImagem = document.getElementById("previewImagem");
   const form = document.getElementById('formEditarProduto');
   const mensagemEl = document.getElementById('mensagem');
+  const loadingOverlay = document.getElementById('loadingOverlay');
 
   let produtoAtual = null;
   let imagemAnterior = null;
   let user = null;
 
+  // Show loading
+  function showLoading() {
+    loadingOverlay.style.display = 'flex';
+  }
+
+  // Hide loading
+  function hideLoading() {
+    loadingOverlay.style.display = 'none';
+  }
+
   auth.onAuthStateChanged(async (u) => {
     if (!u) return window.location.href = "log.html";
     user = u;
+    showLoading();
 
     const doc = await db.collection("produtos").doc(produtoId).get();
-    if (!doc.exists) return alert("Produto não encontrado.");
+    if (!doc.exists) {
+      hideLoading();
+      return alert("Produto não encontrado.");
+    }
 
     produtoAtual = doc.data();
     document.getElementById("nome").value = produtoAtual.nome || "";
@@ -142,14 +576,18 @@
       previewImagem.style.display = "block";
       imagemAnterior = produtoAtual.imagemPrincipal;
     }
+    
+    hideLoading();
   });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const submitBtn = form.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
     mensagemEl.textContent = '';
     mensagemEl.className = '';
+    showLoading();
 
     const nome = document.getElementById("nome").value.trim();
     const preco = parseFloat(document.getElementById("preco").value);
@@ -194,17 +632,47 @@
       console.error("Erro ao atualizar:", error);
       mostrarMensagem("Erro ao atualizar o produto.", "danger", submitBtn);
     }
+    
+    hideLoading();
   });
 
   function mostrarMensagem(texto, tipo, btn) {
     mensagemEl.textContent = texto;
     mensagemEl.className = `alert alert-${tipo} mt-3`;
-    if (btn) btn.disabled = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-save me-2"></i>Guardar Alterações';
+    }
+    hideLoading();
   }
+
+  // File input preview
+  imagemInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImagem.src = e.target.result;
+        previewImagem.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 
   // Botão logout
   document.getElementById('logoutBtn').addEventListener('click', () => {
     auth.signOut().then(() => window.location.href = "log.html");
+  });
+
+  // Add smooth transitions to form elements
+  document.querySelectorAll('.form-control, .form-select').forEach(element => {
+    element.addEventListener('focus', function() {
+      this.parentElement.style.transform = 'translateY(-2px)';
+    });
+    
+    element.addEventListener('blur', function() {
+      this.parentElement.style.transform = 'translateY(0)';
+    });
   });
 </script>
 </body>
