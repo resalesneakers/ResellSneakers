@@ -1,8 +1,7 @@
-// Importando os módulos do Firebase
+// home.js modificado com botão de chat nos cards
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// Configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
   authDomain: "resalesneakers-e17cb.firebaseapp.com",
@@ -14,14 +13,11 @@ const firebaseConfig = {
   measurementId: "G-WVNMT06HJS"
 };
 
-// Inicializando o Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Função para criar um card de produto
 function criarCardProduto(produto, id) {
-  const verificadoBadge = produto.verificado ? 
-    `<i class="fas fa-check-circle verified-badge ms-1"></i>` : '';
+  const verificadoBadge = produto.verificado ? `<i class="fas fa-check-circle verified-badge ms-1"></i>` : '';
   const heartIcon = produto.favorito ? 'fas fa-heart' : 'far fa-heart';
   const disponibilidade = produto.disponibilidade || 'Indefinido';
 
@@ -47,135 +43,99 @@ function criarCardProduto(produto, id) {
           <a href="produto-detalhe.html?id=${id}" class="btn btn-sm btn-outline-primary mt-2 w-100">
             Ver detalhes
           </a>
+          <button class="btn btn-outline-secondary btn-sm mt-2 w-100" onclick="abrirChatComVendedor('${id}')">
+            <i class="bi bi-chat-dots"></i> Chat
+          </button>
         </div>
       </div>
     </div>
   `;
 }
 
-// Carregar produtos recomendados (limite 4)
 async function carregarProdutosRecomendados() {
-  try {
-    const recomendadosContainer = document.querySelector('#featuredProducts');
-    const q = query(collection(db, "produtos"), limit(4));
-    const querySnapshot = await getDocs(q);
-
-    recomendadosContainer.innerHTML = '';
-
-    querySnapshot.forEach(doc => {
-      const produto = doc.data();
-      const cardHTML = criarCardProduto(produto, doc.id);
-      recomendadosContainer.innerHTML += cardHTML;
-    });
-  } catch (error) {
-    console.error("Erro ao carregar produtos recomendados:", error);
-  }
+  const recomendadosContainer = document.querySelector('#featuredProducts');
+  const q = query(collection(db, "produtos"), limit(4));
+  const querySnapshot = await getDocs(q);
+  recomendadosContainer.innerHTML = '';
+  querySnapshot.forEach(doc => {
+    const produto = doc.data();
+    const cardHTML = criarCardProduto(produto, doc.id);
+    recomendadosContainer.innerHTML += cardHTML;
+  });
 }
 
-// Carregar produtos trending (mais visualizados, limite 8)
 async function carregarProdutosTrending() {
-  try {
-    const trendingContainer = document.querySelector('#popularProducts');
-    const q = query(collection(db, "produtos"), orderBy("visualizacoes", "desc"), limit(8));
-    const querySnapshot = await getDocs(q);
-
-    trendingContainer.innerHTML = '';
-
-    querySnapshot.forEach(doc => {
-      const produto = doc.data();
-      const cardHTML = criarCardProduto(produto, doc.id);
-      trendingContainer.innerHTML += cardHTML;
-    });
-  } catch (error) {
-    console.error("Erro ao carregar produtos trending:", error);
-  }
+  const trendingContainer = document.querySelector('#popularProducts');
+  const q = query(collection(db, "produtos"), orderBy("visualizacoes", "desc"), limit(8));
+  const querySnapshot = await getDocs(q);
+  trendingContainer.innerHTML = '';
+  querySnapshot.forEach(doc => {
+    const produto = doc.data();
+    const cardHTML = criarCardProduto(produto, doc.id);
+    trendingContainer.innerHTML += cardHTML;
+  });
 }
 
-// Carregar todos os produtos (exibição inicial)
 async function carregarTodosProdutos() {
-  try {
-    const container = document.querySelector('#produtosContainer');
-    const q = query(collection(db, "produtos"), orderBy("dataCriacao", "desc"));
-    const querySnapshot = await getDocs(q);
-
-    container.innerHTML = '';
-
-    querySnapshot.forEach(doc => {
-      const produto = doc.data();
-      const cardHTML = criarCardProduto(produto, doc.id);
-      container.innerHTML += cardHTML;
-    });
-  } catch (error) {
-    console.error("Erro ao carregar todos os produtos:", error);
-  }
+  const container = document.querySelector('#produtosContainer');
+  const q = query(collection(db, "produtos"), orderBy("dataCriacao", "desc"));
+  const querySnapshot = await getDocs(q);
+  container.innerHTML = '';
+  querySnapshot.forEach(doc => {
+    const produto = doc.data();
+    const cardHTML = criarCardProduto(produto, doc.id);
+    container.innerHTML += cardHTML;
+  });
 }
 
-// Aplicar filtro por disponibilidade
 async function aplicarFiltroDisponibilidade(disponibilidade) {
-  try {
-    const container = document.querySelector('#produtosContainer');
-    let q;
-
-    if (disponibilidade === 'todos') {
-      q = query(collection(db, "produtos"), orderBy("dataCriacao", "desc"));
-    } else {
-      q = query(collection(db, "produtos"), where("disponibilidade", "==", disponibilidade), orderBy("dataCriacao", "desc"));
-    }
-
-    const querySnapshot = await getDocs(q);
-    container.innerHTML = '';
-    querySnapshot.forEach(doc => {
-      const produto = doc.data();
-      const cardHTML = criarCardProduto(produto, doc.id);
-      container.innerHTML += cardHTML;
-    });
-  } catch (error) {
-    console.error("Erro ao aplicar filtro de disponibilidade:", error);
+  const container = document.querySelector('#produtosContainer');
+  let q;
+  if (disponibilidade === 'todos') {
+    q = query(collection(db, "produtos"), orderBy("dataCriacao", "desc"));
+  } else {
+    q = query(collection(db, "produtos"), where("disponibilidade", "==", disponibilidade), orderBy("dataCriacao", "desc"));
   }
+  const querySnapshot = await getDocs(q);
+  container.innerHTML = '';
+  querySnapshot.forEach(doc => {
+    const produto = doc.data();
+    const cardHTML = criarCardProduto(produto, doc.id);
+    container.innerHTML += cardHTML;
+  });
 }
 
-// Configurar filtros por marca
 function configurarFiltros() {
   const filtros = document.querySelectorAll('.filter-pills .badge');
-
   filtros.forEach(filtro => {
     filtro.addEventListener('click', async () => {
       filtros.forEach(f => f.classList.remove('badge-active'));
       filtros.forEach(f => f.classList.add('badge-light'));
       filtro.classList.add('badge-active');
       filtro.classList.remove('badge-light');
-
       const marca = filtro.dataset.brand;
       const container = document.querySelector('#popularProducts');
       let q;
-
       if (marca === 'all') {
         q = query(collection(db, "produtos"), orderBy("visualizacoes", "desc"), limit(8));
       } else {
         q = query(collection(db, "produtos"), where("marca", "==", marca), orderBy("visualizacoes", "desc"), limit(8));
       }
-
-      try {
-        const querySnapshot = await getDocs(q);
-        container.innerHTML = '';
-        querySnapshot.forEach(doc => {
-          const produto = doc.data();
-          const cardHTML = criarCardProduto(produto, doc.id);
-          container.innerHTML += cardHTML;
-        });
-      } catch (error) {
-        console.error("Erro ao aplicar filtro de marca:", error);
-      }
+      const querySnapshot = await getDocs(q);
+      container.innerHTML = '';
+      querySnapshot.forEach(doc => {
+        const produto = doc.data();
+        const cardHTML = criarCardProduto(produto, doc.id);
+        container.innerHTML += cardHTML;
+      });
     });
   });
 }
 
-// Função para pesquisar produtos por termo (nome ou marca)
 async function pesquisarProdutos(termo) {
   const produtosRef = collection(db, "produtos");
   const snapshot = await getDocs(produtosRef);
   const resultados = [];
-
   snapshot.forEach(doc => {
     const dados = doc.data();
     const nome = dados.nome?.toLowerCase() || '';
@@ -184,27 +144,22 @@ async function pesquisarProdutos(termo) {
       resultados.push({ id: doc.id, ...dados });
     }
   });
-
   exibirResultadosPesquisa(resultados);
 }
 
-// Exibir resultados da pesquisa
 function exibirResultadosPesquisa(produtos) {
   const container = document.querySelector('#produtosContainer');
   container.innerHTML = '';
-
   if (produtos.length === 0) {
     container.innerHTML = '<p class="text-muted">Nenhum produto encontrado.</p>';
     return;
   }
-
   produtos.forEach(produto => {
     const cardHTML = criarCardProduto(produto, produto.id);
     container.innerHTML += cardHTML;
   });
 }
 
-// Alternar favorito (fictício)
 window.toggleFavorito = async function(produtoId) {
   const wishlistIcon = document.querySelector(`.card[data-id="${produtoId}"] .wishlist-icon i`);
   if (wishlistIcon.classList.contains('far')) {
@@ -216,37 +171,28 @@ window.toggleFavorito = async function(produtoId) {
   }
 };
 
-// Abrir chat fictício
-window.abrirChat = function(vendedor) {
-  alert(`Abrindo chat com ${vendedor}. Esta funcionalidade será implementada em breve.`);
+window.abrirChatComVendedor = function(produtoId) {
+  window.location.href = `chat.html?produto=${produtoId}`;
 };
 
-// Inicialização ao carregar a página
 document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    await carregarProdutosRecomendados();
-    await carregarProdutosTrending();
-    await carregarTodosProdutos();
-    configurarFiltros();
+  await carregarProdutosRecomendados();
+  await carregarProdutosTrending();
+  await carregarTodosProdutos();
+  configurarFiltros();
 
-    // Pesquisa
-    const barraPesquisa = document.getElementById("barraPesquisa");
-    barraPesquisa.addEventListener("input", (e) => {
-      const termo = e.target.value.trim().toLowerCase();
-      if (termo.length === 0) {
-        carregarTodosProdutos(); // volta para todos os produtos se apagar pesquisa
-      } else {
-        pesquisarProdutos(termo);
-      }
-    });
+  const barraPesquisa = document.getElementById("barraPesquisa");
+  barraPesquisa.addEventListener("input", (e) => {
+    const termo = e.target.value.trim().toLowerCase();
+    if (termo.length === 0) {
+      carregarTodosProdutos();
+    } else {
+      pesquisarProdutos(termo);
+    }
+  });
 
-    // Filtro por disponibilidade
-    const filtroDisponibilidade = document.getElementById("filtroDisponibilidade");
-    filtroDisponibilidade.addEventListener("change", (e) => {
-      aplicarFiltroDisponibilidade(e.target.value);
-    });
-
-  } catch (error) {
-    console.error("Erro ao inicializar a página:", error);
-  }
+  const filtroDisponibilidade = document.getElementById("filtroDisponibilidade");
+  filtroDisponibilidade.addEventListener("change", (e) => {
+    aplicarFiltroDisponibilidade(e.target.value);
+  });
 });

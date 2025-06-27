@@ -102,51 +102,48 @@
           <li class="nav-item"><a class="nav-link" href="mensagens.html">Mensagens</a></li>
         </ul>
         <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link" href="meu-perfil.html"><i class="fas fa-user-circle"></i> Meu Perfil</a></li>
-          <li class="nav-item"><a class="nav-link" href="editar-perfil.html"><i class="fas fa-user-edit"></i> Editar Perfil</a></li>
-          <li class="nav-item"><button id="logoutBtn" class="btn btn-outline-light ms-2">Logout</button></li>
+          <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+          <i class="fas fa-user-circle"></i> Meu Perfil
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="meu-perfil.html">Ver Perfil</a></li>
+          <li><a class="dropdown-item" href="meu-perfil.html#settings">Editar Perfil</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><button class="dropdown-item" id="logoutBtn">Logout</button></li>
         </ul>
+</li>
+</ul>
       </div>
     </div>
   </nav>
 
-<div id="bannerCarousel" class="carousel slide container-fluid mt-3" data-bs-ride="carousel">
-  <!-- Carrossel de Banners -->
-<div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel">
-  <div class="carousel-inner">
-
     <!-- Banner 1 — Compra com Confiança -->
-    <div class="carousel-item active">
-      <img src="images/banner1.png" class="d-block w-100" alt="Compra com Confiança">
+    <div class="container-fluid mt-3">
+  <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="images/banner1.png" class="d-block w-100" alt="Compra com Confiança">
+      </div>
+      <div class="carousel-item">
+        <img src="images/banner2.png" class="d-block w-100" alt="Vende os teus sneakers">
+      </div>
+      <div class="carousel-item">
+        <img src="images/banner3.png" class="d-block w-100" alt="Troca inteligente">
+      </div>
     </div>
 
-    <!-- Banner 2 — Vende os teus sneakers -->
-    <div class="carousel-item">
-      <img src="images/banner2.png" class="d-block w-100" alt="Vende os teus sneakers">
-    </div>
-
-    <!-- Banner 3 — Troca inteligente -->
-    <div class="carousel-item">
-      <img src="images/banner3.png" class="d-block w-100" alt="Troca inteligente">
-    </div>
+    <!-- Botões de controle -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Próximo</span>
+    </button>
   </div>
 </div>
-
-  <!-- Perfil do utilizador -->
-      <div class="container mt-4">
-        <div class="card shadow-sm">
-          <div class="card-body d-flex align-items-center">
-            <img id="userPhoto" src="" alt="Foto de perfil" class="rounded-circle me-3" width="80" height="80" style="object-fit: cover;">
-            <div>
-              <h5 class="card-title mb-1">
-                <img id="userPhoto" src="https://via.placeholder.com/80" alt="Foto de perfil" />
-                <p><i class="bi bi-person-circle me-1"></i><span id="userName">Nome do utilizador</span></p>
-                </h5>
-              <p class="card-text mb-0" id="userEmail">Email</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
   <!-- Controles -->
   <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
