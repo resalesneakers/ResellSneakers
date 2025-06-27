@@ -98,25 +98,24 @@
   </nav>
 
   <!-- Carrossel de Banners -->
-  <div id="carouselBanners" class="carousel slide mb-5" data-bs-ride="carousel">
-    <div class="carousel-inner rounded shadow">
-      <div class="carousel-item active">
-        <img src="https://images.unsplash.com/photo-1585386959984-a4155222d8b0?auto=format&fit=crop&w=1200&q=80" class="d-block w-100" alt="Banner 1" />
-      </div>
-      <div class="carousel-item">
-        <img src="https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=1200&q=80" class="d-block w-100" alt="Banner 2" />
-      </div>
-      <div class="carousel-item">
-        <img src="https://images.unsplash.com/photo-1618354691211-fd04f82b6de0?auto=format&fit=crop&w=1200&q=80" class="d-block w-100" alt="Banner 3" />
-      </div>
+  <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel">
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <img src="images/banner1.png" class="d-block w-100" alt="Compra com Confiança">
     </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselBanners" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon"></span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselBanners" data-bs-slide="next">
-      <span class="carousel-control-next-icon"></span>
-    </button>
+
+    <!-- Aqui vão os próximos banners (Banner 2 e 3) -->
   </div>
+
+  <!-- Setas de navegação -->
+  <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </button>
+</div>
+
 
   <!-- Pesquisa -->
   <div class="mb-4 container">
@@ -211,34 +210,7 @@
       }
     });
   </script>
-<!-- Firebase Config e dependências -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-  import { getStorage } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
-    authDomain: "resalesneakers-e17cb.firebaseapp.com",
-    databaseURL: "https://resalesneakers-e17cb-default-rtdb.firebaseio.com",
-    projectId: "resalesneakers-e17cb",
-    storageBucket: "resalesneakers-e17cb.appspot.com",
-    messagingSenderId: "698715655625",
-    appId: "1:698715655625:web:fde7f7a7f2da0037792c18",
-    measurementId: "G-WVNMT06HJS"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const storage = getStorage(app);
-
-  window.firebaseApp = app;
-  window.auth = auth;
-  window.db = db;
-  window.storage = storage;
-</script>
-
+  
 <!-- O teu JS principal -->
 <script type="module" src="home.js"></script>
 
