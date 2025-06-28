@@ -143,7 +143,10 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+
+    const storage = getStorage(app);
 
     const firebaseConfig = {
       apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
@@ -225,16 +228,18 @@
         if (inputFotoPerfil.files.length > 0) {
           // Upload foto para Storage
           const file = inputFotoPerfil.files[0];
-          const storageRef = app.storage().ref(); // MAS ESTE método é da V8, tem que adaptar para Modular SDK
-          mensagemPerfil.textContent = "A carregar foto...";
-          try {
-            // Aqui falta código para upload modular (v9)
-            mensagemPerfil.textContent = "Funcionalidade foto não implementada ainda.";
-            // Vamos implementar a seguir
-          } catch(err) {
+         if (inputFotoPerfil.files.length > 0) {
+        const file = inputFotoPerfil.files[0];
+        const storageRef = ref(storage, `fotosPerfil/${user.uid}/${file.name}`);
+        mensagemPerfil.textContent = "A carregar foto...";
+        try {
+            await uploadBytes(storageRef, file);
+            fotoURL = await getDownloadURL(storageRef);
+        } catch (err) {
             mensagemPerfil.textContent = "Erro ao carregar foto: " + err.message;
             return;
-          }
+        }
+        }
         }
 
         try {

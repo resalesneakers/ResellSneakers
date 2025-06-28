@@ -4,11 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ResellSneakers - O Meu Perfil</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.1/firebase-app.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.1/firebase-auth.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.1/firebase-firestore.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.1/firebase-storage.min.js"></script>
-    <script src="firebase-config.js"></script>
+
     <style>
         :root {
             --primary-color: #ff5a5f;
@@ -1550,5 +1546,434 @@
             }, 3000);
         }
     </script>
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, EmailAuthProvider, reauthenticateWithCredential, updatePassword, deleteUser } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, orderBy, deleteDoc, serverTimestamp, addDoc, writeBatch } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
+    authDomain: "resalesneakers-e17cb.firebaseapp.com",
+    projectId: "resalesneakers-e17cb",
+    storageBucket: "resalesneakers-e17cb.appspot.com",
+    messagingSenderId: "698715655625",
+    appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      const profileAvatar = document.getElementById('profile-avatar');
+      const profileName = document.getElementById('profile-name');
+      const profileEmail = document.getElementById('profile-email');
+
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        profileName.textContent = data.displayName || user.displayName || 'Utilizador';
+        profileEmail.textContent = user.email;
+        if (data.avatarUrl) {
+          profileAvatar.src = data.avatarUrl;
+        }
+      }
+
+      // Upload do avatar
+      document.getElementById('save-avatar-btn')?.addEventListener('click', async () => {
+        const input = document.getElementById('avatar-upload');
+        if (input.files.length === 0) return;
+
+        const file = input.files[0];
+        const storageRef = ref(storage, `avatars/${user.uid}/${file.name}`);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+
+        await updateDoc(userRef, {
+          avatarUrl: downloadURL,
+          updatedAt: serverTimestamp()
+        });
+
+        profileAvatar.src = downloadURL;
+        input.value = '';
+        alert('Foto de perfil atualizada com sucesso.');
+      });
+
+      // Guardar alterações de dados pessoais
+      document.getElementById('save-info-btn')?.addEventListener('click', async () => {
+        const displayName = document.getElementById('display-name').value;
+        const phone = document.getElementById('phone').value;
+        const location = document.getElementById('location').value;
+
+        await updateDoc(userRef, {
+          displayName,
+          phone,
+          location,
+          updatedAt: serverTimestamp()
+        });
+
+        profileName.textContent = displayName;
+        alert('Dados atualizados com sucesso.');
+      });
+
+      // Guardar preferências
+      document.getElementById('save-preferences-btn')?.addEventListener('click', async () => {
+        const notifications = document.getElementById('notification-preference').value;
+        const language = document.getElementById('language-preference').value;
+
+        await updateDoc(userRef, {
+          preferences: { notifications, language },
+          updatedAt: serverTimestamp()
+        });
+
+        alert('Preferências atualizadas.');
+      });
+
+      // Alterar password
+      document.getElementById('change-password-btn')?.addEventListener('click', async () => {
+        const current = document.getElementById('current-password').value;
+        const nova = document.getElementById('new-password').value;
+        const confirmar = document.getElementById('confirm-password').value;
+
+        if (nova !== confirmar || nova.length < 6) {
+          alert('Passwords inválidas ou diferentes.');
+          return;
+        }
+
+        const credential = EmailAuthProvider.credential(user.email, current);
+        try {
+          await reauthenticateWithCredential(user, credential);
+          await updatePassword(user, nova);
+          alert('Password atualizada com sucesso.');
+        } catch (e) {
+          alert('Erro ao atualizar password: ' + e.message);
+        }
+      });
+
+      // Eliminar conta
+      document.getElementById('confirm-delete-account')?.addEventListener('click', async () => {
+        const confirmPwd = document.getElementById('delete-confirm-password').value;
+        const credential = EmailAuthProvider.credential(user.email, confirmPwd);
+
+        try {
+          await reauthenticateWithCredential(user, credential);
+          await deleteDoc(userRef);
+          await deleteUser(user);
+          alert('Conta eliminada com sucesso.');
+          window.location.href = 'index.html';
+        } catch (e) {
+          alert('Erro ao eliminar conta: ' + e.message);
+        }
+      });
+
+      // Exemplo de carregamento de produtos
+      const container = document.getElementById('listings-container');
+      const q = query(collection(db, 'listings'), where('sellerId', '==', user.uid), orderBy('createdAt', 'desc'));
+      const listingsSnap = await getDocs(q);
+
+      if (!listingsSnap.empty) {
+        document.getElementById('empty-listings').style.display = 'none';
+        listingsSnap.forEach(docSnap => {
+          const l = docSnap.data();
+          const div = document.createElement('div');
+          div.className = 'product-card';
+          div.innerHTML = `
+            <div class="product-image">
+              <img src="${l.imageUrl}" alt="${l.title}" />
+              <div class="product-status status-${l.status}">${l.status}</div>
+            </div>
+            <div class="product-info">
+              <div class="product-title">${l.title}</div>
+              <div class="product-price">€${l.price.toFixed(2)}</div>
+              <div style="font-size: 12px; color: var(--accent-color);">${l.brand} • Tamanho ${l.size}</div>
+              <div class="product-actions">
+                <button class="product-action-btn edit-btn" data-id="${docSnap.id}">Editar</button>
+                <button class="product-action-btn delete-btn" data-id="${docSnap.id}">Eliminar</button>
+              </div>
+            </div>
+          `;
+          container.appendChild(div);
+
+          div.querySelector('.edit-btn').addEventListener('click', () => {
+            window.location.href = `edit-listing.html?id=${docSnap.id}`;
+          });
+
+          div.querySelector('.delete-btn').addEventListener('click', async () => {
+            if (confirm('Eliminar este produto?')) {
+              await deleteDoc(doc(db, 'listings', docSnap.id));
+              div.remove();
+              alert('Produto eliminado.');
+            }
+          });
+        });
+      }
+      // Compras
+      const purchasesContainer = document.getElementById('purchases-container');
+      const emptyPurchases = document.getElementById('empty-purchases');
+      const purchasesQuery = query(collection(db, 'purchases'), where('buyerId', '==', user.uid), orderBy('purchaseDate', 'desc'));
+      const purchasesSnap = await getDocs(purchasesQuery);
+
+      if (!purchasesSnap.empty) {
+        emptyPurchases.style.display = 'none';
+        for (const docSnap of purchasesSnap.docs) {
+          const purchase = docSnap.data();
+          const listingRef = doc(db, 'listings', purchase.listingId);
+          const listingSnap = await getDoc(listingRef);
+          if (listingSnap.exists()) {
+            const l = listingSnap.data();
+            const div = document.createElement('div');
+            div.className = 'product-card';
+            div.innerHTML = `
+              <div class="product-image">
+                <img src="${l.imageUrl}" alt="${l.title}" />
+                <div class="product-status status-sold">Comprado</div>
+              </div>
+              <div class="product-info">
+                <div class="product-title">${l.title}</div>
+                <div class="product-price">€${l.price.toFixed(2)}</div>
+                <div style="font-size: 12px; color: var(--accent-color);">Comprado em ${new Date(purchase.purchaseDate.toDate()).toLocaleDateString('pt-PT')}</div>
+              </div>
+            `;
+            purchasesContainer.appendChild(div);
+          }
+        }
+      }
+
+      // Transações
+      const transactionsContainer = document.getElementById('transactions-container');
+      const emptyTransactions = document.getElementById('empty-transactions');
+      const transactionsQuery = query(collection(db, 'transactions'), where('userId', '==', user.uid), orderBy('date', 'desc'));
+      const transactionsSnap = await getDocs(transactionsQuery);
+
+      if (!transactionsSnap.empty) {
+        emptyTransactions.style.display = 'none';
+        transactionsSnap.forEach(docSnap => {
+          const tx = docSnap.data();
+          const isPositive = ['deposit', 'sale'].includes(tx.type);
+          const amountClass = isPositive ? 'amount-positive' : 'amount-negative';
+          const prefix = isPositive ? '+' : '-';
+          const div = document.createElement('div');
+          div.className = 'transaction-item';
+          div.innerHTML = `
+            <div class="transaction-image">
+              <img src="${tx.itemImage || '/api/placeholder/60/60'}" alt="${tx.itemName || 'Transação'}">
+            </div>
+            <div class="transaction-details">
+              <div class="transaction-title">${tx.description || tx.type}</div>
+              <div class="transaction-date">${new Date(tx.date.toDate()).toLocaleString('pt-PT')}</div>
+            </div>
+            <div class="transaction-amount ${amountClass}">${prefix}€${Math.abs(tx.amount).toFixed(2)}</div>
+          `;
+          transactionsContainer.appendChild(div);
+        });
+      }
+
+      // Trocas
+      const tradesContainer = document.getElementById('trades-container');
+      const emptyTrades = document.getElementById('empty-trades');
+      const tradesQuery = query(collection(db, 'trades'), where('participants', 'array-contains', user.uid), orderBy('createdAt', 'desc'));
+      const tradesSnap = await getDocs(tradesQuery);
+
+      if (!tradesSnap.empty) {
+        emptyTrades.style.display = 'none';
+        for (const docSnap of tradesSnap.docs) {
+          const trade = docSnap.data();
+          const otherUserId = trade.initiatorId === user.uid ? trade.receiverId : trade.initiatorId;
+          const otherUserSnap = await getDoc(doc(db, 'users', otherUserId));
+          const otherName = otherUserSnap.exists() ? otherUserSnap.data().displayName : 'Utilizador';
+          const div = document.createElement('div');
+          div.className = 'product-card';
+          div.innerHTML = `
+            <div class="product-image">
+              <img src="${trade.imageUrl || '/api/placeholder/280/200'}" alt="Troca">
+              <div class="product-status status-${trade.status}">${trade.status}</div>
+            </div>
+            <div class="product-info">
+              <div class="product-title">Troca com ${otherName}</div>
+              <div style="font-size: 14px;">Oferta: ${trade.offerDescription}</div>
+              <div style="font-size: 12px; color: var(--accent-color);">Criado em ${new Date(trade.createdAt.toDate()).toLocaleDateString('pt-PT')}</div>
+            </div>
+          `;
+          tradesContainer.appendChild(div);
+        }
+      }
+      // Tabs dinâmicas
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelector('.tab.active').classList.remove('active');
+          tab.classList.add('active');
+
+          document.querySelector('.tab-content.active').classList.remove('active');
+          document.getElementById(tab.dataset.tab).classList.add('active');
+
+          if (tab.dataset.tab === 'my-listings') carregarProdutos(user);
+          if (tab.dataset.tab === 'purchases') carregarCompras(user);
+          if (tab.dataset.tab === 'transactions') carregarTransacoes(user);
+          if (tab.dataset.tab === 'trades') carregarTrocas(user);
+        });
+      });
+
+      carregarProdutos(user);
+      carregarCompras(user);
+      carregarTransacoes(user);
+      carregarTrocas(user);
+
+      // Eliminar e aceitar trocas
+      document.getElementById('trades-container').addEventListener('click', async (e) => {
+        const tradeId = e.target.dataset.id;
+        if (!tradeId) return;
+
+        if (e.target.classList.contains('accept-btn')) {
+          await updateDoc(doc(db, 'trades', tradeId), {
+            status: 'completed',
+            completedAt: serverTimestamp()
+          });
+          alert('Troca aceite!');
+          carregarTrocas(user);
+        }
+
+        if (e.target.classList.contains('delete-btn')) {
+          await updateDoc(doc(db, 'trades', tradeId), {
+            status: 'rejected',
+            rejectedAt: serverTimestamp()
+          });
+          alert('Troca recusada.');
+          carregarTrocas(user);
+        }
+      });
+
+      async function carregarProdutos(user) {
+        const container = document.getElementById('listings-container');
+        const q = query(collection(db, 'listings'), where('sellerId', '==', user.uid), orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+        container.innerHTML = '';
+        document.getElementById('empty-listings').style.display = snap.empty ? 'block' : 'none';
+        snap.forEach(docSnap => {
+          const l = docSnap.data();
+          const div = document.createElement('div');
+          div.className = 'product-card';
+          div.innerHTML = `
+            <div class="product-image">
+              <img src="${l.imageUrl}" alt="${l.title}" />
+              <div class="product-status status-${l.status}">${l.status}</div>
+            </div>
+            <div class="product-info">
+              <div class="product-title">${l.title}</div>
+              <div class="product-price">€${l.price.toFixed(2)}</div>
+              <div style="font-size: 12px; color: var(--accent-color);">${l.brand} • Tamanho ${l.size}</div>
+              <div class="product-actions">
+                <button class="product-action-btn edit-btn" onclick="location.href='edit-listing.html?id=${docSnap.id}'">Editar</button>
+                <button class="product-action-btn delete-btn" onclick="deletarProduto('${docSnap.id}', this)">Eliminar</button>
+              </div>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      async function deletarProduto(id, btn) {
+        if (confirm('Eliminar produto?')) {
+          await deleteDoc(doc(db, 'listings', id));
+          btn.closest('.product-card').remove();
+          alert('Produto eliminado.');
+        }
+      }
+
+      async function carregarCompras(user) {
+        const container = document.getElementById('purchases-container');
+        const snap = await getDocs(query(collection(db, 'purchases'), where('buyerId', '==', user.uid), orderBy('purchaseDate', 'desc')));
+        container.innerHTML = '';
+        document.getElementById('empty-purchases').style.display = snap.empty ? 'block' : 'none';
+
+        for (const docSnap of snap.docs) {
+          const purchase = docSnap.data();
+          const listingSnap = await getDoc(doc(db, 'listings', purchase.listingId));
+          if (listingSnap.exists()) {
+            const l = listingSnap.data();
+            const div = document.createElement('div');
+            div.className = 'product-card';
+            div.innerHTML = `
+              <div class="product-image">
+                <img src="${l.imageUrl}" alt="${l.title}" />
+                <div class="product-status status-sold">Comprado</div>
+              </div>
+              <div class="product-info">
+                <div class="product-title">${l.title}</div>
+                <div class="product-price">€${l.price.toFixed(2)}</div>
+                <div style="font-size: 12px; color: var(--accent-color);">Comprado em ${new Date(purchase.purchaseDate.toDate()).toLocaleDateString('pt-PT')}</div>
+              </div>
+            `;
+            container.appendChild(div);
+          }
+        }
+      }
+
+      async function carregarTransacoes(user) {
+        const container = document.getElementById('transactions-container');
+        const snap = await getDocs(query(collection(db, 'transactions'), where('userId', '==', user.uid), orderBy('date', 'desc')));
+        container.innerHTML = '';
+        document.getElementById('empty-transactions').style.display = snap.empty ? 'block' : 'none';
+        snap.forEach(docSnap => {
+          const tx = docSnap.data();
+          const isPositive = ['deposit', 'sale'].includes(tx.type);
+          const div = document.createElement('div');
+          div.className = 'transaction-item';
+          div.innerHTML = `
+            <div class="transaction-image">
+              <img src="${tx.itemImage || '/api/placeholder/60/60'}" alt="${tx.description || 'Transação'}">
+            </div>
+            <div class="transaction-details">
+              <div class="transaction-title">${tx.description}</div>
+              <div class="transaction-date">${new Date(tx.date.toDate()).toLocaleString('pt-PT')}</div>
+            </div>
+            <div class="transaction-amount ${isPositive ? 'amount-positive' : 'amount-negative'}">${isPositive ? '+' : '-'}€${Math.abs(tx.amount).toFixed(2)}</div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      async function carregarTrocas(user) {
+        const container = document.getElementById('trades-container');
+        const snap = await getDocs(query(collection(db, 'trades'), where('participants', 'array-contains', user.uid), orderBy('createdAt', 'desc')));
+        container.innerHTML = '';
+        document.getElementById('empty-trades').style.display = snap.empty ? 'block' : 'none';
+
+        for (const docSnap of snap.docs) {
+          const trade = docSnap.data();
+          const id = docSnap.id;
+          const otherUserId = trade.initiatorId === user.uid ? trade.receiverId : trade.initiatorId;
+          const otherUserSnap = await getDoc(doc(db, 'users', otherUserId));
+          const otherName = otherUserSnap.exists() ? otherUserSnap.data().displayName : 'Utilizador';
+
+          const div = document.createElement('div');
+          div.className = 'product-card';
+          div.innerHTML = `
+            <div class="product-image">
+              <img src="${trade.imageUrl || '/api/placeholder/280/200'}" alt="Troca">
+              <div class="product-status status-${trade.status}">${trade.status}</div>
+            </div>
+            <div class="product-info">
+              <div class="product-title">Troca com ${otherName}</div>
+              <div style="font-size: 14px;">Oferta: ${trade.offerDescription}</div>
+              <div style="font-size: 12px; color: var(--accent-color);">Criado em ${new Date(trade.createdAt.toDate()).toLocaleDateString('pt-PT')}</div>
+              ${trade.status === 'pending' ? `
+                <div class="product-actions">
+                  <button class="product-action-btn accept-btn" data-id="${id}">Aceitar</button>
+                  <button class="product-action-btn delete-btn" data-id="${id}">Recusar</button>
+                </div>` : ''}
+            </div>
+          `;
+          container.appendChild(div);
+        }
+      }
+    });
+  });
+</script>
+
 </body>
 </html>
