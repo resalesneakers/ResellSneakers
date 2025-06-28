@@ -337,7 +337,7 @@
 
   function carregarConversas() {
     db.collection("conversations")
-      .where("participants", "array-contains", currentUser.uid)
+      .where("to", "==", currentUser.uid)
       .orderBy("lastMessageTime", "desc")
       .onSnapshot(snapshot => {
         conversationsList.innerHTML = "";
@@ -400,12 +400,16 @@
           if (msg.imageUrl) {
             div.innerHTML = `<img src="${msg.imageUrl}" alt="imagem" style="max-width: 200px; border-radius: 10px;">`;
           } else {
-            div.textContent = msg.text;
+            const time = msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "";
+            div.innerHTML = `<div>${msg.text}</div><small class="text-muted d-block mt-1" style="font-size: 0.75rem;">${time}</small>`;
           }
 
           messagesContainer.appendChild(div);
         });
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        if ('vibrate' in navigator) navigator.vibrate(100);
+        const audio = new Audio('notificacao.mp3');
+        audio.play().catch(() => {});
       });
   }
 

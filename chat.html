@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chat - ResellSneakers</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8f9fa; }
+    .chat-container { max-width: 600px; margin: auto; margin-top: 50px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+    .message-box { height: 400px; overflow-y: auto; padding: 15px; }
+    .message { padding: 10px 15px; border-radius: 20px; margin-bottom: 10px; max-width: 75%; }
+    .me { background-color: #0d6efd; color: white; align-self: end; }
+    .other { background-color: #e9ecef; color: #333; align-self: start; }
+    .message-row { display: flex; flex-direction: column; }
+    .timestamp { font-size: 0.7rem; color: #888; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div class="chat-container p-4">
+    <h5 id="chat-title">Conversa</h5>
+    <div id="messages" class="message-box d-flex flex-column mb-3"></div>
+    <div class="input-group">
+      <input type="text" id="messageInput" class="form-control" placeholder="Digite sua mensagem..." />
+      <button id="sendBtn" class="btn btn-primary">Enviar</button>
+    </div>
+  </div>
+  <!-- Botão para abrir chat com o vendedor -->
+  <div class="container text-center my-4">
+    <a id="chatLink" href="#" class="btn btn-primary btn-lg">💬 Conversar com o Vendedor</a>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, addDoc, collection, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { firebaseConfig } from './firebase-config.js';
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const messagesContainer = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const chatTitle = document.getElementById('chat-title');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    if (!productId) {
+        alert('Produto não encontrado.');
+        return;
+      }
+
+
+    let currentUser = null;
+    let ownerId = null;
+    let chatId = null;
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) return window.location.href = 'log.html';
+      currentUser = user;
+
+      // Obter o dono do produto
+      const productRef = doc(db, 'produtos', productId);
+      const productSnap = await getDoc(productRef);
+      if (!productSnap.exists()) return alert('Produto não encontrado.');
+      const product = productSnap.data();
+      chatLink.href = `chat.html?id=${productId}`;
+
+      // Atualiza dinamicamente o título, preço, imagens, etc.
+      document.querySelector('.product-title').textContent = product.nome;
+      document.querySelector('.product-subtitle').textContent = product.marca || '';
+      document.querySelector('.current-price').textContent = `€${product.preco}`;
+      document.querySelector('.condition-badge').textContent = product.condicao;
+      document.querySelector('.condition-badge').classList.add(product.condicao === 'Novo' ? 'condition-new' : 'condition-used');
+
+      if (product.imagemPrincipal) {
+        const imgRef = ref(storage, product.imagemPrincipal);
+        const url = await getDownloadURL(imgRef);
+        document.getElementById('mainImage').src = url;
+      }
+
+      // Atualizar thumbnails se tiver imagens
+      if (product.imagens && Array.isArray(product.imagens)) {
+        const thumbGrid = document.querySelector('.thumbnail-grid');
+        thumbGrid.innerHTML = '';
+        for (const path of product.imagens) {
+          const thumbRef = ref(storage, path);
+          const thumbUrl = await getDownloadURL(thumbRef);
+          const img = document.createElement('img');
+          img.src = thumbUrl;
+          img.className = 'thumbnail';
+          img.onclick = () => {
+            document.getElementById('mainImage').src = thumbUrl;
+            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+            img.classList.add('active');
+          };
+          thumbGrid.appendChild(img);
+        }
+      }
+    });
+
+    // Ação para botão "Ver detalhes" na homepage
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-product-id]').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = card.getAttribute('data-product-id');
+          window.location.href = `produto-detalhe.html?id=${id}`;
+        });
+      });
+    
+      ownerId = product.vendedorId;
+      if (!ownerId || ownerId === currentUser.uid) return alert('Este é o seu produto.');
+      chatTitle.textContent = `Chat sobre: ${product.nome}`;
+
+      // Gerar chatId
+      chatId = `${productId}_${currentUser.uid}`;
+
+      const mensagensRef = collection(db, 'conversas', chatId, 'mensagens');
+      const mensagensQuery = query(mensagensRef, orderBy('timestamp'));
+
+      // Ouvir mensagens em tempo real
+      onSnapshot(mensagensQuery, snapshot => {
+        messagesContainer.innerHTML = '';
+        snapshot.forEach(doc => {
+          const msg = doc.data();
+          const row = document.createElement('div');
+          row.className = 'message-row';
+
+          const msgDiv = document.createElement('div');
+          msgDiv.className = `message ${msg.from === currentUser.uid ? 'me' : 'other'}`;
+          msgDiv.textContent = msg.text;
+
+          const time = document.createElement('div');
+          time.className = 'timestamp';
+          time.textContent = new Date(msg.timestamp?.toDate()).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+
+          row.appendChild(msgDiv);
+          row.appendChild(time);
+          messagesContainer.appendChild(row);
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        });
+      });
+
+      sendBtn.onclick = async () => {
+        const text = messageInput.value.trim();
+        if (!text) return;
+        messageInput.value = '';
+
+        await addDoc(collection(db, 'conversas', chatId, 'mensagens'), {
+          text,
+          from: currentUser.uid,
+          to: ownerId,
+          productId,
+          timestamp: serverTimestamp()
+        });
+      };
+    });
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
