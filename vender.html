@@ -553,43 +553,8 @@
       
       // Form validation with Bootstrap
       const sellForm = document.getElementById('sellForm');
+
       
-      sellForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        if (!sellForm.checkValidity()) {
-          e.stopPropagation();
-          sellForm.classList.add('was-validated');
-          return;
-        }
-        
-        if (uploadedImages.length === 0) {
-          alert('Por favor, faça upload de pelo menos uma imagem.');
-          return;
-        }
-        
-        // Get the active sale type
-        const activeType = document.querySelector('.sale-type-option.active').getAttribute('data-type');
-        
-        // Gather form data
-        const formData = new FormData(sellForm);
-        formData.append('saleType', activeType);
-        formData.append('imageCount', uploadedImages.length);
-        
-        // In real implementation, you would upload images to Firebase Storage
-        // and save listing data to Firestore
-        
-        // Simulating submission
-        alert('O seu anúncio está a ser processado. Numa implementação real, os dados seriam enviados para o Firebase.');
-        console.log('Form data:', Object.fromEntries(formData));
-        console.log('Images:', uploadedImages);
-        
-        // Here you would typically:
-        // 1. Upload images to Firebase Storage
-        // 2. Get the download URLs
-        // 3. Create a new document in Firestore with all listing data and image URLs
-        // 4. Redirect user to their listings page or show success message
-      });
     });
   </script>
   <script type="module" src="vender.js"></script>

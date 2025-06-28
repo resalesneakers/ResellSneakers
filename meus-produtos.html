@@ -1,98 +1,790 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meus Produtos - ResellSneakers</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      color: #333;
-    }
-    .main-container {
-      padding: 20px;
-    }
-    .product-image {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      background: #f0f0f0;
-    }
-    .product-card {
-      border-radius: 15px;
-      overflow: hidden;
-      border: 1px solid #ddd;
-      transition: transform 0.3s ease;
-    }
-    .product-card:hover {
-      transform: translateY(-5px);
-    }
-    .product-actions button {
-      margin-right: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Produtos - SoleStyle</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --danger-color: #f56565;
+            --info-color: #4299e1;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin: 20px auto;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin: 0;
+        }
+
+        .stats-summary {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .btn-add-product {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-add-product:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            color: white;
+        }
+
+        .filters-section {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .search-bar {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 25px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 15px;
+            border: 2px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            position: relative;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-ativo { background: var(--success-color); color: white; }
+        .status-vendido { background: var(--danger-color); color: white; }
+        .status-reservado { background: var(--warning-color); color: white; }
+        .status-inativo { background: #6c757d; color: white; }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-edit {
+            background: var(--info-color);
+            color: white;
+        }
+
+        .btn-delete {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-stats {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .spinner-border {
+            margin-right: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .header-section {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .stats-summary {
+                justify-content: center;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-container {
+                margin: 10px;
+                padding: 20px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+
+        .visibility-toggle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-  <div class="main-container">
-    <div class="mb-4 d-flex justify-content-between align-items-center">
-      <div>
-        <h2 class="text-white">
-          <i class="fas fa-box-open me-2"></i> Os Meus Produtos
-        </h2>
-        <p class="text-white-50">Gerencie seus produtos de forma simples</p>
-        <div class="d-flex align-items-center gap-2">
-          <img id="avatarUtilizador" src="" alt="Avatar" class="rounded-circle" width="40" height="40">
-          <span id="nomeUtilizador" class="text-white fw-bold">Utilizador</span>
+    <div class="container-fluid">
+        <div class="main-container">
+            <!-- Header Section -->
+            <div class="header-section">
+                <div>
+                    <h1 class="page-title"><i class="fas fa-box-open"></i> Meus Produtos</h1>
+                    <div class="stats-summary">
+                        <span class="stat-badge" id="totalProducts">Total: 0</span>
+                        <span class="stat-badge" id="activeProducts">Ativos: 0</span>
+                        <span class="stat-badge" id="soldProducts">Vendidos: 0</span>
+                    </div>
+                </div>
+                <a href="vender.html" class="btn-add-product">
+                    <i class="fas fa-plus"></i> Adicionar Novo Produto
+                </a>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="filters-section">
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Buscar produtos pelo nome...">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="todos">Todos</button>
+                    <button class="filter-btn" data-filter="ativo">Ativos</button>
+                    <button class="filter-btn" data-filter="vendido">Vendidos</button>
+                    <button class="filter-btn" data-filter="reservado">Reservados</button>
+                    <button class="filter-btn" data-filter="inativo">Inativos</button>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-spinner" id="loadingState">
+                <div class="spinner-border" role="status"></div>
+                Carregando produtos...
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid" id="productsGrid" style="display: none;">
+                <!-- Products will be loaded here dynamically -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="fas fa-box-open"></i>
+                <h3>Nenhum produto encontrado</h3>
+                <p>Ainda não adicionou nenhum produto. Clique em "Adicionar Novo Produto" para começar.</p>
+                <a href="vender.html" class="btn-add-product mt-3">
+                    <i class="fas fa-plus"></i> Adicionar Primeiro Produto
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Modal for Delete Confirmation -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Botão de Eliminar -->
+                      <button class="delete-btn" data-id="ID_DO_PRODUTO">Eliminar</button>
+                      <!-- Modal de Confirmação -->
+                      <div id="confirmModal" class="modal">
+                        <div class="modal-content">
+                          <p>Tens a certeza que queres eliminar este produto?</p>
+                          <button id="confirmDeleteBtn">Confirmar</button>
+                          <button id="cancelDeleteBtn">Cancelar</button>
+                        </div>
+                      </div>
+                        <img id="deleteProductImage" src="" alt="" class="me-3" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                        <div>
+                            <strong id="deleteProductName"></strong><br>
+                            <span id="deleteProductPrice" class="text-muted"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Excluir Produto</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simulação de dados (substitua pela integração real com Firebase)
+        const mockProducts = [
+            {
+                id: '1',
+                nome: 'Nike Air Max 270 React',
+                preco: 129.99,
+                imagem: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=200&fit=crop',
+                estado: 'ativo',
+                dataPublicacao: '2024-06-20',
+                visualizacoes: 247,
+                interessados: 12
+            },
+            {
+                id: '2',
+                nome: 'Adidas Ultraboost 22',
+                preco: 159.99,
+                imagem: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=300&h=200&fit=crop',
+                estado: 'vendido',
+                dataPublicacao: '2024-06-18',
+                visualizacoes: 89,
+                interessados: 5
+            },
+            {
+                id: '3',
+                nome: 'Converse Chuck Taylor All Star',
+                preco: 65.00,
+                imagem: 'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=300&h=200&fit=crop',
+                estado: 'reservado',
+                dataPublicacao: '2024-06-25',
+                visualizacoes: 156,
+                interessados: 8
+            },
+            {
+                id: '4',
+                nome: 'Vans Old Skool',
+                preco: 75.50,
+                imagem: 'https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=300&h=200&fit=crop',
+                estado: 'inativo',
+                dataPublicacao: '2024-06-15',
+                visualizacoes: 34,
+                interessados: 2
+            }
+        ];
+
+        let allProducts = [];
+        let filteredProducts = [];
+        let currentFilter = 'todos';
+        let searchTerm = '';
+
+        // Simulação de autenticação (substitua pela verificação real do Firebase Auth)
+        function checkAuthentication() {
+            // Simular usuário autenticado
+            const isAuthenticated = true; // Substitua por: firebase.auth().currentUser
+            
+            if (!isAuthenticated) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Carregar produtos do Firestore (simulado)
+        async function loadProducts() {
+            try {
+                document.getElementById('loadingState').style.display = 'flex';
+                document.getElementById('productsGrid').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'none';
+
+                // Simular delay de carregamento
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Aqui você faria a consulta real ao Firestore:
+                // const snapshot = await db.collection('produtos')
+                //     .where('userId', '==', firebase.auth().currentUser.uid)
+                //     .orderBy('dataPublicacao', 'desc')
+                //     .get();
+
+                allProducts = mockProducts;
+                applyFilters();
+                updateStats();
+
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                showError('Erro ao carregar produtos. Tente novamente.');
+            } finally {
+                document.getElementById('loadingState').style.display = 'none';
+            }
+        }
+
+        // Aplicar filtros
+        function applyFilters() {
+            filteredProducts = allProducts.filter(product => {
+                const matchesFilter = currentFilter === 'todos' || product.estado === currentFilter;
+                const matchesSearch = product.nome.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesFilter && matchesSearch;
+            });
+
+            renderProducts();
+        }
+
+        // Renderizar produtos
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            if (filteredProducts.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            grid.innerHTML = filteredProducts.map(product => `
+                <div class="product-card" data-product-id="${product.id}">
+                    <div style="position: relative;">
+                        <img src="${product.imagem}" alt="${product.nome}" class="product-image">
+                        <span class="status-badge status-${product.estado}">${product.estado}</span>
+                        <button class="visibility-toggle" onclick="toggleVisibility('${product.id}')">
+                            <i class="fas fa-eye${product.estado === 'inativo' ? '-slash' : ''}"></i>
+                        </button>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${product.nome}</h3>
+                        <div class="product-price">€${product.preco.toFixed(2)}</div>
+                        <div class="product-meta">
+                            <span><i class="fas fa-calendar"></i> ${formatDate(product.dataPublicacao)}</span>
+                            <span><i class="fas fa-eye"></i> ${product.visualizacoes}</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="action-btn btn-edit" onclick="editProduct('${product.id}')">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="action-btn btn-stats" onclick="viewStats('${product.id}')">
+                                <i class="fas fa-chart-line"></i> Stats
+                            </button>
+                            <button class="action-btn btn-delete" onclick="confirmDelete('${product.id}', '${product.nome}', '${product.preco}', '${product.imagem}')">
+                                <i class="fas fa-trash"></i> Excluir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Atualizar estatísticas
+        function updateStats() {
+            const total = allProducts.length;
+            const active = allProducts.filter(p => p.estado === 'ativo').length;
+            const sold = allProducts.filter(p => p.estado === 'vendido').length;
+
+            document.getElementById('totalProducts').textContent = `Total: ${total}`;
+            document.getElementById('activeProducts').textContent = `Ativos: ${active}`;
+            document.getElementById('soldProducts').textContent = `Vendidos: ${sold}`;
+        }
+
+        // Formatar data
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        // Ações dos produtos
+        function editProduct(productId) {
+            window.location.href = `editar-produto.html?id=${productId}`;
+        }
+
+        function viewStats(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            alert(`Estatísticas de "${product.nome}":\n\n📊 Visualizações: ${product.visualizacoes}\n💌 Interessados: ${product.interessados}\n📅 Publicado em: ${formatDate(product.dataPublicacao)}`);
+        }
+
+        function toggleVisibility(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (product) {
+                product.estado = product.estado === 'inativo' ? 'ativo' : 'inativo';
+                // Aqui você atualizaria no Firestore
+                applyFilters();
+                updateStats();
+            }
+        }
+
+        function confirmDelete(productId, productName, productPrice, productImage) {
+            document.getElementById('deleteProductName').textContent = productName;
+            document.getElementById('deleteProductPrice').textContent = `€${parseFloat(productPrice).toFixed(2)}`;
+            document.getElementById('deleteProductImage').src = productImage;
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+
+            document.getElementById('confirmDelete').onclick = () => deleteProduct(productId, modal);
+        }
+
+        function deleteProduct(productId, modal) {
+            // Aqui você faria a exclusão no Firestore
+            allProducts = allProducts.filter(p => p.id !== productId);
+            applyFilters();
+            updateStats();
+            modal.hide();
+            
+            // Toast de sucesso (opcional)
+            showSuccess('Produto excluído com sucesso!');
+        }
+
+        function showSuccess(message) {
+            // Implementar toast de sucesso
+            alert(message);
+        }
+
+        function showError(message) {
+            // Implementar toast de erro
+            alert(message);
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            if (checkAuthentication()) {
+                loadProducts();
+            }
+
+            // Filtros
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.filter;
+                    applyFilters();
+                });
+            });
+
+            // Busca
+            document.getElementById('searchInput').addEventListener('input', function() {
+                searchTerm = this.value;
+                applyFilters();
+            });
+        });
+  
+  const productsGrid = document.getElementById('productsGrid');
+  const loadingState = document.getElementById('loadingState');
+  const emptyState = document.getElementById('emptyState');
+  const totalProducts = document.getElementById('totalProducts');
+  const activeProducts = document.getElementById('activeProducts');
+  const soldProducts = document.getElementById('soldProducts');
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      const userId = user.uid;
+      db.collection("produtos")
+        .where("vendedorId", "==", userId)
+        .get()
+        .then(snapshot => {
+          loadingState.style.display = 'none';
+
+          if (snapshot.empty) {
+            emptyState.style.display = 'block';
+            return;
+          }
+
+          productsGrid.style.display = 'grid';
+
+          let ativos = 0, vendidos = 0;
+
+          snapshot.forEach(doc => {
+            const produto = doc.data();
+            produto.id = doc.id;
+
+            allProducts.push(produto);
+
+            // Contagem de status
+            if (produto.disponibilidade === "venda" || produto.disponibilidade === "venda e troca") {
+              ativos++;
+            } else if (produto.disponibilidade === "vendido") {
+              vendidos++;
+            }
+
+            renderProductCard(produto);
+          });
+
+          totalProducts.textContent = `Total: ${allProducts.length}`;
+          activeProducts.textContent = `Ativos: ${ativos}`;
+          soldProducts.textContent = `Vendidos: ${vendidos}`;
+        })
+        .catch(error => {
+          console.error("Erro ao buscar produtos:", error);
+          loadingState.textContent = "Erro ao carregar produtos.";
+        });
+    } else {
+      window.location.href = "log.html"; // redireciona se não estiver logado
+    }
+  });
+
+  function renderProductCard(produto) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+
+    // Cor do badge de status
+    let statusClass = 'status-inativo';
+    if (produto.disponibilidade === "venda" || produto.disponibilidade === "venda e troca") statusClass = 'status-ativo';
+    else if (produto.disponibilidade === "vendido") statusClass = 'status-vendido';
+    else if (produto.disponibilidade === "reservado") statusClass = 'status-reservado';
+
+    card.innerHTML = `
+      <img src="${produto.imagemPrincipal}" class="product-image" alt="${produto.nome}">
+      <span class="status-badge ${statusClass}">${produto.disponibilidade}</span>
+      <div class="product-info">
+        <div class="product-name">${produto.nome}</div>
+        <div class="product-price">€${produto.preco}</div>
+        <div class="product-meta">
+          <span>${produto.condicao || 'Desconhecido'}</span>
+        </div>
+        <div class="product-actions">
+          <button class="action-btn btn-edit"><i class="fas fa-edit"></i> Editar</button>
+          <button class="action-btn btn-delete"><i class="fas fa-trash"></i> Eliminar</button>
         </div>
       </div>
-      <div>
-        <a href="vender.html" class="btn btn-light">
-          <i class="fas fa-plus me-2"></i> Adicionar Produto
-        </a>
-        <button id="btn-logout" class="btn btn-outline-danger ms-2">
-          <i class="fas fa-sign-out-alt me-1"></i> Sair
-        </button>
-      </div>
-    </div>
+    `;
+    productsGrid.appendChild(card);
+  }
+  let productIdToDelete = null;
 
-    <div class="row mb-3">
-      <div class="col-md-4">
-        <input id="searchInput" type="text" class="form-control" placeholder="Pesquisar por nome ou marca...">
-      </div>
-      <div class="col-md-4">
-        <select id="conditionFilter" class="form-select">
-          <option value="">Todas as condições</option>
-          <option value="Novo">Novo</option>
-          <option value="Usado">Usado</option>
-        </select>
-      </div>
-      <div class="col-md-4">
-        <select id="availabilityFilter" class="form-select">
-          <option value="">Todas as disponibilidades</option>
-          <option value="venda">Venda</option>
-          <option value="troca">Troca</option>
-          <option value="revenda">Revenda</option>
-        </select>
-      </div>
-    </div>
+document.querySelectorAll(".delete-btn").forEach((btn) => {
+  btn.addEventListener("click", (e) => {
+    productIdToDelete = e.target.dataset.id;
+    document.getElementById("confirmModal").style.display = "block";
+  });
+});
 
-    <div id="meusProdutosContainer" class="row g-4"></div>
-    <div id="nenhumProduto" class="text-center text-white mt-5 d-none">
-      <i class="fas fa-box-open fa-2x mb-3"></i>
-      <p>Nenhum produto encontrado</p>
-    </div>
-  </div>
+document.getElementById("cancelDeleteBtn").addEventListener("click", () => {
+  productIdToDelete = null;
+  document.getElementById("confirmModal").style.display = "none";
+});
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-  <script>
-    const firebaseConfig = {
+document.getElementById("confirmDeleteBtn").addEventListener("click", () => {
+  if (productIdToDelete) {
+    deleteProduct(productIdToDelete);
+    productIdToDelete = null;
+  }
+  document.getElementById("confirmModal").style.display = "none";
+});
+
+// Função para eliminar o produto do Firestore
+function deleteProduct(productId) {
+  db.collection("produtos").doc(productId).delete()
+    .then(() => {
+      console.log("Produto eliminado com sucesso");
+      // Atualizar a UI (opcional: recarregar a lista ou remover o item do DOM)
+      document.querySelector(`[data-id='${productId}']`).closest(".produto").remove();
+    })
+    .catch((error) => {
+      console.error("Erro ao eliminar produto:", error);
+    });
+}
+
+    </script>
+    <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // Configuração do Firebase (altere pelos seus dados se necessário)
+  const firebaseConfig = {
       apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
       authDomain: "resalesneakers-e17cb.firebaseapp.com",
       projectId: "resalesneakers-e17cb",
@@ -101,87 +793,10 @@
       appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
 
-    const container = document.getElementById('meusProdutosContainer');
-    const nenhumProduto = document.getElementById('nenhumProduto');
-    const searchInput = document.getElementById('searchInput');
-    const conditionFilter = document.getElementById('conditionFilter');
-    const availabilityFilter = document.getElementById('availabilityFilter');
-
-    let produtos = [];
-
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) return window.location.href = "log.html";
-
-      const userSnap = await db.collection("users").doc(user.uid).get();
-      const userData = userSnap.data();
-
-      document.getElementById("nomeUtilizador").textContent = userData?.nome || user.email;
-      document.getElementById("avatarUtilizador").src = userData?.foto || "https://via.placeholder.com/32";
-
-      const snapshot = await db.collection("produtos").where("userId", "==", user.uid).orderBy("dataCriacao", "desc").get();
-      produtos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      renderizarProdutos(produtos);
-    });
-
-    function renderizarProdutos(lista) {
-      container.innerHTML = "";
-      if (!lista.length) return nenhumProduto.classList.remove("d-none");
-      nenhumProduto.classList.add("d-none");
-
-      lista.forEach(produto => {
-        const col = document.createElement("div");
-        col.className = "col-md-4";
-        col.innerHTML = `
-          <div class="card product-card">
-            <img src="${produto.imagemPrincipal}" class="product-image" alt="${produto.nome}">
-            <div class="card-body">
-              <h5 class="card-title">${produto.nome}</h5>
-              <p class="card-text">${produto.marca} • ${produto.condicao}</p>
-              <p class="card-text fw-bold text-success">${produto.preco}€</p>
-              <div class="d-flex justify-content-between">
-                <a href="editar-produto.html?id=${produto.id}" class="btn btn-primary btn-sm">Editar</a>
-                <button class="btn btn-danger btn-sm" onclick="removerProduto('${produto.id}')">Eliminar</button>
-              </div>
-            </div>
-          </div>
-        `;
-        container.appendChild(col);
-      });
-    }
-
-    document.getElementById("btn-logout").addEventListener("click", async () => {
-      await auth.signOut();
-      window.location.href = "log.html";
-    });
-
-    [searchInput, conditionFilter, availabilityFilter].forEach(el => {
-      el.addEventListener("input", () => {
-        const termo = searchInput.value.toLowerCase();
-        const condicao = conditionFilter.value;
-        const dispo = availabilityFilter.value;
-
-        const filtrados = produtos.filter(p => {
-          return (
-            (p.nome.toLowerCase().includes(termo) || p.marca.toLowerCase().includes(termo)) &&
-            (!condicao || p.condicao === condicao) &&
-            (!dispo || p.disponibilidade === dispo)
-          );
-        });
-
-        renderizarProdutos(filtrados);
-      });
-    });
-
-    async function removerProduto(id) {
-      if (!confirm("Tens certeza que queres remover este produto?")) return;
-      await db.collection("produtos").doc(id).delete();
-      produtos = produtos.filter(p => p.id !== id);
-      renderizarProdutos(produtos);
-    }
-  </script>
 </body>
 </html>
