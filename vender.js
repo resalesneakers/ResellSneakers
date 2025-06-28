@@ -1,7 +1,5 @@
-// vender.js compatível com home.js
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+// vender.js corrigido e funcional
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getStorage,
   ref,
@@ -19,6 +17,7 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
+// Configuração Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
   authDomain: "resalesneakers-e17cb.firebaseapp.com",
@@ -35,55 +34,83 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
 
+// Obter elementos
 const form = document.getElementById("sellForm");
 const imageInput = document.getElementById("imageInput");
 
+// Esperar confirmação de autenticação
 onAuthStateChanged(auth, (user) => {
-  if (!user) return window.location.href = "log.html";
+  if (!user) {
+    alert("Você precisa estar autenticado para publicar um produto.");
+    window.location.href = "log.html";
+    return;
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    // Validação de imagens
     const files = imageInput.files;
-    if (!files.length) return alert("Selecione pelo menos uma imagem.");
+    if (!files.length) {
+      alert("Selecione pelo menos uma imagem.");
+      return;
+    }
+
+    // Validar formulário
+    if (!form.checkValidity()) {
+      form.classList.add("was-validated");
+      return;
+    }
 
     const formData = new FormData(form);
     const urls = [];
 
-    for (let i = 0; i < files.length; i++) {
-      const storageRef = ref(storage, `produtos/${user.uid}/${Date.now()}-${files[i].name}`);
-      await uploadBytes(storageRef, files[i]);
-      const url = await getDownloadURL(storageRef);
-      urls.push(url);
-    }
-
-    const produto = {
-      nome: formData.get("title"),
-      marca: formData.get("brand"),
-      modelo: formData.get("model"),
-      tamanho: formData.get("size"),
-      condicao: formData.get("condition"),
-      preco: parseFloat(formData.get("price")) || 0,
-      negociavel: formData.get("negotiable") === "yes",
-      disponibilidade: formData.get("saleType") || "venda",
-      descricao: formData.get("description"),
-      localizacao: formData.get("location"),
-      imagemPrincipal: urls[0],
-      imagens: urls,
-      visualizacoes: 0,
-      favorito: false,
-      verificado: false,
-      dataCriacao: serverTimestamp(),
-      userId: user.uid
-    };
-
     try {
+      // Mostrar carregamento
+      const btn = form.querySelector("button[type='submit']");
+      btn.disabled = true;
+      btn.innerText = "A publicar...";
+
+      // Upload de imagens
+      for (let i = 0; i < files.length; i++) {
+        const storageRef = ref(storage, `produtos/${user.uid}/${Date.now()}-${files[i].name}`);
+        await uploadBytes(storageRef, files[i]);
+        const url = await getDownloadURL(storageRef);
+        urls.push(url);
+      }
+
+      const produto = {
+        nome: formData.get("title"),
+        marca: formData.get("brand"),
+        modelo: formData.get("model"),
+        tamanho: formData.get("size"),
+        condicao: formData.get("condition"),
+        preco: parseFloat(formData.get("price")) || 0,
+        negociavel: formData.get("negotiable") === "yes",
+        disponibilidade: formData.get("saleType") || "venda",
+        descricao: formData.get("description"),
+        localizacao: formData.get("location"),
+        imagemPrincipal: urls[0],
+        imagens: urls,
+        visualizacoes: 0,
+        favorito: false,
+        verificado: false,
+        dataCriacao: serverTimestamp(),
+        userId: user.uid
+      };
+
       await addDoc(collection(db, "produtos"), produto);
-      alert("Produto publicado com sucesso!");
+
+      alert("✅ Produto publicado com sucesso!");
       window.location.href = "meus-produtos.html";
+
     } catch (error) {
       console.error("Erro ao publicar produto:", error);
-      alert("Erro ao publicar produto.");
+      alert("❌ Ocorreu um erro ao tentar publicar o produto. Tente novamente.");
+    } finally {
+      const btn = form.querySelector("button[type='submit']");
+      btn.disabled = false;
+      btn.innerText = "Publicar Anúncio";
     }
   });
 });
