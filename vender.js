@@ -1,4 +1,5 @@
 // vender.js corrigido e funcional
+console.log("Utilizador autenticado:", user.uid);
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getStorage,
