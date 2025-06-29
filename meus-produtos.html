@@ -514,7 +514,7 @@
         // Aplicar filtros
         function applyFilters() {
             filteredProducts = allProducts.filter(product => {
-                const matchesFilter = currentFilter === 'todos' || product.estado === currentFilter;
+                const matchesFilter = currentFilter === 'todos' || product.disponibilidade  === currentFilter;
                 const matchesSearch = product.nome.toLowerCase().includes(searchTerm.toLowerCase());
                 return matchesFilter && matchesSearch;
             });
@@ -539,10 +539,10 @@
             grid.innerHTML = filteredProducts.map(product => `
                 <div class="product-card" data-product-id="${product.id}">
                     <div style="position: relative;">
-                        <img src="${product.imagem}" alt="${product.nome}" class="product-image">
-                        <span class="status-badge status-${product.estado}">${product.estado}</span>
+                        <img src="${product.imagemPrincipal}" alt="${product.nome}" class="product-image">
+                        <span class="status-badge status-${product.disponibilidade}">${product.disponibilidade}</span>
                         <button class="visibility-toggle" onclick="toggleVisibility('${product.id}')">
-                            <i class="fas fa-eye${product.estado === 'inativo' ? '-slash' : ''}"></i>
+                            <i class="fas fa-eye${product.disponibilidade === 'inativo' ? '-slash' : ''}"></i>
                         </button>
                     </div>
                     <div class="product-info">
@@ -598,7 +598,7 @@
         function toggleVisibility(productId) {
             const product = allProducts.find(p => p.id === productId);
             if (product) {
-                product.estado = product.estado === 'inativo' ? 'ativo' : 'inativo';
+                product.disponibilidade = product.disponibilidade === 'inativo' ? 'ativo' : 'inativo';
                 // Aqui você atualizaria no Firestore
                 applyFilters();
                 updateStats();
@@ -717,6 +717,8 @@
   function renderProductCard(produto) {
     const card = document.createElement('div');
     card.className = 'product-card';
+    card.setAttribute('data-id', produto.id);
+
 
     // Cor do badge de status
     let statusClass = 'status-inativo';
@@ -769,7 +771,7 @@ function deleteProduct(productId) {
     .then(() => {
       console.log("Produto eliminado com sucesso");
       // Atualizar a UI (opcional: recarregar a lista ou remover o item do DOM)
-      document.querySelector(`[data-id='${productId}']`).closest(".produto").remove();
+    document.querySelector(`[data-id='${productId}']`).closest(".product-card").remove();
     })
     .catch((error) => {
       console.error("Erro ao eliminar produto:", error);

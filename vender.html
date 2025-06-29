@@ -382,6 +382,7 @@
         
         <div class="d-flex justify-content-between align-items-center">
           <p class="text-muted mb-0"><small>* Campos obrigatórios</small></p>
+          <input type="hidden" name="saleType" id="saleTypeInput" value="venda">
           <button type="submit" class="btn btn-custom-primary">Publicar Anúncio</button>
         </div>
       </form>
@@ -406,6 +407,7 @@
           
           // Handle specific sale type logic
           const saleType = this.getAttribute('data-type');
+          document.getElementById("saleTypeInput").value = saleType;
           if (saleType === 'trade') {
             priceSection.style.display = 'none';
             document.getElementById('price').removeAttribute('required');
