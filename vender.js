@@ -78,6 +78,16 @@ onAuthStateChanged(auth, (user) => {
         await uploadBytes(storageRef, files[i]);
         const url = await getDownloadURL(storageRef);
         urls.push(url);
+        // Mostrar imagem carregada publicamente (sem erro de CORS)
+        const firebasePreview = document.getElementById("firebaseImagePreview");
+        if (firebasePreview) {
+          const img = document.createElement("img");
+          img.src = url;
+          img.alt = "Imagem carregada para o Firebase";
+          img.style.maxWidth = "150px";
+          img.style.margin = "5px";
+          firebasePreview.appendChild(img);
+        }
       }
 
     const produto = {
