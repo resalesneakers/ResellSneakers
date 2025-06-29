@@ -118,3 +118,10 @@ onAuthStateChanged(auth, (user) => {
     }
   });
 });
+document.querySelectorAll('[data-type]').forEach(option => {
+  option.addEventListener('click', function () {
+    const saleType = this.getAttribute('data-type');
+    document.getElementById("saleTypeInput").value = saleType;
+  });
+});
+
