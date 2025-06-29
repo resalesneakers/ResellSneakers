@@ -47,6 +47,8 @@ onAuthStateChanged(auth, (user) => {
     return;
   }
 
+  console.log("Utilizador autenticado:", user.uid); // ✅ AGORA sim funciona
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
