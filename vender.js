@@ -79,25 +79,26 @@ onAuthStateChanged(auth, (user) => {
         urls.push(url);
       }
 
-      const produto = {
-        nome: formData.get("title"),
-        marca: formData.get("brand"),
-        modelo: formData.get("model"),
-        tamanho: formData.get("size"),
-        condicao: formData.get("condition"),
-        preco: parseFloat(formData.get("price")) || 0,
-        negociavel: formData.get("negotiable") === "yes",
-        disponibilidade: formData.get("saleType") || "venda",
-        descricao: formData.get("description"),
-        localizacao: formData.get("location"),
-        imagemPrincipal: urls[0],
-        imagens: urls,
-        visualizacoes: 0,
-        favorito: false,
-        verificado: false,
-        dataCriacao: serverTimestamp(),
-        userId: user.uid
-      };
+    const produto = {
+      nome: formData.get("title"),
+      marca: formData.get("brand")?.trim() || "Desconhecida",
+      modelo: formData.get("model")?.trim() || "",
+      tamanho: formData.get("size") || "",
+      condicao: formData.get("condition") || "",
+      preco: parseFloat(formData.get("price")) || 0,
+      negociavel: formData.get("negotiable") === "yes",
+      disponibilidade: formData.get("saleType") || "venda",
+      descricao: formData.get("description")?.trim() || "",
+      localizacao: formData.get("location")?.trim() || "",
+      imagemPrincipal: urls[0],
+      imagens: urls,
+      visualizacoes: 0,
+      favorito: false,
+      verificado: false,
+      dataCriacao: serverTimestamp(),
+      userId: user.uid
+    };
+
 
       await addDoc(collection(db, "produtos"), produto);
 

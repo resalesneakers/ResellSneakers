@@ -246,17 +246,6 @@
             <p>Definir um preço fixo para os seus ténis</p>
           </div>
         </div>
-        <div class="col-md-4 mb-3 mb-md-0">
-          <div class="sale-type-option" data-type="auction">
-            <h3>Leilão</h3>
-            <p>Deixe os compradores licitarem no seu produto</p>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="sale-type-option" data-type="trade">
-            <h3>Troca</h3>
-            <p>Proponha trocar por outros ténis</p>
-          </div>
         </div>
       </div>
       
@@ -272,23 +261,22 @@
         <div class="row mb-3">
           <div class="col-md-6 mb-3 mb-md-0">
             <label for="brand" class="form-label">Marca *</label>
-            <select class="form-select" id="brand" name="brand" required>
-              <option value="">Selecione a marca</option>
-              <option value="nike">Nike</option>
-              <option value="adidas">Adidas</option>
-              <option value="jordan">Jordan</option>
-              <option value="puma">Puma</option>
-              <option value="reebok">Reebok</option>
-              <option value="newbalance">New Balance</option>
-              <option value="asics">Asics</option>
-              <option value="converse">Converse</option>
-              <option value="vans">Vans</option>
-              <option value="other">Outra</option>
-            </select>
+            <input list="brandList" class="form-control" id="brand" name="brand" placeholder="Ex: Nike, Adidas..." required>
+            <datalist id="brandList">
+              <option value="Nike">
+              <option value="Adidas">
+              <option value="Jordan">
+              <option value="Puma">
+              <option value="Reebok">
+              <option value="New Balance">
+              <option value="Asics">
+              <option value="Converse">
+              <option value="Vans">
+              <option value="Outra">
+            </datalist>
             <div class="invalid-feedback">
-              Por favor, selecione uma marca.
+              Por favor, insira ou selecione uma marca.
             </div>
-          </div>
           
           <div class="col-md-6">
             <label for="model" class="form-label">Modelo *</label>
