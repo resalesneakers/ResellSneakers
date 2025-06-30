@@ -201,3 +201,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     aplicarFiltroDisponibilidade(e.target.value);
   });
 });
+import { db } from './firebase.js';
+import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+
+const produtosRef = collection(db, "produtos");
+
+const container = document.getElementById("produtos");
+
+getDocs(produtosRef).then((snapshot) => {
+  snapshot.forEach((doc) => {
+    const dados = doc.data();
+    const id = doc.id;
+
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <h3>${dados.nome}</h3>
+      <p>Preço: €${dados.preco}</p>
+      <img src="${dados.imagemPrincipal}" width="150" />
+      <button onclick="adicionarAoCarrinho('${id}', '${dados.nome}', '${dados.preco}', '${dados.imagemPrincipal}')">
+        Adicionar ao Carrinho
+      </button>
+    `;
+    container.appendChild(div);
+  });
+});
+

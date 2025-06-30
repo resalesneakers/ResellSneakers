@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pagamento - ResellSneakers</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="checkout.js"></script>
+</head>
+<body>
+  <h1>Finalizar Compra</h1>
+  <div id="detalhes-produto"></div>
+
+  <form id="form-pagamento">
+    <label>Nome do Cartão:</label><br />
+    <input type="text" required /><br />
+
+    <label>Número do Cartão:</label><br />
+    <input type="text" required placeholder="0000 0000 0000 0000" /><br />
+
+    <label>Validade:</label><br />
+    <input type="text" required placeholder="MM/AA" /><br />
+
+    <label>CVC:</label><br />
+    <input type="text" required placeholder="123" /><br /><br />
+
+    <button type="submit">Pagar Agora</button>
+  </form>
+
+  <p id="mensagem-pagamento"></p>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagamento - ResellSneakers</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="pagamento.js"></script>
+</head>
+<body>
+  <h1>Finalizar Compra</h1>
+
+  <div id="resumo-pedido"></div>
+  <h2 id="total"></h2>
+
+  <form id="formPagamento">
+    <label>Nome Completo:</label><br>
+    <input type="text" id="nome" required><br>
+
+    <label>Morada:</label><br>
+    <input type="text" id="morada" required><br>
+
+    <label>Método de Pagamento:</label><br>
+    <select id="metodo" required>
+      <option value="MB Way">MB Way</option>
+      <option value="Cartão de Crédito">Cartão de Crédito</option>
+      <option value="Multibanco">Multibanco</option>
+    </select><br><br>
+
+    <button type="submit">Confirmar Pagamento</button>
+  </form>
+
+  <p id="mensagemFinal" style="color: green; font-weight: bold;"></p>
+</body>
+</html>
