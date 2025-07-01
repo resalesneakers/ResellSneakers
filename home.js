@@ -43,9 +43,9 @@ function criarCardProduto(produto, id) {
           <a href="produto-detalhe.html?id=${id}" class="btn btn-sm btn-outline-primary mt-2 w-100">
             Ver detalhes
           </a>
-          <button class="btn btn-outline-secondary btn-sm mt-2 w-100" onclick="abrirChatComVendedor('${id}', '${produto.uid}')">
+          <a href="chat.html?user=${data.userId}" class="btn btn-outline-primary mt-2">
             <i class="bi bi-chat-dots"></i> Chat
-          </button>
+          </a>
         </div>
       </div>
     </div>
@@ -131,6 +131,9 @@ function configurarFiltros() {
     });
   });
 }
+document.getElementById('barraPesquisa').addEventListener('input', filtrarProdutos);
+document.getElementById('filtroDisponibilidade').addEventListener('change', filtrarProdutos);
+
 
 async function pesquisarProdutos(termo) {
   const produtosRef = collection(db, "produtos");
@@ -201,28 +204,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     aplicarFiltroDisponibilidade(e.target.value);
   });
 });
-import { db } from './firebase.js';
-import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
-
-const produtosRef = collection(db, "produtos");
-
-const container = document.getElementById("produtos");
-
-getDocs(produtosRef).then((snapshot) => {
-  snapshot.forEach((doc) => {
-    const dados = doc.data();
-    const id = doc.id;
-
-    const div = document.createElement("div");
-    div.innerHTML = `
-      <h3>${dados.nome}</h3>
-      <p>Preço: €${dados.preco}</p>
-      <img src="${dados.imagemPrincipal}" width="150" />
-      <button onclick="adicionarAoCarrinho('${id}', '${dados.nome}', '${dados.preco}', '${dados.imagemPrincipal}')">
-        Adicionar ao Carrinho
-      </button>
-    `;
-    container.appendChild(div);
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  firebase.auth().signOut().then(() => {
+    window.location.href = "index.html";
   });
 });
+
+
 

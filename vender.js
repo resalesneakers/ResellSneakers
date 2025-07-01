@@ -28,7 +28,7 @@ const firebaseConfig = {
   measurementId: "G-WVNMT06HJS"
 };
 
-// ✅ Inicializar com métodos MODULARES
+// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
@@ -38,15 +38,12 @@ const auth = getAuth(app);
 const form = document.getElementById("sellForm");
 const imageInput = document.getElementById("imageInput");
 
-// Esperar autenticação
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     alert("Você precisa estar autenticado para publicar um produto.");
     window.location.href = "log.html";
     return;
   }
-
-  console.log("Utilizador autenticado:", user.uid);
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -70,6 +67,7 @@ onAuthStateChanged(auth, (user) => {
       btn.disabled = true;
       btn.innerText = "A publicar...";
 
+      // Upload das imagens
       for (let i = 0; i < files.length; i++) {
         const imageRef = ref(storage, `produtos/${user.uid}/${Date.now()}-${files[i].name}`);
         await uploadBytes(imageRef, files[i]);
@@ -77,6 +75,7 @@ onAuthStateChanged(auth, (user) => {
         urls.push(url);
       }
 
+      // Criar o objeto produto
       const produto = {
         nome: formData.get("title"),
         marca: formData.get("brand")?.trim() || "Desconhecida",
@@ -97,22 +96,19 @@ onAuthStateChanged(auth, (user) => {
         userId: user.uid
       };
 
+      // Salvar no Firestore
       await addDoc(collection(db, "produtos"), produto);
 
       alert("✅ Produto publicado com sucesso!");
       window.location.href = "meus-produtos.html";
-
-    } catch (error) {
-      console.error("Erro ao publicar produto:", error);
-      alert("❌ Ocorreu um erro ao tentar publicar o produto. Tente novamente.");
-    } finally {
-      const btn = form.querySelector("button[type='submit']");
-      btn.disabled = false;
-      btn.innerText = "Publicar Anúncio";
+    } catch (err) {
+      console.error("Erro ao publicar produto:", err);
+      alert("❌ Erro ao publicar produto.");
     }
   });
 });
 
+// Botões de venda ou troca
 document.querySelectorAll('[data-type]').forEach(option => {
   option.addEventListener('click', function () {
     const saleType = this.getAttribute('data-type');

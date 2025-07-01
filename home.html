@@ -11,8 +11,6 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <script src="carrinho.js" type="module" defer></script>
   <script src="firebase.js" type="module" defer></script>
-  <script src="home.js" type="module" defer></script>
-
   <style>
     body {
       background-color: #f8f9fa;
@@ -76,6 +74,11 @@
 <body>
   <!-- Navbar -->
   <div id="menu-container"></div>
+  <!-- Adiciona isto em qualquer lugar visível no <body>, idealmente depois do <nav> -->
+<button id="logoutBtn" class="btn btn-danger position-fixed top-0 end-0 m-3">
+  Logout
+</button>
+
 
     <!-- Banner 1 — Compra com Confiança -->
     <div class="container-fluid mt-3">
@@ -103,9 +106,8 @@
 </div>
   
   <!-- Pesquisa -->
-<div class="mb-4 container mt-4">
-  <input id="barraPesquisa" type="text" class="form-control" placeholder="Pesquisar por nome ou marca..." />
-</div>
+<input type="text" id="barraPesquisa" placeholder="Pesquisar produto..." class="form-control">
+<select id="filtroDisponibilidade" class="form-select">
   <!-- Filtro de disponibilidade -->
   <div class="mb-4 container">
     <label class="form-label">Filtrar por disponibilidade:</label>
@@ -207,7 +209,6 @@
 
     if (userSnap.exists()) {
       const userData = userSnap.data();
-      document.getElementById("userName").textContent = userData.nome || user.displayName || "Utilizador";
       document.getElementById("userEmail").textContent = user.email;
       document.getElementById("userPhoto").src = user.photoURL || "images/default-profile.png";
     }
