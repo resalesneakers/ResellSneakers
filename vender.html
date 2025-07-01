@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ResellSneakers - Colocar à Venda</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"> 
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
   <style>
     :root {
       --primary-color: #e74c3c;
@@ -186,26 +188,21 @@
       <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
           <a class="navbar-brand logo" href="home.html">ResellSneakers</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+          >
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link" href="home.html">Início</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Comprar</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link active" href="vender.html" aria-current="page">Vender</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Trocar</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Sobre</a>
-              </li>
+              <li class="nav-item"><a class="nav-link" href="home.html">Início</a></li>
+              <li class="nav-item"><a class="nav-link" href="#">Comprar</a></li>
+              <li class="nav-item"><a class="nav-link active" href="vender.html">Vender</a></li>
+              <li class="nav-item"><a class="nav-link" href="#">Trocar</a></li>
+              <li class="nav-item"><a class="nav-link" href="#">Sobre</a></li>
             </ul>
           </div>
         </div>
@@ -215,17 +212,23 @@
   
   <main class="container py-4">
     <h1 class="page-title">Vender Ténis</h1>
-    
     <div class="sell-form-container">
-      <div class="row mb-4 sale-type-selector">
-        <div class="col-md-4 mb-3 mb-md-0">
-          <div class="sale-type-option active" data-type="sale">
-            <h3>Venda</h3>
+      <form id="sellForm" class="needs-validation" novalidate>
+        <div class="mb-3">
+          <label for="title" class="form-label">Venda</label>
+          <input type="text" class="form-control" id="title" name="title" required />
             <p>Definir um preço fixo para os seus ténis</p>
-          </div>
+          <div class="mb-3">
+          <label>Imagens *</label>
+          <input
+            type="file"
+            class="form-control"
+            id="imageInput"
+            accept="image/*"
+            multiple
+            required
+          />
         </div>
-        </div>
-      </div>
       
       <form id="sellForm" class="needs-validation" novalidate>
         <div class="mb-3">
@@ -367,6 +370,9 @@
       </form>
     </div>
   </main>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+  ></script>
   
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
@@ -521,6 +527,12 @@
     });
   
   </script> 
-  <script type="module" src="vender.js"></script>
+  
+  <!-- Firebase compat (v9 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
+  <script src="vender.js"></script>
  </body>
 </html>
