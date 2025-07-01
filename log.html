@@ -188,9 +188,13 @@
         await signInWithEmailAndPassword(auth, email, password);
         window.location.href = "home.html";
       } catch (error) {
-        alert("Erro ao autenticar: " + error.message);
-      } finally {
-        toggleLoading(false);
+        let msg = "Erro ao autenticar.";
+        if (error.code === "auth/user-not-found") {
+          msg = "Este email não está registado.";
+        } else if (error.code === "auth/wrong-password") {
+          msg = "Palavra-passe incorreta.";
+        }
+        alert(msg);
       }
     });
   }
@@ -228,44 +232,45 @@ if (googleRegisterBtn) {
 
   const formRegister = document.getElementById("form-register");
   if (formRegister) {
-    formRegister.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("registerEmail").value;
-      const password = document.getElementById("registerPassword").value;
-      const confirm = document.getElementById("confirmPassword").value;
+  formRegister.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("registerEmail").value;
+  const password = document.getElementById("registerPassword").value;
+  const confirm = document.getElementById("confirmPassword").value;
 
-      if (password !== confirm) {
-        alert("As passwords não coincidem.");
-        return;
-      }
-
-      toggleLoading(true);
-      try {
-        const methods = await fetchSignInMethodsForEmail(auth, email);
-        if (methods.length > 0) {
-          alert("Este email já está registado.");
-          return;
-        }
-
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        const user = cred.user;
-        await setDoc(doc(db, "users", user.uid), {
-          uid: user.uid,
-          email: user.email,
-          nome: "",
-          foto: "",
-          dataCriacao: new Date(),
-          provider: "password"
-        });
-
-        window.location.href = "home.html";
-      } catch (error) {
-        alert("Erro ao criar conta: " + error.message);
-      } finally {
-        toggleLoading(false);
-      }
-    });
+  if (password !== confirm) {
+    alert("As passwords não coincidem.");
+    return;
   }
+
+  toggleLoading(true);
+  try {
+    const methods = await fetchSignInMethodsForEmail(auth, email);
+    if (methods.length > 0) {
+      toggleLoading(false);
+      alert("Este email já está registado.");
+      return;
+    }
+
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const user = cred.user;
+
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      email: user.email,
+      nome: "",
+      foto: "",
+      dataCriacao: new Date(),
+      provider: "password"
+    });
+
+    window.location.href = "home.html";
+  } catch (error) {
+    alert("Erro ao criar conta: " + error.message);
+    toggleLoading(false);
+  }
+});
+}
 </script>
 <div id="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 9999;">
   <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;"></div>
