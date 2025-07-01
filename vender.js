@@ -1,5 +1,4 @@
-// compat puro
-
+document.addEventListener('DOMContentLoaded', function () {
 const firebaseConfig = {
   apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
   authDomain: "resalesneakers-e17cb.firebaseapp.com",
@@ -13,9 +12,43 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
+
 const db = firebase.firestore();
 const storage = firebase.storage();
 const auth = firebase.auth();
+
+let uploadedImages = [];
+const imageInput = document.getElementById("imageInput");
+async function uploadImages(userId) {
+  const storageRef = storage.ref();
+  
+  const uploadPromises = uploadedImages.map((file, index) => {
+    const fileRef = storageRef.child(`produtos/${userId}/${Date.now()}_${index}_${file.name}`);
+    const uploadTask = fileRef.put(file);
+
+    return new Promise((resolve, reject) => {
+      uploadTask.on('state_changed', 
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload da imagem ${index + 1}: ${progress.toFixed(0)}%`);
+          // Aqui podes atualizar uma barra de progresso visual
+          progressBar.style.width = progress + '%';
+          progressBar.textContent = Math.floor(progress) + '%';
+
+        },
+        (error) => reject(error),
+        () => {
+          uploadTask.snapshot.ref.getDownloadURL().then(resolve);
+        }
+      );
+    });
+  });
+
+  return Promise.all(uploadPromises);
+}
+
+
+
 
 auth.onAuthStateChanged((user) => {
   if (!user) {
@@ -35,28 +68,21 @@ auth.onAuthStateChanged((user) => {
       return;
     }
 
-    const files = imageInput.files;
-    if (!files.length) {
+    if (!uploadedImages.length) {
       alert("Por favor selecione ao menos uma imagem.");
       return;
     }
 
-    const formData = new FormData(form);
-    const urls = [];
+    form.classList.add("was-validated");
+
+    const btn = form.querySelector("button[type='submit']");
+    btn.disabled = true;
+    btn.textContent = "A publicar...";
 
     try {
-      const btn = form.querySelector("button[type='submit']");
-      btn.disabled = true;
-      btn.textContent = "A publicar...";
+      const urls = await uploadImages(auth.currentUser.uid);
 
-      // upload imagens
-      for (let i = 0; i < files.length; i++) {
-        const storageRef = storage
-          .ref(`produtos/${user.uid}/${Date.now()}-${files[i].name}`);
-        await storageRef.put(files[i]);
-        const url = await storageRef.getDownloadURL();
-        urls.push(url);
-      }
+      const formData = new FormData(form);
 
       const produto = {
         nome: formData.get("title"),
@@ -75,7 +101,7 @@ auth.onAuthStateChanged((user) => {
         favorito: false,
         verificado: false,
         dataCriacao: new Date(),
-        userId: user.uid
+        userId: auth.currentUser.uid
       };
 
       await db.collection("produtos").add(produto);
@@ -85,6 +111,49 @@ auth.onAuthStateChanged((user) => {
     } catch (err) {
       console.error("Erro ao publicar produto:", err);
       alert("❌ Erro ao publicar produto.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Publicar";
     }
   });
 });
+
+const uploadContainer = document.getElementById('upload-container');
+const preview = document.getElementById('preview');
+const progressBar = document.getElementById('progress-bar');
+
+// Disparar o input ao clicar no container
+uploadContainer.addEventListener('click', () => {
+  imageInput.click();
+});
+
+// Quando o usuário selecionar arquivos
+imageInput.addEventListener('change', (e) => {
+  const files = Array.from(e.target.files);
+
+  // ✅ Adiciona as imagens ao array global para serem usadas depois no submit
+  uploadedImages = files;
+
+  // ✅ Mostra a pré-visualização das imagens
+  showImagePreview(files);
+});
+
+
+function showImagePreview(files) {
+  preview.innerHTML = '';
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.width = '100px';
+      img.style.height = '100px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '5px';
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+});
+

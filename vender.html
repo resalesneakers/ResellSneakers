@@ -180,6 +180,7 @@
         flex-direction: column;
       }
     }
+
   </style>
 </head>
 <body>
@@ -216,22 +217,12 @@
       <form id="sellForm" class="needs-validation" novalidate>
         <div class="mb-3">
           <label for="title" class="form-label">Venda</label>
-          <input type="text" class="form-control" id="title" name="title" required />
             <p>Definir um preço fixo para os seus ténis</p>
           <div class="mb-3">
           <label>Imagens *</label>
-          <input
-            type="file"
-            class="form-control"
-            id="imageInput"
-            accept="image/*"
-            multiple
-            required
-          />
         </div>
-      
-      <form id="sellForm" class="needs-validation" novalidate>
-        <div class="mb-3">
+        
+            <div class="mb-3">
           <label for="title" class="form-label">Título do Anúncio *</label>
           <input type="text" class="form-control" id="title" name="title" placeholder="Ex: Nike Air Jordan 1 Chicago - Tamanho 42" required>
           <div class="invalid-feedback">
@@ -258,6 +249,7 @@
             <div class="invalid-feedback">
               Por favor, insira ou selecione uma marca.
             </div>
+          </div>
           
           <div class="col-md-6">
             <label for="model" class="form-label">Modelo *</label>
@@ -336,31 +328,35 @@
           </div>
         </div>
         
-        <div class="mb-3">
-          <label class="form-label">Imagens (Máximo 6 imagens) *</label>
-          <div class="image-upload-container" id="imageUpload">
-            <div class="upload-icon">📷</div>
-            <p>Clique ou arraste as imagens para aqui</p>
-            <p>Máximo 6 imagens - A primeira será a imagem principal</p>
-            <input type="file" id="imageInput" accept="image/*" multiple required />
-  <div id="preview" class="preview-container"></div>
-          <div class="image-preview-container" id="imagePreviewContainer">
-            <!-- Image previews will be added here -->
-          </div>
-          <div class="progress mt-3 d-none" id="progressContainer">
-            <div class="progress-bar bg-danger" role="progressbar" style="width: 0%" id="progressFill"></div>
-          </div>
-          <p class="text-muted small mt-1" id="progressText"></p>
-        </div>
-        
+<div class="mb-3">
+  <label class="form-label">Imagens (Máximo 6 imagens) *</label>
+  <div class="image-upload-container" id="uploadContainer" style="position: relative;">
+    <div class="upload-icon">📷</div>
+    <p>Clique ou arraste as imagens para aqui</p>
+    <p>Máximo 6 imagens - A primeira será a imagem principal</p>
+    <input
+      type="file"
+      id="imageInput"
+      accept="image/*"
+      multiple
+      required
+      style="opacity: 0; position: absolute; width: 100%; height: 100%; top: 0; left: 0; cursor: pointer;"
+    />
+    <div class="image-preview-container" id="imagePreviewContainer"></div>
+  </div>
+  <div class="progress mt-3 d-none" id="progressContainer">
+    <div class="progress-bar bg-danger" role="progressbar" style="width: 0%" id="progressFill"></div>
+  </div>
+  <p class="text-muted small mt-1" id="progressText"></p>
+</div>
+
         <div class="mb-4">
           <label for="location" class="form-label">Localização *</label>
           <input type="text" class="form-control" id="location" name="location" placeholder="Ex: Lisboa, Portugal" required>
           <div class="invalid-feedback">
             Por favor, insira uma localização.
           </div>
-        </div>
-        
+          
         <div class="d-flex justify-content-between align-items-center">
           <p class="text-muted mb-0"><small>* Campos obrigatórios</small></p>
           <input type="hidden" name="saleType" id="saleTypeInput" value="venda">
@@ -370,16 +366,13 @@
       </form>
     </div>
   </main>
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
-  ></script>
-  
+
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Sale type selector
-      const saleTypeOptions = document.querySelectorAll('.sale-type-option');
       const priceSection = document.getElementById('price-section');
       const saleTypeInput = document.getElementById('saleTypeInput');      
       
@@ -529,10 +522,12 @@
   </script> 
   
   <!-- Firebase compat (v9 compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
-  <script src="vender.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+  <script src="js/vender.js"></script> <!-- o teu arquivo JS -->
+
  </body>
 </html>
