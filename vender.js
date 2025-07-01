@@ -1,22 +1,6 @@
-document.addEventListener('DOMContentLoaded', function () {
-const firebaseConfig = {
-  apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
-  authDomain: "resalesneakers-e17cb.firebaseapp.com",
-  databaseURL: "https://resalesneakers-e17cb-default-rtdb.firebaseio.com",
-  projectId: "resalesneakers-e17cb",
-  storageBucket: "resalesneakers-e17cb.appspot.com",
-  messagingSenderId: "698715655625",
-  appId: "1:698715655625:web:fde7f7a7f2da0037792c18",
-  measurementId: "G-WVNMT06HJS"
-};
-
-firebase.initializeApp(firebaseConfig);
-
-
-const db = firebase.firestore();
-const storage = firebase.storage();
-const auth = firebase.auth();
-
+import { auth, db, storage } from './firebase-config.js';
+document.addEventListener('DOMContentLoaded', () => {
+  
 let uploadedImages = [];
 const imageInput = document.getElementById("imageInput");
 async function uploadImages(userId) {
@@ -57,8 +41,7 @@ auth.onAuthStateChanged((user) => {
     return;
   }
 
-  const form = document.getElementById("sellForm");
-  const imageInput = document.getElementById("imageInput");
+  const form = document.getElementById("productForm");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -121,6 +104,7 @@ auth.onAuthStateChanged((user) => {
 const uploadContainer = document.getElementById('upload-container');
 const preview = document.getElementById('preview');
 const progressBar = document.getElementById('progress-bar');
+
 
 // Disparar o input ao clicar no container
 uploadContainer.addEventListener('click', () => {
