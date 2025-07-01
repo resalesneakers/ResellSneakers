@@ -420,10 +420,11 @@
       
       function handleFiles(files) {
         // Check if adding these files exceeds the maximum of 6
-        if (uploadedImages.length + files.length > 6) {
-          alert('Pode fazer upload de no máximo 6 imagens.');
+        if (uploadedImages.length > 6) {
+          alert("Você só pode enviar no máximo 6 imagens.");
           return;
         }
+
         
         // Show progress container
         progressContainer.classList.remove('d-none');
@@ -504,6 +505,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
-  <script type="module" src="vender.js"></script>
+<script type="module" src="vender.js"></script>
  </body>
 </html>

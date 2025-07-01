@@ -1,10 +1,12 @@
 import { auth, db, storage } from './firebase-config.js';
 document.addEventListener('DOMContentLoaded', () => {
-  
+
 let uploadedImages = [];
 const imageInput = document.getElementById("imageInput");
 async function uploadImages(userId) {
   const storageRef = storage.ref();
+
+  document.getElementById("progressContainer").classList.remove("d-none");
   
   const uploadPromises = uploadedImages.map((file, index) => {
     const fileRef = storageRef.child(`produtos/${userId}/${Date.now()}_${index}_${file.name}`);
@@ -41,7 +43,7 @@ auth.onAuthStateChanged((user) => {
     return;
   }
 
-  const form = document.getElementById("productForm");
+  const form = document.getElementById("sellForm");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -101,9 +103,9 @@ auth.onAuthStateChanged((user) => {
   });
 });
 
-const uploadContainer = document.getElementById('upload-container');
-const preview = document.getElementById('preview');
-const progressBar = document.getElementById('progress-bar');
+const uploadContainer = document.getElementById('uploadContainer');
+const preview = document.getElementById('imagePreviewContainer');
+const progressBar = document.getElementById('progressFill');
 
 
 // Disparar o input ao clicar no container
@@ -111,17 +113,17 @@ uploadContainer.addEventListener('click', () => {
   imageInput.click();
 });
 
-// Quando o usuário selecionar arquivos
 imageInput.addEventListener('change', (e) => {
   const files = Array.from(e.target.files);
+  if (files.length > 6) {
+    alert("Você só pode enviar no máximo 6 imagens.");
+    imageInput.value = ""; // limpa
+    return;
+  }
 
-  // ✅ Adiciona as imagens ao array global para serem usadas depois no submit
   uploadedImages = files;
-
-  // ✅ Mostra a pré-visualização das imagens
   showImagePreview(files);
 });
-
 
 function showImagePreview(files) {
   preview.innerHTML = '';
@@ -134,10 +136,12 @@ function showImagePreview(files) {
       img.style.height = '100px';
       img.style.objectFit = 'cover';
       img.style.borderRadius = '5px';
+      img.style.margin = '5px';
       preview.appendChild(img);
     };
     reader.readAsDataURL(file);
   });
 }
+
 });
 
