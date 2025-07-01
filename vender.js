@@ -28,6 +28,7 @@ const firebaseConfig = {
   measurementId: "G-WVNMT06HJS"
 };
 
+// ✅ Inicializar com métodos MODULARES
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
@@ -37,7 +38,7 @@ const auth = getAuth(app);
 const form = document.getElementById("sellForm");
 const imageInput = document.getElementById("imageInput");
 
-// Esperar confirmação de autenticação
+// Esperar autenticação
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     alert("Você precisa estar autenticado para publicar um produto.");
@@ -45,19 +46,17 @@ onAuthStateChanged(auth, (user) => {
     return;
   }
 
-  console.log("Utilizador autenticado:", user.uid); // AGORA sim funciona
+  console.log("Utilizador autenticado:", user.uid);
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // Validação de imagens
     const files = imageInput.files;
     if (!files.length) {
       alert("Selecione pelo menos uma imagem.");
       return;
     }
 
-    // Validar formulário
     if (!form.checkValidity()) {
       form.classList.add("was-validated");
       return;
@@ -67,49 +66,36 @@ onAuthStateChanged(auth, (user) => {
     const urls = [];
 
     try {
-      // Mostrar carregamento
       const btn = form.querySelector("button[type='submit']");
       btn.disabled = true;
       btn.innerText = "A publicar...";
 
-      // Upload de imagens
       for (let i = 0; i < files.length; i++) {
-        const storageRef = ref(storage, `produtos/${user.uid}/${Date.now()}-${files[i].name}`);
-        await uploadBytes(storageRef, files[i]);
-        const url = await getDownloadURL(storageRef);
+        const imageRef = ref(storage, `produtos/${user.uid}/${Date.now()}-${files[i].name}`);
+        await uploadBytes(imageRef, files[i]);
+        const url = await getDownloadURL(imageRef);
         urls.push(url);
-        // Mostrar imagem carregada publicamente (sem erro de CORS)
-        const firebasePreview = document.getElementById("firebaseImagePreview");
-        if (firebasePreview) {
-          const img = document.createElement("img");
-          img.src = url;
-          img.alt = "Imagem carregada para o Firebase";
-          img.style.maxWidth = "150px";
-          img.style.margin = "5px";
-          firebasePreview.appendChild(img);
-        }
       }
 
-    const produto = {
-      nome: formData.get("title"),
-      marca: formData.get("brand")?.trim() || "Desconhecida",
-      modelo: formData.get("model")?.trim() || "",
-      tamanho: formData.get("size") || "",
-      condicao: formData.get("condition") || "",
-      preco: parseFloat(formData.get("price")) || 0,
-      negociavel: formData.get("negotiable") === "yes",
-      disponibilidade: formData.get("saleType") || "venda",
-      descricao: formData.get("description")?.trim() || "",
-      localizacao: formData.get("location")?.trim() || "",
-      imagemPrincipal: urls[0],
-      imagens: urls,
-      visualizacoes: 0,
-      favorito: false,
-      verificado: false,
-      dataCriacao: serverTimestamp(),
-      userId: user.uid
-    };
-
+      const produto = {
+        nome: formData.get("title"),
+        marca: formData.get("brand")?.trim() || "Desconhecida",
+        modelo: formData.get("model")?.trim() || "",
+        tamanho: formData.get("size") || "",
+        condicao: formData.get("condition") || "",
+        preco: parseFloat(formData.get("price")) || 0,
+        negociavel: formData.get("negotiable") === "yes",
+        disponibilidade: formData.get("saleType") || "venda",
+        descricao: formData.get("description")?.trim() || "",
+        localizacao: formData.get("location")?.trim() || "",
+        imagemPrincipal: urls[0],
+        imagens: urls,
+        visualizacoes: 0,
+        favorito: false,
+        verificado: false,
+        dataCriacao: serverTimestamp(),
+        userId: user.uid
+      };
 
       await addDoc(collection(db, "produtos"), produto);
 
@@ -126,10 +112,10 @@ onAuthStateChanged(auth, (user) => {
     }
   });
 });
+
 document.querySelectorAll('[data-type]').forEach(option => {
   option.addEventListener('click', function () {
     const saleType = this.getAttribute('data-type');
     document.getElementById("saleTypeInput").value = saleType;
   });
 });
-
