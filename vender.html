@@ -377,7 +377,7 @@
       const saleTypeInput = document.getElementById('saleTypeInput');      
 
       // Image upload handling
-      const imageInput  = document.getElementById('imageInput ');
+      const imageInput  = document.getElementById('imageInput');
       const imagePreviewContainer = document.getElementById('imagePreviewContainer');
       const progressContainer = document.getElementById('progressContainer');
       const progressFill = document.getElementById('progressFill');
@@ -385,26 +385,26 @@
       
       let uploadedImages = [];
       
-      imageInput .addEventListener('click', function() {
+      imageInput.addEventListener('click', function() {
         imageInput.click();
       });
       
-      imageInput .addEventListener('dragover', function(e) {
+      imageInput.addEventListener('dragover', function(e) {
         e.preventDefault();
         // ERRO CORRIGIDO: Referência direta à variável CSS substituída
-        imageInput .style.borderColor = '#e74c3c';
-        imageInput .style.backgroundColor = 'rgba(231, 76, 60, 0.05)';
+        imageInput.style.borderColor = '#e74c3c';
+        imageInput.style.backgroundColor = 'rgba(231, 76, 60, 0.05)';
       });
       
-      imageInput .addEventListener('dragleave', function() {
-        imageInput .style.borderColor = '#ddd';
-        imageInput .style.backgroundColor = 'transparent';
+      imageInput.addEventListener('dragleave', function() {
+        imageInput.style.borderColor = '#ddd';
+        imageInput.style.backgroundColor = 'transparent';
       });
       
-      imageInput .addEventListener('drop', function(e) {
+      imageInput.addEventListener('drop', function(e) {
         e.preventDefault();
-        imageInput .style.borderColor = '#ddd';
-        imageInput .style.backgroundColor = 'transparent';
+        imageInput.style.borderColor = '#ddd';
+        imageInput.style.backgroundColor = 'transparent';
         
         if (e.dataTransfer.files.length > 0) {
           handleFiles(e.dataTransfer.files);

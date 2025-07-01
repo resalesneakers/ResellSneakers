@@ -1,33 +1,70 @@
-import { auth, db, storage } from './firebase-config.js';
-document.addEventListener('DOMContentLoaded', () => {
+import { auth, db, storage } from "./firebase-config.js";
+import {
+  ref as storageRef,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
 let uploadedImages = [];
 const imageInput = document.getElementById("imageInput");
-async function uploadImages(userId) {
-  const storageRef = storage.ref();
-  
-  console.log("📦 vender.js carregado");
+const preview = document.getElementById("imagePreviewContainer");
+const progressBar = document.getElementById("progressFill");
+const progressContainer = document.getElementById("progressContainer");
+const progressText = document.getElementById("progressText");
 
+function showImagePreview(files) {
+  preview.innerHTML = '';
+  files.forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = document.createElement("img");
+      img.src = e.target.result;
+      img.style.width = "100px";
+      img.style.height = "100px";
+      img.style.objectFit = "cover";
+      img.style.borderRadius = "5px";
+      img.style.margin = "5px";
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
-  document.getElementById("progressContainer").classList.remove("d-none");
-  
+imageInput.addEventListener("change", (e) => {
+  const files = Array.from(e.target.files);
+  if (files.length > 6) {
+    alert("Você só pode enviar no máximo 6 imagens.");
+    imageInput.value = "";
+    return;
+  }
+  uploadedImages = files;
+  showImagePreview(files);
+});
+
+function uploadImages(userId) {
+  progressContainer.classList.remove("d-none");
   const uploadPromises = uploadedImages.map((file, index) => {
-    const fileRef = storageRef.child(`produtos/${userId}/${Date.now()}_${index}_${file.name}`);
-    const uploadTask = fileRef.put(file);
+    const filePath = `produtos/${userId}/${Date.now()}_${index}_${file.name}`;
+    const fileRef = storageRef(storage, filePath);
+    const uploadTask = uploadBytesResumable(fileRef, file);
 
     return new Promise((resolve, reject) => {
-      uploadTask.on('state_changed', 
+      uploadTask.on(
+        "state_changed",
         (snapshot) => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Upload da imagem ${index + 1}: ${progress.toFixed(0)}%`);
-          // Aqui podes atualizar uma barra de progresso visual
-          progressBar.style.width = progress + '%';
-          progressBar.textContent = Math.floor(progress) + '%';
-
+          progressBar.style.width = `${progress}%`;
+          progressText.textContent = `A carregar imagens... ${Math.floor(progress)}%`;
         },
-        (error) => reject(error),
+        reject,
         () => {
-          uploadTask.snapshot.ref.getDownloadURL().then(resolve);
+          getDownloadURL(uploadTask.snapshot.ref).then(resolve);
         }
       );
     });
@@ -36,10 +73,7 @@ async function uploadImages(userId) {
   return Promise.all(uploadPromises);
 }
 
-
-
-
-auth.onAuthStateChanged((user) => {
+onAuthStateChanged(auth, (user) => {
   if (!user) {
     alert("Você precisa estar autenticado para publicar um produto.");
     window.location.href = "log.html";
@@ -47,7 +81,6 @@ auth.onAuthStateChanged((user) => {
   }
 
   const form = document.getElementById("sellForm");
-
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -68,8 +101,7 @@ auth.onAuthStateChanged((user) => {
     btn.textContent = "A publicar...";
 
     try {
-      const urls = await uploadImages(auth.currentUser.uid);
-
+      const urls = await uploadImages(user.uid);
       const formData = new FormData(form);
 
       const produto = {
@@ -88,11 +120,11 @@ auth.onAuthStateChanged((user) => {
         visualizacoes: 0,
         favorito: false,
         verificado: false,
-        dataCriacao: new Date(),
-        userId: auth.currentUser.uid
+        dataCriacao: serverTimestamp(),
+        userId: user.uid,
       };
 
-      await db.collection("produtos").add(produto);
+      await addDoc(collection(db, "produtos"), produto);
 
       alert("✅ Produto publicado com sucesso!");
       window.location.href = "meus-produtos.html";
@@ -105,46 +137,3 @@ auth.onAuthStateChanged((user) => {
     }
   });
 });
-
-const uploadContainer = document.getElementById('uploadContainer');
-const preview = document.getElementById('imagePreviewContainer');
-const progressBar = document.getElementById('progressFill');
-
-
-// Disparar o input ao clicar no container
-uploadContainer.addEventListener('click', () => {
-  imageInput.click();
-});
-
-imageInput.addEventListener('change', (e) => {
-  const files = Array.from(e.target.files);
-  if (files.length > 6) {
-    alert("Você só pode enviar no máximo 6 imagens.");
-    imageInput.value = ""; // limpa
-    return;
-  }
-
-  uploadedImages = files;
-  showImagePreview(files);
-});
-
-function showImagePreview(files) {
-  preview.innerHTML = '';
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = document.createElement('img');
-      img.src = e.target.result;
-      img.style.width = '100px';
-      img.style.height = '100px';
-      img.style.objectFit = 'cover';
-      img.style.borderRadius = '5px';
-      img.style.margin = '5px';
-      preview.appendChild(img);
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-});
-
