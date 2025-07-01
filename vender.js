@@ -5,6 +5,9 @@ let uploadedImages = [];
 const imageInput = document.getElementById("imageInput");
 async function uploadImages(userId) {
   const storageRef = storage.ref();
+  
+  console.log("📦 vender.js carregado");
+
 
   document.getElementById("progressContainer").classList.remove("d-none");
   

@@ -377,8 +377,7 @@
       const saleTypeInput = document.getElementById('saleTypeInput');      
 
       // Image upload handling
-      const imageUpload = document.getElementById('imageUpload');
-      const imageInput = document.getElementById('imageInput');
+      const imageInput  = document.getElementById('imageInput ');
       const imagePreviewContainer = document.getElementById('imagePreviewContainer');
       const progressContainer = document.getElementById('progressContainer');
       const progressFill = document.getElementById('progressFill');
@@ -386,26 +385,26 @@
       
       let uploadedImages = [];
       
-      imageUpload.addEventListener('click', function() {
+      imageInput .addEventListener('click', function() {
         imageInput.click();
       });
       
-      imageUpload.addEventListener('dragover', function(e) {
+      imageInput .addEventListener('dragover', function(e) {
         e.preventDefault();
         // ERRO CORRIGIDO: Referência direta à variável CSS substituída
-        imageUpload.style.borderColor = '#e74c3c';
-        imageUpload.style.backgroundColor = 'rgba(231, 76, 60, 0.05)';
+        imageInput .style.borderColor = '#e74c3c';
+        imageInput .style.backgroundColor = 'rgba(231, 76, 60, 0.05)';
       });
       
-      imageUpload.addEventListener('dragleave', function() {
-        imageUpload.style.borderColor = '#ddd';
-        imageUpload.style.backgroundColor = 'transparent';
+      imageInput .addEventListener('dragleave', function() {
+        imageInput .style.borderColor = '#ddd';
+        imageInput .style.backgroundColor = 'transparent';
       });
       
-      imageUpload.addEventListener('drop', function(e) {
+      imageInput .addEventListener('drop', function(e) {
         e.preventDefault();
-        imageUpload.style.borderColor = '#ddd';
-        imageUpload.style.backgroundColor = 'transparent';
+        imageInput .style.borderColor = '#ddd';
+        imageInput .style.backgroundColor = 'transparent';
         
         if (e.dataTransfer.files.length > 0) {
           handleFiles(e.dataTransfer.files);
@@ -420,7 +419,7 @@
       
       function handleFiles(files) {
         // Check if adding these files exceeds the maximum of 6
-        if (uploadedImages.length > 6) {
+                if (uploadedImages.length > 6) {
           alert("Você só pode enviar no máximo 6 imagens.");
           return;
         }

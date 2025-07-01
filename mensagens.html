@@ -312,7 +312,7 @@
   const messagesContainer = document.getElementById("messages-container");
   const messageInput = document.getElementById("message-input");
   const sendButton = document.getElementById("send-button");
-  const imageUpload = document.getElementById("image-upload");
+  const imageInput = document.getElementById("image-upload");
 
   const emptyChat = document.getElementById("empty-chat");
   const activeChat = document.getElementById("active-chat");
@@ -433,7 +433,7 @@
     messageInput.value = "";
   });
 
-  imageUpload.addEventListener("change", async (e) => {
+  imageInput.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file || !currentChatId || !currentReceiverId) return;
 
@@ -454,7 +454,7 @@
       lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    imageUpload.value = "";
+    imageInput.value = "";
   });
 
   messageInput.addEventListener("keypress", (e) => {
