@@ -80,9 +80,25 @@ onAuthStateChanged(auth, (user) => {
     return;
   }
 
+let user = null;
+
+firebase.auth().onAuthStateChanged(function (u) {
+  if (u) {
+    user = u;
+  } else {
+    alert("Você precisa estar logado para acessar esta página.");
+    window.location.href = "/resellsneakers/index.html"; // ou o caminho correto
+  }
+});
+
   const form = document.getElementById("sellForm");
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+  if (!user) {
+    alert("Você precisa estar logado para publicar.");
+    return;
+  }
 
     if (!form.checkValidity()) {
       form.classList.add("was-validated");
@@ -127,7 +143,7 @@ onAuthStateChanged(auth, (user) => {
       await addDoc(collection(db, "produtos"), produto);
 
       alert("✅ Produto publicado com sucesso!");
-      window.location.href = "meus-produtos.html";
+      window.location.href = "/resellsneakers/meu-perfil.html";
     } catch (err) {
       console.error("Erro ao publicar produto:", err);
       alert("❌ Erro ao publicar produto.");

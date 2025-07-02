@@ -371,6 +371,18 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   
 <script>
+  let user = null;
+
+  firebase.auth().onAuthStateChanged(function (u) {
+    if (u) {
+      user = u;
+      // aqui você pode mostrar algo com user.displayName se quiser
+    } else {
+      alert("Você precisa estar logado para acessar esta página.");
+      window.location.href = "index.html"; // ou "login.html"
+    }
+  });
+  
   const imageInput = document.getElementById("imageInput");
   const imagePreviewContainer = document.getElementById("imagePreviewContainer");
   const sellForm = document.getElementById("sellForm");
@@ -470,27 +482,30 @@
 
       // Coletar dados do formulário
       const data = {
-        title: document.getElementById("title").value.trim(),
-        brand: document.getElementById("brand").value.trim(),
-        model: document.getElementById("model").value.trim(),
+        title: document.getElementById("title").value,
+        brand: document.getElementById("brand").value,
+        model: document.getElementById("model").value,
         size: document.getElementById("size").value,
         condition: document.getElementById("condition").value,
         price: parseFloat(document.getElementById("price").value),
-        negotiable: document.getElementById("negotiable").value,
-        description: document.getElementById("description").value.trim(),
-        location: document.getElementById("location").value.trim(),
-        saleType: document.getElementById("saleTypeInput").value,
-        imageUrls: urlsImagens,
-        userId: user.uid,
+        negotiable: document.getElementById("negotiable").value === "yes",
+        description: document.getElementById("description").value,
+        location: document.getElementById("location").value,
+        images: urlsImagens,
+        ownerId: user.uid,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        saleType: document.getElementById("saleTypeInput").value || "venda",
       };
 
       await produtoRef.set(data);
+
+      progressText.textContent = "Anúncio publicado com sucesso!";
       alert("Produto publicado com sucesso!");
       window.location.href = "meu-perfil.html";
     } catch (error) {
       console.error("Erro ao publicar produto:", error);
       alert("Ocorreu um erro. Tente novamente.");
+      progressContainer.classList.add("d-none");
     } finally {
       progressContainer.classList.add("d-none");
       progressFill.style.width = "0%";
