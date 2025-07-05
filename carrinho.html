@@ -365,19 +365,14 @@
 
   <!-- Script do carrinho -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { firebaseConfig } from './firebase-config.js';
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { doc, getDoc, updateDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     // Carregar menu universal
     fetch('menu.html').then(res => res.text()).then(html => {
       document.getElementById('menu-container').innerHTML = html;
     });
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
 
     const carrinhoDiv = document.getElementById("carrinho-lista");
     const totalSpan = document.getElementById("total");
@@ -449,9 +444,26 @@
       });
     }
 
-    finalizarBtn.onclick = () => {
+    finalizarBtn.onclick = async () => {
       if (produtosCarrinho.length === 0) return;
-      window.location.href = 'checkout.html';
+      finalizarBtn.disabled = true;
+      finalizarBtn.textContent = 'Processando...';
+      // Simular processamento
+      setTimeout(async () => {
+        // Limpar carrinho no Firestore
+        await setDoc(doc(db, 'carrinhos', user.uid), { produtos: [] });
+        produtosCarrinho = [];
+        carrinhoIds = [];
+        renderizarCarrinho();
+        finalizarBtn.disabled = false;
+        finalizarBtn.textContent = '✨ Finalizar Compra';
+        // Mensagem de sucesso
+        resumoDiv.innerHTML += `<div class='alert alert-success mt-3' id='msgSucesso'>Compra finalizada com sucesso! Obrigado por comprar conosco.</div>`;
+        setTimeout(() => {
+          const msg = document.getElementById('msgSucesso');
+          if (msg) msg.remove();
+        }, 4000);
+      }, 1200);
     };
   </script>
 

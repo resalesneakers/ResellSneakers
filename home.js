@@ -1,12 +1,22 @@
 // home.js modificado com botão de chat nos cards
 import { auth, db, storage } from './firebase-config.js';
-import { collection, query, where, orderBy, onSnapshot, getDocs, limit } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { collection, query, where, orderBy, onSnapshot, getDocs, limit, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 const marcasPadrao = ["Nike", "Adidas", "Jordan", "Yeezy", "New Balance", "Puma", "Converse", "Vans"];
+let favoritosIds = new Set();
+
+// Buscar favoritos do usuário autenticado
+async function carregarFavoritosUsuario() {
+  favoritosIds.clear();
+  const user = auth.currentUser;
+  if (!user) return;
+  const favsSnap = await getDocs(query(collection(db, "favoritos"), where("userId", "==", user.uid)));
+  favsSnap.forEach(doc => favoritosIds.add(doc.data().produtoId));
+}
 
 function criarCardProduto(produto, id) {
   const verificadoBadge = produto.verificado ? `<i class="fas fa-check-circle verified-badge ms-1"></i>` : '';
-  const heartIcon = produto.favorito ? 'fas fa-heart' : 'far fa-heart';
+  const heartIcon = favoritosIds.has(id) ? 'fas fa-heart' : 'far fa-heart';
   const disponibilidade = produto.disponibilidade || 'Indefinido';
   const imagem = produto.imagemPrincipal && produto.imagemPrincipal !== ''
     ? produto.imagemPrincipal
@@ -41,8 +51,9 @@ function criarCardProduto(produto, id) {
   `;
 }
 
-function carregarProdutosFiltradosRealtime({ termo = '', marca = '', condicao = '', disponibilidade = '' } = {}) {
+async function carregarProdutosFiltradosRealtime({ termo = '', marca = '', condicao = '', disponibilidade = '' } = {}) {
   const container = document.querySelector('#produtosContainer');
+  await carregarFavoritosUsuario();
   let q = collection(db, "produtos");
   let filtros = [];
 
@@ -120,11 +131,24 @@ function configurarFiltrosInteligentes() {
 }
 
 window.toggleFavorito = async function(produtoId) {
+  const user = auth.currentUser;
+  if (!user) {
+    alert('Faça login para favoritar produtos.');
+    return;
+  }
+  const favRef = query(collection(db, "favoritos"), where("userId", "==", user.uid), where("produtoId", "==", produtoId));
+  const favSnap = await getDocs(favRef);
   const wishlistIcon = document.querySelector(`.card[data-id="${produtoId}"] .wishlist-icon i`);
-  if (wishlistIcon.classList.contains('far')) {
+  if (favSnap.empty) {
+    // Adicionar favorito
+    await setDoc(doc(collection(db, "favoritos")), { userId: user.uid, produtoId });
+    favoritosIds.add(produtoId);
     wishlistIcon.classList.remove('far');
     wishlistIcon.classList.add('fas');
   } else {
+    // Remover favorito
+    await deleteDoc(favSnap.docs[0].ref);
+    favoritosIds.delete(produtoId);
     wishlistIcon.classList.remove('fas');
     wishlistIcon.classList.add('far');
   }

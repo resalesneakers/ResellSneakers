@@ -769,18 +769,27 @@
           }
         } catch {}
       }
-      // Favoritos (simples, localStorage)
+      // Favoritos (Firestore)
       const favBtn = document.getElementById('btnFavorito');
-      favBtn.onclick = () => {
-        let favs = JSON.parse(localStorage.getItem('favoritos') || '[]');
-        if (favs.includes(productId)) {
-          favs = favs.filter(f => f !== productId);
+      async function atualizarFavoritoBtn() {
+        const favRef = query(collection(db, "favoritos"), where("userId", "==", user.uid), where("produtoId", "==", productId));
+        const favSnap = await getDocs(favRef);
+        if (favSnap.empty) {
           favBtn.textContent = '💙 Adicionar aos Favoritos';
         } else {
-          favs.push(productId);
           favBtn.textContent = '❤️ Nos Favoritos';
         }
-        localStorage.setItem('favoritos', JSON.stringify(favs));
+      }
+      atualizarFavoritoBtn();
+      favBtn.onclick = async () => {
+        const favRef = query(collection(db, "favoritos"), where("userId", "==", user.uid), where("produtoId", "==", productId));
+        const favSnap = await getDocs(favRef);
+        if (favSnap.empty) {
+          await addDoc(collection(db, "favoritos"), { userId: user.uid, produtoId: productId });
+        } else {
+          await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js').then(({ deleteDoc }) => deleteDoc(favSnap.docs[0].ref));
+        }
+        atualizarFavoritoBtn();
       };
       // Comprar agora
       document.getElementById('btnComprar').onclick = () => {
