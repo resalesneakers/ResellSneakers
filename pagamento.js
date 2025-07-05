@@ -1,5 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { auth, db } from "./firebase-config.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
@@ -13,11 +15,12 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
-async function mostrarResumo() {
+async function mostrarResumo(user) {
   const container = document.getElementById("resumo-pedido");
-  let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+  const carrinhoRef = doc(db, "carrinhos", user.uid);
+  const carrinhoSnap = await getDoc(carrinhoRef);
+  const carrinho = carrinhoSnap.exists() ? (carrinhoSnap.data().produtos || []) : [];
 
   if (carrinho.length === 0) {
     container.innerHTML = "<p>O carrinho está vazio.</p>";
@@ -46,37 +49,48 @@ async function mostrarResumo() {
   document.getElementById("total").textContent = "Total: €" + total.toFixed(2);
 }
 
-document.getElementById("formPagamento").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const nome = document.getElementById("nome").value;
-  const morada = document.getElementById("morada").value;
-  const metodo = document.getElementById("metodo").value;
-  const carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
-
-  if (carrinho.length === 0) {
-    alert("Carrinho vazio.");
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    alert("Tens de fazer login para finalizar a compra.");
+    window.location.href = "log.html";
     return;
   }
 
-  try {
-    await addDoc(collection(db, "compras"), {
-      nome,
-      morada,
-      metodo,
-      produtos: carrinho,
-      data: serverTimestamp()
-    });
+  mostrarResumo(user);
 
-    document.getElementById("mensagemFinal").textContent = "Compra realizada com sucesso!";
-    localStorage.removeItem("carrinho");
-    document.getElementById("formPagamento").reset();
-    document.getElementById("resumo-pedido").innerHTML = "";
-    document.getElementById("total").textContent = "";
-  } catch (error) {
-    alert("Erro ao processar o pagamento. Tenta novamente.");
-    console.error(error);
-  }
+  document.getElementById("formPagamento").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const nome = document.getElementById("nome").value;
+    const morada = document.getElementById("morada").value;
+    const metodo = document.getElementById("metodo").value;
+    const carrinhoRef = doc(db, "carrinhos", user.uid);
+    const carrinhoSnap = await getDoc(carrinhoRef);
+    const carrinho = carrinhoSnap.exists() ? (carrinhoSnap.data().produtos || []) : [];
+
+    if (carrinho.length === 0) {
+      alert("Carrinho vazio.");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "compras"), {
+        userId: user.uid,
+        nome,
+        morada,
+        metodo,
+        produtos: carrinho,
+        data: serverTimestamp()
+      });
+
+      document.getElementById("mensagemFinal").textContent = "Compra realizada com sucesso!";
+      await setDoc(carrinhoRef, { produtos: [] });
+      document.getElementById("formPagamento").reset();
+      document.getElementById("resumo-pedido").innerHTML = "";
+      document.getElementById("total").textContent = "";
+    } catch (error) {
+      alert("Erro ao processar o pagamento. Tenta novamente.");
+      console.error(error);
+    }
+  });
 });
-
-mostrarResumo();

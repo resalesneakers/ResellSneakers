@@ -330,6 +330,7 @@
     </style>
 </head>
 <body>
+    <div id="menu-container"></div>
     <div class="container-fluid">
         <div class="main-container">
             <!-- Header Section -->
@@ -421,322 +422,116 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, query, where, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { firebaseConfig } from './firebase-config.js';
 
-        // Simulação de autenticação (substitua pela verificação real do Firebase Auth)
-        function checkAuthentication() {
-            // Simular usuário autenticado
-            const isAuthenticated = true; // Substitua por: firebase.auth().currentUser
-            
-            if (!isAuthenticated) {
-                window.location.href = 'login.html';
-                return false;
-            }
-            return true;
-        }
-
-        // Carregar produtos do Firestore (simulado)
-        async function loadProducts() {
-        const productsGrid = document.getElementById('productsGrid');
-        productsGrid.innerHTML = '';
-
-        const querySnapshot = await firebase.firestore().collection('produtos')
-            .where('disponibilidade', '==', 'ativo')
-            .get();
-
-        querySnapshot.forEach(doc => {
-            const produto = { id: doc.id, ...doc.data() };
-            renderProductCard(produto);
-        });
-        }
-
-
-        // Aplicar filtros
-        function applyFilters() {
-            filteredProducts = allProducts.filter(product => {
-                const matchesFilter = currentFilter === 'todos' || product.disponibilidade  === currentFilter;
-                const matchesSearch = product.nome.toLowerCase().includes(searchTerm.toLowerCase());
-                return matchesFilter && matchesSearch;
-            });
-
-            renderProducts();
-        }
-
-        // Renderizar produtos
-        function renderProducts() {
-            const grid = document.getElementById('productsGrid');
-            const emptyState = document.getElementById('emptyState');
-
-            if (filteredProducts.length === 0) {
-                grid.style.display = 'none';
-                emptyState.style.display = 'block';
-                return;
-            }
-
-            grid.style.display = 'grid';
-            emptyState.style.display = 'none';
-
-            grid.innerHTML = filteredProducts.map(product => `
-                <div class="product-card" data-product-id="${product.id}">
-                    <div style="position: relative;">
-                        <img src="${product.imagemPrincipal}" alt="${product.nome}" class="product-image">
-                        <span class="status-badge status-${product.disponibilidade}">${product.disponibilidade}</span>
-                        <button class="visibility-toggle" onclick="toggleVisibility('${product.id}')">
-                            <i class="fas fa-eye${product.disponibilidade === 'inativo' ? '-slash' : ''}"></i>
-                        </button>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-name">${product.nome}</h3>
-                        <div class="product-price">€${product.preco.toFixed(2)}</div>
-                        <div class="product-meta">
-                            <span><i class="fas fa-calendar"></i> ${formatDate(product.dataPublicacao)}</span>
-                            <span><i class="fas fa-eye"></i> ${product.visualizacoes}</span>
-                        </div>
-                        <div class="product-actions">
-                            <button class="action-btn btn-edit" onclick="editProduct('${product.id}')">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            <button class="action-btn btn-stats" onclick="viewStats('${product.id}')">
-                                <i class="fas fa-chart-line"></i> Stats
-                            </button>
-                            <button class="action-btn btn-delete" onclick="confirmDelete('${product.id}', '${product.nome}', '${product.preco}', '${product.imagem}')">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Atualizar estatísticas
-        function updateStats() {
-            const total = allProducts.length;
-            const active = allProducts.filter(p => p.estado === 'ativo').length;
-            const sold = allProducts.filter(p => p.estado === 'vendido').length;
-
-            document.getElementById('totalProducts').textContent = `Total: ${total}`;
-            document.getElementById('activeProducts').textContent = `Ativos: ${active}`;
-            document.getElementById('soldProducts').textContent = `Vendidos: ${sold}`;
-        }
-
-        // Formatar data
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('pt-BR');
-        }
-
-        // Ações dos produtos
-        function editProduct(productId) {
-            window.location.href = `editar-produto.html?id=${productId}`;
-        }
-
-        function viewStats(productId) {
-            const product = allProducts.find(p => p.id === productId);
-            alert(`Estatísticas de "${product.nome}":\n\n📊 Visualizações: ${product.visualizacoes}\n💌 Interessados: ${product.interessados}\n📅 Publicado em: ${formatDate(product.dataPublicacao)}`);
-        }
-
-function toggleVisibility(productId) {
-  const produto = allProducts.find(p => p.id === productId);
-  if (!produto) return;
-
-  const novoStatus = produto.disponibilidade === 'inativo' ? 'venda' : 'inativo';
-
-  db.collection("produtos").doc(productId).update({ disponibilidade: novoStatus })
-    .then(() => {
-      produto.disponibilidade = novoStatus;
-      console.log(`Produto ${productId} agora está ${novoStatus}`);
-      applyFilters();
-      updateStats();
-    })
-    .catch(error => {
-      console.error("Erro ao alterar visibilidade:", error);
+    // Carregar menu universal
+    fetch('menu.html').then(res => res.text()).then(html => {
+      document.getElementById('menu-container').innerHTML = html;
     });
-}
 
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
- function confirmDelete(productId, productName, productPrice, productImage) {
-    document.getElementById('deleteProductName').textContent = productName;
-    document.getElementById('deleteProductPrice').textContent = `€${parseFloat(productPrice).toFixed(2)}`;
-    document.getElementById('deleteProductImage').src = productImage;
-    
-    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    modal.show();
+    const loadingState = document.getElementById('loadingState');
+    const productsGrid = document.getElementById('productsGrid');
+    const emptyState = document.getElementById('emptyState');
+    const totalProducts = document.getElementById('totalProducts');
+    const activeProducts = document.getElementById('activeProducts');
+    const soldProducts = document.getElementById('soldProducts');
+    const searchInput = document.getElementById('searchInput');
+    const filterBtns = document.querySelectorAll('.filter-btn');
 
-    // Ao clicar em confirmar, chama deleteProduct com o modal
-    document.getElementById('confirmDelete').onclick = () => {
-        deleteProduct(productId, modal);
-    };
-}
+    let allProducts = [];
+    let filteredProducts = [];
 
+    onAuthStateChanged(auth, async user => {
+      if (!user) return window.location.href = 'log.html';
+      await carregarProdutos(user.uid);
+    });
 
- function deleteProduct(productId, modal) {
-    db.collection("produtos").doc(productId).delete()
-        .then(() => {
-            console.log("Produto eliminado do Firestore");
-
-            // Remove o card do DOM
-            const card = document.querySelector(`[data-product-id='${productId}']`);
-            if (card) card.remove();
-
-            // Atualiza arrays e UI
-            allProducts = allProducts.filter(p => p.id !== productId);
-            applyFilters();
-            updateStats();
-
-            // Fecha o modal
-            if (modal) modal.hide();
-
-            // Toast de sucesso
-            showSuccess("Produto eliminado com sucesso!");
-        })
-        .catch(error => {
-            console.error("Erro ao eliminar produto:", error);
-            showError("Ocorreu um erro ao eliminar o produto.");
-        });
-}
-
-
-        function showSuccess(message) {
-            // Implementar toast de sucesso
-            alert(message);
-        }
-
-        function showError(message) {
-            // Implementar toast de erro
-            alert(message);
-        }
-
-        // Event Listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            if (checkAuthentication()) {
-                loadProducts();
-            }
-
-            // Filtros
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentFilter = this.dataset.filter;
-                    applyFilters();
-                });
-            });
-
-            // Busca
-            document.getElementById('searchInput').addEventListener('input', function() {
-                searchTerm = this.value;
-                applyFilters();
-            });
-        });
-  
-  const productsGrid = document.getElementById('productsGrid');
-  const loadingState = document.getElementById('loadingState');
-  const emptyState = document.getElementById('emptyState');
-  const totalProducts = document.getElementById('totalProducts');
-  const activeProducts = document.getElementById('activeProducts');
-  const soldProducts = document.getElementById('soldProducts');
-
-let allProducts = [];
-let filteredProducts = [];
-let currentFilter = 'todos';
-let searchTerm = '';
-
-function loadProducts() {
-  loadingState.style.display = 'block';
-  emptyState.style.display = 'none';
-  productsGrid.innerHTML = '';
-
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      window.location.href = "log.html";
-      return;
+    async function carregarProdutos(uid) {
+      loadingState.style.display = '';
+      productsGrid.style.display = 'none';
+      emptyState.style.display = 'none';
+      const q = query(collection(db, 'produtos'), where('vendedorId', '==', uid));
+      const querySnapshot = await getDocs(q);
+      allProducts = [];
+      querySnapshot.forEach(docSnap => {
+        allProducts.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      atualizarStats();
+      filtrarProdutos();
+      loadingState.style.display = 'none';
     }
 
-    db.collection("produtos")
-      .where("userId", "==", user.uid)
-      .orderBy("dataCriacao", "desc")
-      .get()
-      .then(snapshot => {
-        loadingState.style.display = 'none';
+    function atualizarStats() {
+      totalProducts.textContent = `Total: ${allProducts.length}`;
+      activeProducts.textContent = `Ativos: ${allProducts.filter(p => p.status === 'ativo').length}`;
+      soldProducts.textContent = `Vendidos: ${allProducts.filter(p => p.status === 'vendido').length}`;
+    }
 
-        if (snapshot.empty) {
-          emptyState.style.display = 'block';
-          return;
-        }
-
-        allProducts = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-
-        applyFilters();
-        updateStats();
-      })
-      .catch(error => {
-        console.error("Erro ao buscar produtos:", error);
-        loadingState.textContent = "Erro ao carregar produtos.";
+    function filtrarProdutos() {
+      const termo = searchInput.value.trim().toLowerCase();
+      const filtro = document.querySelector('.filter-btn.active').dataset.filter;
+      filteredProducts = allProducts.filter(p => {
+        const matchNome = p.nome?.toLowerCase().includes(termo);
+        const matchFiltro = filtro === 'todos' || (p.status === filtro);
+        return matchNome && matchFiltro;
       });
-  });
-}
+      renderizarProdutos();
+    }
 
-function renderProductCard(produto) {
-  const card = document.createElement('div');
-  card.className = 'product-card';
-  card.setAttribute('data-id', produto.id);
+    function renderizarProdutos() {
+      productsGrid.innerHTML = '';
+      if (filteredProducts.length === 0) {
+        productsGrid.style.display = 'none';
+        emptyState.style.display = '';
+        return;
+      }
+      productsGrid.style.display = '';
+      emptyState.style.display = 'none';
+      filteredProducts.forEach(produto => {
+        const div = document.createElement('div');
+        div.className = 'product-card';
+        div.innerHTML = `
+          <img src='${produto.imagemPrincipal || 'images/no-image.png'}' class='product-image' alt='${produto.nome}'>
+          <span class='status-badge status-${produto.status || 'ativo'}'>${produto.status || 'Ativo'}</span>
+          <div class='product-info'>
+            <div class='product-name'>${produto.nome}</div>
+            <div class='product-price'>€${produto.preco}</div>
+            <div class='product-meta'>${produto.marca || ''} | ${produto.condicao || ''}</div>
+            <div class='product-actions'>
+              <a href='produto-detalhe.html?id=${produto.id}' class='action-btn btn-edit'><i class='fas fa-eye'></i> Ver</a>
+              <button class='action-btn btn-delete' data-id='${produto.id}'><i class='fas fa-trash'></i> Remover</button>
+            </div>
+          </div>
+        `;
+        productsGrid.appendChild(div);
+      });
+      // Event listeners para remover
+      document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.onclick = async () => {
+          if (!confirm('Tem a certeza que deseja remover este produto?')) return;
+          await deleteDoc(doc(db, 'produtos', btn.dataset.id));
+          allProducts = allProducts.filter(p => p.id !== btn.dataset.id);
+          filtrarProdutos();
+        };
+      });
+    }
 
-  // Usar status consistente
-  let statusClass = 'status-inativo';
-  let statusLabel = produto.disponibilidade; // ex: 'ativo', 'vendido', etc
-
-  if (produto.disponibilidade === "ativo") statusClass = 'status-ativo';
-  else if (produto.disponibilidade === "vendido") statusClass = 'status-vendido';
-  else if (produto.disponibilidade === "reservado") statusClass = 'status-reservado';
-  else if (produto.disponibilidade === "inativo") statusClass = 'status-inativo';
-
-  card.innerHTML = `
-    <div style="position: relative;">
-      <img src="${produto.imagemPrincipal}" alt="${produto.nome}" class="product-image">
-      <span class="status-badge ${statusClass}">${statusLabel}</span>
-    </div>
-    <div class="product-info">
-      <h3 class="product-name">${produto.nome}</h3>
-      <div class="product-price">€${produto.preco.toFixed(2)}</div>
-      <div class="product-meta">
-        <span><i class="fas fa-calendar"></i> ${produto.dataCriacao?.toDate?.().toLocaleDateString('pt-PT') || ''}</span>
-        <span><i class="fas fa-eye"></i> ${produto.visualizacoes || 0}</span>
-      </div>
-      <div class="product-actions">
-        <button class="action-btn btn-edit" onclick="editProduct('${produto.id}')"><i class="fas fa-edit"></i> Editar</button>
-        <button class="action-btn btn-delete" onclick="confirmDelete('${produto.id}', '${produto.nome}', '${produto.preco}', '${produto.imagemPrincipal}')"><i class="fas fa-trash"></i> Eliminar</button>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('productsGrid').appendChild(card);
-}
-
-</script>
-<script>
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-  // Configuração do Firebase (altere pelos seus dados se necessário)
-  const firebaseConfig = {
-      apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
-      authDomain: "resalesneakers-e17cb.firebaseapp.com",
-      projectId: "resalesneakers-e17cb",
-      storageBucket: "resalesneakers-e17cb.appspot.com",
-      messagingSenderId: "698715655625",
-      appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
-    };
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-</script>
-<script src="firebase-config.js"></script>
-<script src="meus-produtos.js"></script>
+    searchInput.addEventListener('input', filtrarProdutos);
+    filterBtns.forEach(btn => {
+      btn.onclick = () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filtrarProdutos();
+      };
+    });
+    </script>
 </body>
 </html>

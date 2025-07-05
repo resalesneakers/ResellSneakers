@@ -4,347 +4,212 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Editar Perfil - ResellSneakers</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0; padding: 0;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
+    body { background: #f5f5f5; }
+    .profile-img-preview {
+      width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 2px solid #eee; margin-bottom: 1rem;
     }
-    nav {
-      background-color: #1e1e1e;
-      color: white;
-      padding: 10px 20px;
-      height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    nav .perfil-icon {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-    }
-    nav .perfil-icon img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-    }
-    #sidebar {
-      width: 220px;
-      background: #222;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      padding-top: 20px;
-      overflow-y: auto;
-    }
-    #sidebar button {
-      background: none;
-      border: none;
-      color: white;
-      padding: 15px 20px;
-      text-align: left;
-      cursor: pointer;
-      font-size: 16px;
-      border-left: 4px solid transparent;
-      transition: background 0.3s, border-color 0.3s;
-    }
-    #sidebar button.active, #sidebar button:hover {
-      background: #444;
-      border-left: 4px solid #ff6f61;
-    }
-    #content {
-      flex-grow: 1;
-      padding: 20px;
-      overflow-y: auto;
-      background: #f5f5f5;
-    }
-    h2 {
-      margin-top: 0;
-    }
-    /* Form e listas */
-    form label {
-      display: block;
-      margin: 8px 0 4px;
-      font-weight: bold;
-    }
-    form input, form select {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 12px;
-      box-sizing: border-box;
-    }
-    form button {
-      background-color: #ff6f61;
-      border: none;
-      color: white;
-      padding: 10px 20px;
-      cursor: pointer;
-      font-size: 16px;
-      border-radius: 4px;
-    }
-    .produto-item, .venda-item, .compra-item {
-      background: white;
-      margin-bottom: 12px;
-      padding: 12px;
-      border-radius: 4px;
-      box-shadow: 0 0 5px #ccc;
-    }
-    .produto-item img {
-      max-width: 80px;
-      max-height: 80px;
-      object-fit: cover;
-      float: left;
-      margin-right: 10px;
-      border-radius: 4px;
-    }
-    .produto-info {
-      overflow: hidden;
-    }
-    .btn-editar, .btn-remover {
-      margin-top: 10px;
-      margin-right: 8px;
-      background-color: #4caf50;
-      border: none;
-      color: white;
-      padding: 6px 12px;
-      cursor: pointer;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    .btn-remover {
-      background-color: #e53935;
-    }
+    .tab-content { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 2rem; margin-top: 1rem; }
+    .nav-tabs .nav-link.active { background: #ff6f61; color: #fff !important; border: none; }
+    .nav-tabs .nav-link { color: #ff6f61; font-weight: 500; border: none; }
+    .form-label { font-weight: 500; }
+    .btn-custom { background: #ff6f61; color: #fff; border: none; }
+    .btn-custom:hover { background: #e55a4e; }
+    .produto-card img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+    .produto-card { border: 1px solid #eee; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: #fafafa; }
   </style>
 </head>
 <body>
-  <nav>
-    <div>ResellSneakers</div>
-    <div class="perfil-icon" title="Ver perfil">
-      <img id="fotoPerfilNav" src="default-profile.png" alt="Foto de Perfil" />
-      <span id="nomeUsuarioNav">Carregando...</span>
+  <div id="menu-container"></div>
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-md-10">
+        <ul class="nav nav-tabs" id="perfilTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="perfil-tab" data-bs-toggle="tab" data-bs-target="#perfil" type="button" role="tab">Perfil</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="produtos-tab" data-bs-toggle="tab" data-bs-target="#produtos" type="button" role="tab">Meus Produtos</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="vendas-tab" data-bs-toggle="tab" data-bs-target="#vendas" type="button" role="tab">Vendas</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="compras-tab" data-bs-toggle="tab" data-bs-target="#compras" type="button" role="tab">Compras</button>
+          </li>
+        </ul>
+        <div class="tab-content" id="perfilTabsContent">
+          <div class="tab-pane fade show active" id="perfil" role="tabpanel">
+            <h3 class="mb-3">Editar Perfil</h3>
+            <form id="formPerfil" autocomplete="off">
+              <div class="text-center mb-3">
+                <img id="fotoPreview" src="images/default-profile.png" class="profile-img-preview" alt="Foto de Perfil" />
+              </div>
+              <div class="mb-3">
+                <label for="nome" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="nome" required />
+              </div>
+              <div class="mb-3">
+                <label for="localizacao" class="form-label">Localização</label>
+                <input type="text" class="form-control" id="localizacao" />
+              </div>
+              <div class="mb-3">
+                <label for="idioma" class="form-label">Idioma</label>
+                <select class="form-select" id="idioma">
+                  <option value="pt-PT">Português</option>
+                  <option value="en-US">Inglês</option>
+                  <option value="es-ES">Espanhol</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="fotoPerfil" class="form-label">Foto de Perfil</label>
+                <input type="file" class="form-control" id="fotoPerfil" accept="image/*" />
+              </div>
+              <button type="submit" class="btn btn-custom w-100">Guardar Alterações</button>
+              <div id="mensagemPerfil" class="mt-3"></div>
+            </form>
+          </div>
+          <div class="tab-pane fade" id="produtos" role="tabpanel">
+            <h3 class="mb-3">Meus Produtos</h3>
+            <div id="meusProdutosContainer"></div>
+          </div>
+          <div class="tab-pane fade" id="vendas" role="tabpanel">
+            <h3 class="mb-3">Minhas Vendas</h3>
+            <div id="vendasContainer"></div>
+          </div>
+          <div class="tab-pane fade" id="compras" role="tabpanel">
+            <h3 class="mb-3">Minhas Compras</h3>
+            <div id="comprasContainer"></div>
+          </div>
+        </div>
+      </div>
     </div>
-  </nav>
-
-  <div id="sidebar">
-    <button class="active" data-section="perfil">Perfil</button>
-    <button data-section="meusProdutos">Meus Produtos</button>
-    <button data-section="vendas">Vendas</button>
-    <button data-section="compras">Compras</button>
   </div>
-
-  <div id="content">
-    <!-- Conteúdo dinâmico será injetado aqui -->
-  </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, query, where, getDocs, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+    import { auth, db, storage } from './firebase-config.js';
+    import { onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import { doc, getDoc, updateDoc, collection, query, where, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+    import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
-    const storage = getStorage(app);
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
-      authDomain: "resalesneakers-e17cb.firebaseapp.com",
-      projectId: "resalesneakers-e17cb",
-      storageBucket: "resalesneakers-e17cb.appspot.com",
-      messagingSenderId: "698715655625",
-      appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
-    };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    const fotoPerfilNav = document.getElementById('fotoPerfilNav');
-    const nomeUsuarioNav = document.getElementById('nomeUsuarioNav');
-    const sidebarButtons = document.querySelectorAll('#sidebar button');
-    const content = document.getElementById('content');
+    // Carregar menu universal
+    fetch('menu.html').then(res => res.text()).then(html => {
+      document.getElementById('menu-container').innerHTML = html;
+    });
 
     let user = null;
+    let userData = {};
+    let fotoFile = null;
 
-    function setActiveButton(btn) {
-      sidebarButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    }
-
-    function mostrarPerfil() {
-      content.innerHTML = `
-        <h2>Editar Perfil</h2>
-        <form id="formPerfil">
-          <label>Nome:</label>
-          <input type="text" id="nome" required />
-          
-          <label>Localização:</label>
-          <input type="text" id="localizacao" />
-          
-          <label>Idioma:</label>
-          <select id="idioma">
-            <option value="pt-PT">Português</option>
-            <option value="en-US">Inglês</option>
-            <option value="es-ES">Espanhol</option>
-          </select>
-          
-          <label>Foto de Perfil:</label>
-          <input type="file" id="fotoPerfil" accept="image/*" />
-          
-          <button type="submit">Guardar Alterações</button>
-        </form>
-        <div id="mensagemPerfil"></div>
-      `;
-
-      const formPerfil = document.getElementById('formPerfil');
-      const mensagemPerfil = document.getElementById('mensagemPerfil');
-      const inputNome = document.getElementById('nome');
-      const inputLocalizacao = document.getElementById('localizacao');
-      const selectIdioma = document.getElementById('idioma');
-      const inputFotoPerfil = document.getElementById('fotoPerfil');
-
-      // Carregar dados atuais do usuário
-      const userDocRef = doc(db, 'users', user.uid);
-      getDoc(userDocRef).then(docSnap => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          inputNome.value = data.nome || '';
-          inputLocalizacao.value = data.localizacao || '';
-          selectIdioma.value = data.idioma || 'pt-PT';
-          if (data.fotoPerfilURL) {
-            fotoPerfilNav.src = data.fotoPerfilURL;
-          }
-        }
-      });
-
-      formPerfil.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        mensagemPerfil.textContent = "A guardar...";
-
-        // Atualizar dados do usuário no Firestore
-        let fotoURL = fotoPerfilNav.src;
-
-        if (inputFotoPerfil.files.length > 0) {
-          // Upload foto para Storage
-          const file = inputFotoPerfil.files[0];
-         if (inputFotoPerfil.files.length > 0) {
-        const file = inputFotoPerfil.files[0];
-        const storageRef = ref(storage, `fotosPerfil/${user.uid}/${file.name}`);
-        mensagemPerfil.textContent = "A carregar foto...";
-        try {
-            await uploadBytes(storageRef, file);
-            fotoURL = await getDownloadURL(storageRef);
-        } catch (err) {
-            mensagemPerfil.textContent = "Erro ao carregar foto: " + err.message;
-            return;
-        }
-        }
-        }
-
-        try {
-          // Atualiza Firestore
-          await import('https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js').then(async (mod) => {
-            const { updateDoc } = mod;
-            await updateDoc(userDocRef, {
-              nome: inputNome.value,
-              localizacao: inputLocalizacao.value,
-              idioma: selectIdioma.value,
-              fotoPerfilURL: fotoURL,
-            });
-          });
-          mensagemPerfil.textContent = "Perfil atualizado com sucesso!";
-          nomeUsuarioNav.textContent = inputNome.value;
-          if (fotoURL) fotoPerfilNav.src = fotoURL;
-
-        } catch (err) {
-          mensagemPerfil.textContent = "Erro ao atualizar perfil: " + err.message;
-        }
-      });
-    }
-
-    async function mostrarMeusProdutos() {
-      content.innerHTML = `<h2>Meus Produtos à Venda</h2><div id="listaProdutos"></div><button id="btnAdicionarProduto">Adicionar Produto</button>`;
-      const listaProdutos = document.getElementById('listaProdutos');
-      const btnAdicionarProduto = document.getElementById('btnAdicionarProduto');
-
-      btnAdicionarProduto.addEventListener('click', () => {
-        window.location.href = 'adicionar-produto.html';
-      });
-
-      const q = query(collection(db, "produtos"), where("vendedorId", "==", user.uid));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        listaProdutos.innerHTML = "<p>Não tem produtos à venda.</p>";
-        return;
-      }
-
-      querySnapshot.forEach(docSnap => {
-        const p = docSnap.data();
-        const div = document.createElement('div');
-        div.className = "produto-item";
-        div.innerHTML = `
-          <img src="${p.imagemPrincipal}" alt="${p.nome}" />
-          <div class="produto-info">
-            <strong>${p.nome}</strong><br/>
-            Preço: €${p.preco.toFixed(2)}<br/>
-            Condição: ${p.condicao}<br/>
-            Disponibilidade: ${p.disponibilidade}<br/>
-            <button class="btn-editar" data-id="${docSnap.id}">Editar</button>
-            <button class="btn-remover" data-id="${docSnap.id}">Remover</button>
-          </div>
-        `;
-        listaProdutos.appendChild(div);
-      });
-
-      listaProdutos.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('btn-remover')) {
-          const id = e.target.dataset.id;
-          if (confirm("Quer mesmo remover este produto?")) {
-            await deleteDoc(doc(db, "produtos", id));
-            alert("Produto removido.");
-            mostrarMeusProdutos(); // Atualiza a lista
-          }
-        } else if (e.target.classList.contains('btn-editar')) {
-          const id = e.target.dataset.id;
-          // Redirecionar para a página de edição (que você poderá criar)
-          window.location.href = `editar-produto.html?id=${id}`;
-        }
-      });
-    }
-
-    // Para demos, as funções vendas e compras ficam simples por enquanto
-    function mostrarVendas() {
-      content.innerHTML = "<h2>Vendas</h2><p>Em desenvolvimento...</p>";
-    }
-    function mostrarCompras() {
-      content.innerHTML = "<h2>Compras</h2><p>Em desenvolvimento...</p>";
-    }
-
-    sidebarButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        setActiveButton(btn);
-        switch (btn.dataset.section) {
-          case 'perfil': mostrarPerfil(); break;
-          case 'meusProdutos': mostrarMeusProdutos(); break;
-          case 'vendas': mostrarVendas(); break;
-          case 'compras': mostrarCompras(); break;
-        }
-      });
+    onAuthStateChanged(auth, async u => {
+      if (!u) return window.location.href = 'log.html';
+      user = u;
+      const userRef = doc(db, 'usuarios', user.uid);
+      const userSnap = await getDoc(userRef);
+      userData = userSnap.exists() ? userSnap.data() : {};
+      document.getElementById('fotoPreview').src = userData.foto || user.photoURL || 'images/default-profile.png';
+      document.getElementById('nome').value = userData.nome || user.displayName || '';
+      document.getElementById('localizacao').value = userData.localizacao || '';
+      document.getElementById('idioma').value = userData.idioma || 'pt-PT';
+      carregarMeusProdutos();
+      carregarVendas();
+      carregarCompras();
     });
 
-    onAuthStateChanged(auth, (u) => {
-      if (u) {
-        user = u;
-        nomeUsuarioNav.textContent = u.displayName || u.email;
-        fotoPerfilNav.src = u.photoURL || 'default-profile.png';
-        mostrarPerfil();
-      } else {
-        // Não autenticado, redirecionar para login
-        window.location.href = "log.html";
+    document.getElementById('fotoPerfil').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) {
+        fotoFile = file;
+        const reader = new FileReader();
+        reader.onload = e2 => {
+          document.getElementById('fotoPreview').src = e2.target.result;
+        };
+        reader.readAsDataURL(file);
       }
     });
+
+    document.getElementById('formPerfil').onsubmit = async e => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+      const nome = document.getElementById('nome').value.trim();
+      const localizacao = document.getElementById('localizacao').value.trim();
+      const idioma = document.getElementById('idioma').value;
+      let fotoURL = userData.foto || user.photoURL || '';
+      try {
+        if (fotoFile) {
+          const storageRef = ref(storage, `usuarios/${user.uid}/perfil.jpg`);
+          await uploadBytes(storageRef, fotoFile);
+          fotoURL = await getDownloadURL(storageRef);
+        }
+        await updateProfile(user, { displayName: nome, photoURL: fotoURL });
+        await updateDoc(doc(db, 'usuarios', user.uid), {
+          nome, localizacao, idioma, foto: fotoURL
+        });
+        document.getElementById('mensagemPerfil').innerHTML = '<div class="alert alert-success">Perfil atualizado com sucesso!</div>';
+      } catch (err) {
+        document.getElementById('mensagemPerfil').innerHTML = '<div class="alert alert-danger">Erro ao atualizar perfil.</div>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Guardar Alterações';
+      }
+    };
+
+    function produtoCard(produto) {
+      return `<div class="produto-card d-flex align-items-center gap-3">
+        <img src="${produto.imagemPrincipal || 'https://via.placeholder.com/80'}" alt="${produto.nome}" />
+        <div>
+          <div><strong>${produto.nome}</strong></div>
+          <div>Preço: €${produto.preco}</div>
+          <div>Estado: ${produto.condicao}</div>
+          <div>Disponibilidade: ${produto.disponibilidade}</div>
+        </div>
+      </div>`;
+    }
+
+    function carregarMeusProdutos() {
+      const container = document.getElementById('meusProdutosContainer');
+      container.innerHTML = '<div class="text-center"><div class="spinner-border"></div></div>';
+      const q = query(collection(db, 'produtos'), where('userId', '==', user.uid), orderBy('dataCriacao', 'desc'));
+      onSnapshot(q, snap => {
+        if (snap.empty) {
+          container.innerHTML = '<p class="text-muted">Você ainda não publicou nenhum produto.</p>';
+          return;
+        }
+        container.innerHTML = '';
+        snap.forEach(doc => {
+          container.innerHTML += produtoCard(doc.data());
+        });
+      });
+    }
+
+    function carregarVendas() {
+      const container = document.getElementById('vendasContainer');
+      container.innerHTML = '<div class="text-center"><div class="spinner-border"></div></div>';
+      // Exemplo: produtos vendidos pelo usuário (pode customizar)
+      const q = query(collection(db, 'produtos'), where('userId', '==', user.uid), where('disponibilidade', '==', 'vendido'), orderBy('dataCriacao', 'desc'));
+      onSnapshot(q, snap => {
+        if (snap.empty) {
+          container.innerHTML = '<p class="text-muted">Nenhuma venda registrada.</p>';
+          return;
+        }
+        container.innerHTML = '';
+        snap.forEach(doc => {
+          container.innerHTML += produtoCard(doc.data());
+        });
+      });
+    }
+
+    function carregarCompras() {
+      const container = document.getElementById('comprasContainer');
+      container.innerHTML = '<div class="text-center"><div class="spinner-border"></div></div>';
+      // Exemplo: produtos comprados pelo usuário (ajuste conforme sua lógica de compras)
+      // Aqui é só um placeholder, pois depende de como você salva as compras
+      container.innerHTML = '<p class="text-muted">Funcionalidade em desenvolvimento.</p>';
+    }
   </script>
 </body>
 </html>

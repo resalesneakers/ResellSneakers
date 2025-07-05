@@ -8,6 +8,12 @@
   <script type="module" src="produto.js"></script>
 </head>
 <body>
+  <div id="menu-container"></div>
+  <script>
+    fetch('menu.html').then(res => res.text()).then(html => {
+      document.getElementById('menu-container').innerHTML = html;
+    });
+  </script>
   <div id="produto-container">
     <img id="imagemProduto" src="" alt="Imagem do Produto">
     <h1 id="nomeProduto"></h1>

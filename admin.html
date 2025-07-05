@@ -8,6 +8,12 @@
   <script type="module" src="admin.js"></script>
 </head>
 <body>
+  <div id="menu-container"></div>
+  <script>
+    fetch('menu.html').then(res => res.text()).then(html => {
+      document.getElementById('menu-container').innerHTML = html;
+    });
+  </script>
   <h1>Gestão de Produtos (Admin)</h1>
   <div id="produtos-container"></div>
   <button onclick="exportarProdutos()">Exportar Produtos (CSV)</button>

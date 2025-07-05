@@ -8,20 +8,9 @@ import {
   getAuth, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
-  authDomain: "resalesneakers-e17cb.firebaseapp.com",
-  databaseURL: "https://resalesneakers-e17cb-default-rtdb.firebaseio.com",
-  projectId: "resalesneakers-e17cb",
-  storageBucket: "resalesneakers-e17cb.firebasestorage.app",
-  messagingSenderId: "698715655625",
-  appId: "1:698715655625:web:fde7f7a7f2da0037792c18",
-  measurementId: "G-WVNMT06HJS"
-};
+import { auth, db } from "./firebase-config.js";
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+// Remover tudo entre 'const firebaseConfig = {' até 'const app = initializeApp(firebaseConfig);'
 
 // Simulação: ID do vendedor e produto (passar por URL ou localStorage no real)
 const vendedorId = "vendedor123";

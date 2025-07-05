@@ -675,5 +675,12 @@
     });
   });
 </script>
+
+<div id="menu-container"></div>
+<script>
+  fetch('menu.html').then(res => res.text()).then(html => {
+    document.getElementById('menu-container').innerHTML = html;
+  });
+</script>
 </body>
 </html>

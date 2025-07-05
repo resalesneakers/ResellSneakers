@@ -1,4 +1,4 @@
-import { auth, db, storage } from "./firebase-config.js";
+import { auth, db, storage } from './firebase-config.js';
 import {
   ref as storageRef,
   uploadBytesResumable,
@@ -8,6 +8,9 @@ import {
   collection,
   addDoc,
   serverTimestamp,
+  getDocs,
+  query,
+  where,
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
@@ -73,32 +76,24 @@ function uploadImages(userId) {
   return Promise.all(uploadPromises);
 }
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    alert("Você precisa estar autenticado para publicar um produto.");
-    window.location.href = "log.html";
-    return;
-  }
-
 let user = null;
 
-firebase.auth().onAuthStateChanged(function (u) {
+onAuthStateChanged(auth, (u) => {
   if (u) {
     user = u;
   } else {
     alert("Você precisa estar logado para acessar esta página.");
-    window.location.href = "/resellsneakers/index.html"; // ou o caminho correto
+    window.location.href = "/resellsneakers/index.html";
   }
-});
 
   const form = document.getElementById("sellForm");
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-  if (!user) {
-    alert("Você precisa estar logado para publicar.");
-    return;
-  }
+    if (!user) {
+      alert("Você precisa estar logado para publicar.");
+      return;
+    }
 
     if (!form.checkValidity()) {
       form.classList.add("was-validated");
@@ -142,8 +137,27 @@ firebase.auth().onAuthStateChanged(function (u) {
 
       await addDoc(collection(db, "produtos"), produto);
 
+      // Notificar seguidores
+      try {
+        const seguidoresSnap = await getDocs(query(collection(db, 'seguidores'), where('userId', '==', user.uid)));
+        for (const docSnap of seguidoresSnap.docs) {
+          const seguidorId = docSnap.data().seguidorId;
+          await addDoc(collection(db, 'notificacoes'), {
+            userId: seguidorId,
+            mensagem: `Novo produto publicado por ${user.displayName || 'um vendedor que você segue'}!`,
+            produtoNome: produto.nome,
+            produtoId: null, // pode ser preenchido se quiser buscar o ID do produto
+            vendedorId: user.uid,
+            lida: false,
+            timestamp: new Date()
+          });
+        }
+      } catch (e) {
+        console.warn('Não foi possível notificar seguidores:', e);
+      }
+
       alert("✅ Produto publicado com sucesso!");
-      window.location.href = "/resellsneakers/meu-perfil.html";
+      window.location.href = "meu-perfil.html";
     } catch (err) {
       console.error("Erro ao publicar produto:", err);
       alert("❌ Erro ao publicar produto.");

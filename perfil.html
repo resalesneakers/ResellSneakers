@@ -476,6 +476,7 @@
     </style>
 </head>
 <body>
+    <div id="menu-container"></div>
     <div class="container">
         <header>
             <a href="index.html" class="logo">ResellSneakers</a>
@@ -548,6 +549,8 @@
         <div class="tabs">
             <div class="tab active" data-tab="seller-listings">Produtos à Venda</div>
             <div class="tab" data-tab="seller-reviews">Avaliações</div>
+            <div class="tab" data-tab="seller-followers">Seguidores</div>
+            <div class="tab" data-tab="seller-following">Seguindo</div>
         </div>
 
         <!-- Produtos à Venda -->
@@ -561,641 +564,240 @@
                     <p>Este vendedor não tem produtos à venda de momento.</p>
                 </div>
             </div>
-            <div class="pagination" id="listings-pagination">
-                <!-- Paginação será adicionada aqui -->
-            </div>
+            <div class="pagination" id="listings-pagination"></div>
         </div>
 
         <!-- Avaliações -->
         <div class="tab-content" id="seller-reviews">
             <h2>Avaliações dos Compradores</h2>
             <div id="reviews-container">
-                <!-- Avaliações serão carregadas aqui -->
                 <div class="empty-state" id="empty-reviews">
                     <i>⭐</i>
                     <h3>Sem Avaliações</h3>
                     <p>Este vendedor ainda não recebeu avaliações.</p>
                 </div>
             </div>
-            <div class="pagination" id="reviews-pagination">
-                <!-- Paginação será adicionada aqui -->
-            </div>
+            <div class="pagination" id="reviews-pagination"></div>
+        </div>
+
+        <!-- Seguidores -->
+        <div class="tab-content" id="seller-followers">
+            <h2>Seguidores</h2>
+            <div id="followers-list" class="grid-container"></div>
+        </div>
+        <!-- Seguindo -->
+        <div class="tab-content" id="seller-following">
+            <h2>Seguindo</h2>
+            <div id="following-list" class="grid-container"></div>
         </div>
     </div>
 
     <div class="toast" id="toast-message"></div>
 
-    <script>
-        // Inicializar Firebase
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        
-        // Variáveis globais
-        let currentSellerId;
-        let currentUserId;
-        let isFollowing = false;
-        let listingsPage = 1;
-        let reviewsPage = 1;
-        const itemsPerPage = 6;
+    <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import { doc, getDoc, collection, query, where, getDocs, onSnapshot, addDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-        // Quando o DOM estiver carregado
-        document.addEventListener('DOMContentLoaded', function() {
-            // Obter ID do vendedor da URL
-            const urlParams = new URLSearchParams(window.location.search);
-            currentSellerId = urlParams.get('id');
-            
-            if (!currentSellerId) {
-                showToast('ID de vendedor não encontrado.');
-                return;
-            }
+    let currentSellerId;
+    let currentUserId;
 
-            // Verificar se o usuário está autenticado
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    currentUserId = user.uid;
-                    
-                    // Verificar se está a visualizar o próprio perfil
-                    if (currentUserId === currentSellerId) {
-                        window.location.href = 'meu-perfil.html';
-                        return;
-                    }
-                    
-                    // Verificar se já segue este vendedor
-                    checkFollowStatus();
-                }
-                
-                // Carregar perfil do vendedor
-                loadSellerProfile();
-                
-                // Carregar produtos ativos do vendedor
-                loadSellerListings();
-                
-                // Carregar avaliações do vendedor
-                loadSellerReviews();
-            });
+    // Utilitário para pegar parâmetro da URL
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
 
-            // Setup dos tabs
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Atualizar classes ativas
-                    document.querySelector('.tab.active').classList.remove('active');
-                    tab.classList.add('active');
-                    
-                    // Mostrar conteúdo correspondente
-                    const tabId = tab.getAttribute('data-tab');
-                    document.querySelector('.tab-content.active').classList.remove('active');
-                    document.getElementById(tabId).classList.add('active');
-                });
-            });
+    // Ao carregar a página
+    window.addEventListener('DOMContentLoaded', () => {
+      currentSellerId = getParam('id');
+      if (!currentSellerId) {
+        alert('ID de vendedor não encontrado.');
+        window.location.href = 'index.html';
+        return;
+      }
 
-            // Botão "Conversar"
-            document.getElementById('chat-btn').addEventListener('click', startConversation);
-            
-            // Botão "Seguir"
-            document.getElementById('follow-btn').addEventListener('click', toggleFollow);
-        });
-
-        // Carregar perfil do vendedor
-        function loadSellerProfile() {
-            db.collection('users').doc(currentSellerId).get().then(doc => {
-                if (doc.exists) {
-                    const userData = doc.data();
-                    
-                    // Informações básicas
-                    document.getElementById('seller-name').textContent = userData.displayName || 'Vendedor';
-                    
-                    // Verificação do vendedor
-                    if (userData.isVerified) {
-                        document.getElementById('verification-badge').style.display = 'inline-flex';
-                    }
-                    
-                    // Localização
-                    document.getElementById('seller-location').textContent = userData.location || 'Não especificada';
-                    
-                    // Data de registo
-                    const joinDate = userData.createdAt ? 
-                        new Date(userData.createdAt.toDate()).toLocaleDateString('pt-PT', {
-                            day: 'numeric', 
-                            month: 'long', 
-                            year: 'numeric'
-                        }) : 'N/A';
-                    document.getElementById('join-date').textContent = joinDate;
-                    
-                    // Avatar
-                    if (userData.avatarUrl) {
-                        document.getElementById('seller-avatar').src = userData.avatarUrl;
-                    }
-                    
-                    // Estatísticas
-                    document.getElementById('listings-count').textContent = userData.listingsCount || 0;
-                    document.getElementById('sales-count').textContent = userData.salesCount || 0;
-                    document.getElementById('followers-count').textContent = userData.followersCount || 0;
-                    
-                    // Rating
-                    const rating = userData.rating || 0;
-                    updateRatingStars(rating);
-                    document.getElementById('rating-count').textContent = 
-                        `(${userData.reviewCount || 0} avaliações)`;
-                } else {
-                    showToast('Vendedor não encontrado.');
-                    window.location.href = 'index.html';
-                }
-            }).catch(error => {
-                showToast('Erro ao carregar perfil: ' + error.message);
-            });
+      onAuthStateChanged(auth, async user => {
+        if (user) {
+          currentUserId = user.uid;
+          if (currentUserId === currentSellerId) {
+            window.location.href = 'meu-perfil.html';
+            return;
+          }
+          await renderProfile();
+        } else {
+          window.location.href = 'log.html';
         }
+      });
+    });
 
-        // Atualizar estrelas com base na classificação
-        function updateRatingStars(rating) {
-            for (let i = 1; i <= 5; i++) {
-                const star = document.getElementById(`star-${i}`);
-                if (i <= rating) {
-                    star.className = 'star';
-                } else {
-                    star.className = 'star empty-star';
-                }
-            }
+    async function renderProfile() {
+      // Buscar dados do usuário
+      let userRef = doc(db, 'usuarios', currentSellerId);
+      let userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) {
+        // Tentar na coleção 'users' se não existir em 'usuarios'
+        userRef = doc(db, 'users', currentSellerId);
+        userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) {
+          alert('Usuário não encontrado.');
+          window.location.href = 'index.html';
+          return;
         }
+      }
+      const userData = userSnap.data();
+      document.getElementById('seller-name').textContent = userData.nome || userData.displayName || 'Vendedor';
+      document.getElementById('seller-location').textContent = userData.localizacao || userData.location || 'Não especificada';
+      document.getElementById('seller-avatar').src = userData.foto || userData.avatarUrl || 'images/default-profile.png';
+      // Data de cadastro
+      let joinDate = 'N/A';
+      if (userData.dataCriacao) {
+        joinDate = new Date(userData.dataCriacao.seconds * 1000).toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' });
+      } else if (userData.createdAt && userData.createdAt.seconds) {
+        joinDate = new Date(userData.createdAt.seconds * 1000).toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+      document.getElementById('join-date').textContent = joinDate;
+      // Badge verificado
+      if (userData.verificado || userData.isVerified) {
+        document.getElementById('verification-badge').style.display = 'inline-flex';
+      }
+      // Buscar produtos do usuário
+      const produtosSnap = await getDocs(query(collection(db, 'produtos'), where('userId', '==', currentSellerId)));
+      let produtos = [];
+      let vendidos = 0;
+      produtosSnap.forEach(doc => {
+        const p = doc.data();
+        produtos.push(p);
+        if (p.disponibilidade === 'vendido') vendidos++;
+      });
+      document.getElementById('listings-count').textContent = produtos.length;
+      document.getElementById('sales-count').textContent = vendidos;
+      // Buscar seguidores
+      const seguidoresSnap = await getDocs(query(collection(db, 'seguidores'), where('userId', '==', currentSellerId)));
+      document.getElementById('followers-count').textContent = seguidoresSnap.size;
+      // Buscar seguindo
+      const seguindoSnap = await getDocs(query(collection(db, 'seguidores'), where('seguidorId', '==', currentSellerId)));
+      // Renderizar listas de seguidores e seguindo
+      renderFollowersList(seguidoresSnap.docs);
+      renderFollowingList(seguindoSnap.docs);
+      // Verificar se o usuário logado já segue
+      let isFollowing = false;
+      seguidoresSnap.forEach(doc => {
+        if (doc.data().seguidorId === currentUserId) isFollowing = true;
+      });
+      const followBtn = document.getElementById('follow-btn');
+      followBtn.textContent = isFollowing ? 'Seguindo' : 'Seguir';
+      followBtn.classList.toggle('following-btn', isFollowing);
+      followBtn.onclick = async () => {
+        followBtn.disabled = true;
+        if (isFollowing) {
+          // Deixar de seguir
+          const toDelete = seguidoresSnap.docs.find(doc => doc.data().seguidorId === currentUserId);
+          if (toDelete) await deleteDoc(doc(db, 'seguidores', toDelete.id));
+          showToast('Deixou de seguir este vendedor.');
+        } else {
+          // Seguir
+          await addDoc(collection(db, 'seguidores'), { userId: currentSellerId, seguidorId: currentUserId, timestamp: new Date() });
+          showToast('Agora está a seguir este vendedor!');
+        }
+        followBtn.disabled = false;
+        renderProfile(); // Atualiza contadores e listas
+      };
+      // Botão conversar
+      document.getElementById('chat-btn').onclick = () => {
+        window.location.href = `chat.html?user=${currentSellerId}`;
+      };
+      // Renderizar produtos à venda
+      renderListings(produtos.filter(p => p.disponibilidade === 'venda' || p.disponibilidade === 'ativo'));
+    }
 
-        // Carregar produtos do vendedor
-        function loadSellerListings(page = 1) {
-            listingsPage = page;
-            
-            db.collection('listings')
-                .where('sellerId', '==', currentSellerId)
-                .where('status', '==', 'active')
-                .orderBy('createdAt', 'desc')
-                .get()
-                .then(snapshot => {
-                    const listings = [];
-                    snapshot.forEach(doc => {
-                        listings.push({ id: doc.id, ...doc.data() });
-                    });
-                    
-                    // Paginar os resultados
-                    const start = (page - 1) * itemsPerPage;
-                    const end = start + itemsPerPage;
-                    const paginatedListings = listings.slice(start, end);
-                    
-                    // Renderizar produtos
-                    renderListings(paginatedListings);
-                    
-                    // Renderizar paginação
-                    renderListingsPagination(listings.length, page);
-                })
-                .catch(error => {
-                    showToast('Erro ao carregar produtos: ' + error.message);
-                });
-        }
+    function renderListings(listings) {
+      const container = document.getElementById('listings-container');
+      const emptyState = document.getElementById('empty-listings');
+      if (listings.length === 0) {
+        emptyState.style.display = 'block';
+        container.innerHTML = '';
+        return;
+      }
+      emptyState.style.display = 'none';
+      container.innerHTML = '';
+      listings.forEach(listing => {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card';
+        productCard.innerHTML = `
+          <div class="product-image">
+            <img src="${listing.imagemPrincipal || listing.imageUrl || '/api/placeholder/280/200'}" alt="${listing.nome || listing.title}">
+            <div class="product-status status-active">Disponível</div>
+          </div>
+          <div class="product-info">
+            <div class="product-title">${listing.nome || listing.title}</div>
+            <div class="product-price">€${listing.preco ? Number(listing.preco).toFixed(2) : (listing.price ? Number(listing.price).toFixed(2) : '')}</div>
+            <div class="product-meta">
+              <span>${listing.marca || listing.brand || ''} • Tamanho ${listing.tamanho || listing.size || ''}</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(productCard);
+      });
+    }
 
-        // Renderizar produtos
-        function renderListings(listings) {
-            const container = document.getElementById('listings-container');
-            const emptyState = document.getElementById('empty-listings');
-            
-            if (listings.length === 0) {
-                emptyState.style.display = 'block';
-                container.innerHTML = '';
-                return;
-            }
-            
-            emptyState.style.display = 'none';
-            container.innerHTML = '';
-            
-            listings.forEach(listing => {
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                productCard.innerHTML = `
-                    <div class="product-image">
-                        <img src="${listing.imageUrl || '/api/placeholder/280/200'}" alt="${listing.title}">
-                        <div class="product-status status-active">Disponível</div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-title">${listing.title}</div>
-                        <div class="product-price">€${listing.price.toFixed(2)}</div>
-                        <div class="product-meta">
-                            <span>${listing.brand} • Tamanho ${listing.size}</span>
-                            <span>${formatTimeAgo(listing.createdAt.toDate())}</span>
-                        </div>
-                    </div>
-                `;
-                
-                container.appendChild(productCard);
-                
-                // Adicionar event listener para abrir página do produto
-                productCard.addEventListener('click', function() {
-                    window.location.href = `produto.html?id=${listing.id}`;
-                });
-            });
-        }
+    function renderFollowersList(docs) {
+      const container = document.getElementById('followers-list');
+      if (!container) return;
+      if (docs.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i>👥</i><h3>Sem seguidores ainda</h3></div>';
+        return;
+      }
+      container.innerHTML = '';
+      docs.forEach(async docSnap => {
+        const seguidorId = docSnap.data().seguidorId;
+        const userRef = doc(db, 'usuarios', seguidorId);
+        const userSnap = await getDoc(userRef);
+        const user = userSnap.exists() ? userSnap.data() : { nome: 'Usuário', foto: 'images/default-profile.png' };
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `<div class='product-image'><img src='${user.foto || 'images/default-profile.png'}' alt='${user.nome}'></div><div class='product-info'><div class='product-title'>${user.nome}</div><a href='perfil.html?id=${seguidorId}' class='btn btn-outline-primary btn-sm mt-2'>Ver Perfil</a></div>`;
+        container.appendChild(card);
+      });
+    }
 
-        // Renderizar paginação para produtos
-        function renderListingsPagination(totalItems, currentPage) {
-            const container = document.getElementById('listings-pagination');
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
-            
-            if (totalPages <= 1) {
-                container.innerHTML = '';
-                return;
-            }
-            
-            container.innerHTML = '';
-            
-            // Botão "Anterior"
-            if (currentPage > 1) {
-                const prevBtn = document.createElement('button');
-                prevBtn.className = 'pagination-btn';
-                prevBtn.textContent = '«';
-                prevBtn.addEventListener('click', () => loadSellerListings(currentPage - 1));
-                container.appendChild(prevBtn);
-            }
-            
-            // Números de página
-            const maxButtons = 5;
-            const startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-            const endPage = Math.min(totalPages, startPage + maxButtons - 1);
-            
-            for (let i = startPage; i <= endPage; i++) {
-                const pageBtn = document.createElement('button');
-                pageBtn.className = 'pagination-btn';
-                if (i === currentPage) pageBtn.classList.add('active');
-                pageBtn.textContent = i;
-                pageBtn.addEventListener('click', () => loadSellerListings(i));
-                container.appendChild(pageBtn);
-            }
-            
-            // Botão "Próximo"
-            if (currentPage < totalPages) {
-                const nextBtn = document.createElement('button');
-                nextBtn.className = 'pagination-btn';
-                nextBtn.textContent = '»';
-                nextBtn.addEventListener('click', () => loadSellerListings(currentPage + 1));
-                container.appendChild(nextBtn);
-            }
-        }
+    function renderFollowingList(docs) {
+      const container = document.getElementById('following-list');
+      if (!container) return;
+      if (docs.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i>👣</i><h3>Não segue ninguém ainda</h3></div>';
+        return;
+      }
+      container.innerHTML = '';
+      docs.forEach(async docSnap => {
+        const seguidoId = docSnap.data().userId;
+        const userRef = doc(db, 'usuarios', seguidoId);
+        const userSnap = await getDoc(userRef);
+        const user = userSnap.exists() ? userSnap.data() : { nome: 'Usuário', foto: 'images/default-profile.png' };
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `<div class='product-image'><img src='${user.foto || 'images/default-profile.png'}' alt='${user.nome}'></div><div class='product-info'><div class='product-title'>${user.nome}</div><a href='perfil.html?id=${seguidoId}' class='btn btn-outline-primary btn-sm mt-2'>Ver Perfil</a></div>`;
+        container.appendChild(card);
+      });
+    }
 
-        // Carregar avaliações do vendedor
-        function loadSellerReviews(page = 1) {
-            reviewsPage = page;
-            
-            db.collection('reviews')
-                .where('sellerId', '==', currentSellerId)
-                .orderBy('createdAt', 'desc')
-                .get()
-                .then(snapshot => {
-                    const reviews = [];
-                    snapshot.forEach(doc => {
-                        reviews.push({ id: doc.id, ...doc.data() });
-                    });
-                    
-                    // Paginar os resultados
-                    const start = (page - 1) * itemsPerPage;
-                    const end = start + itemsPerPage;
-                    const paginatedReviews = reviews.slice(start, end);
-                    
-                    // Renderizar avaliações
-                    renderReviews(paginatedReviews);
-                    
-                    // Renderizar paginação
-                    renderReviewsPagination(reviews.length, page);
-                })
-                .catch(error => {
-                    showToast('Erro ao carregar avaliações: ' + error.message);
-                });
-        }
+    // Toast para feedback visual
+    function showToast(msg) {
+      const toast = document.getElementById('toast-message');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    }
 
-        // Renderizar avaliações
-        function renderReviews(reviews) {
-            const container = document.getElementById('reviews-container');
-            const emptyState = document.getElementById('empty-reviews');
-            
-            if (reviews.length === 0) {
-                emptyState.style.display = 'block';
-                container.innerHTML = '';
-                return;
-            }
-            
-            emptyState.style.display = 'none';
-            container.innerHTML = '';
-            
-            reviews.forEach(review => {
-                // Carregar informações do comprador
-                db.collection('users').doc(review.buyerId).get().then(userDoc => {
-                    if (userDoc.exists) {
-                        const buyer = userDoc.data();
-                        
-                        // Carregar informações do produto
-                        db.collection('listings').doc(review.listingId).get().then(listingDoc => {
-                            let productInfo = '';
-                            
-                            if (listingDoc.exists) {
-                                const listing = listingDoc.data();
-                                productInfo = `
-                                    <div style="margin-top: 10px; display: flex; align-items: center;">
-                                        <div class="product-thumbnail">
-                                            <img src="${listing.imageUrl || '/api/placeholder/60/60'}" alt="${listing.title}">
-                                        </div>
-                                        <div style="margin-left: 10px;">
-                                            <div style="font-weight: bold;">${listing.title}</div>
-                                            <div style="font-size: 12px; color: var(--accent-color);">${listing.brand} • Tamanho ${listing.size}</div>
-                                        </div>
-                                    </div>
-                                `;
-                                // Continuing from where the code left off:
-                            }
-                            
-                            // Criar item de avaliação
-                            const reviewItem = document.createElement('div');
-                            reviewItem.className = 'review-item';
-                            reviewItem.innerHTML = `
-                                <div class="review-header">
-                                    <div class="reviewer">
-                                        <div class="reviewer-avatar">
-                                            <img src="${buyer.avatarUrl || '/api/placeholder/40/40'}" alt="${buyer.displayName}">
-                                        </div>
-                                        <div>
-                                            <div class="reviewer-name">${buyer.displayName}</div>
-                                            <div class="review-date">${formatDate(review.createdAt.toDate())}</div>
-                                        </div>
-                                    </div>
-                                    <div class="review-rating">
-                                        ${renderStars(review.rating)}
-                                    </div>
-                                </div>
-                                <div class="review-text">${review.text}</div>
-                                ${productInfo}
-                            `;
-                            
-                            container.appendChild(reviewItem);
-                        }).catch(error => {
-                            console.error('Erro ao carregar produto:', error);
-                        });
-                    }
-                }).catch(error => {
-                    console.error('Erro ao carregar comprador:', error);
-                });
-            });
-        }
-
-        // Renderizar estrelas para uma avaliação
-        function renderStars(rating) {
-            let stars = '';
-            for (let i = 1; i <= 5; i++) {
-                if (i <= rating) {
-                    stars += '<span class="star">★</span>';
-                } else {
-                    stars += '<span class="star empty-star">★</span>';
-                }
-            }
-            return stars;
-        }
-
-        // Renderizar paginação para avaliações
-        function renderReviewsPagination(totalItems, currentPage) {
-            const container = document.getElementById('reviews-pagination');
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
-            
-            if (totalPages <= 1) {
-                container.innerHTML = '';
-                return;
-            }
-            
-            container.innerHTML = '';
-            
-            // Botão "Anterior"
-            if (currentPage > 1) {
-                const prevBtn = document.createElement('button');
-                prevBtn.className = 'pagination-btn';
-                prevBtn.textContent = '«';
-                prevBtn.addEventListener('click', () => loadSellerReviews(currentPage - 1));
-                container.appendChild(prevBtn);
-            }
-            
-            // Números de página
-            const maxButtons = 5;
-            const startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-            const endPage = Math.min(totalPages, startPage + maxButtons - 1);
-            
-            for (let i = startPage; i <= endPage; i++) {
-                const pageBtn = document.createElement('button');
-                pageBtn.className = 'pagination-btn';
-                if (i === currentPage) pageBtn.classList.add('active');
-                pageBtn.textContent = i;
-                pageBtn.addEventListener('click', () => loadSellerReviews(i));
-                container.appendChild(pageBtn);
-            }
-            
-            // Botão "Próximo"
-            if (currentPage < totalPages) {
-                const nextBtn = document.createElement('button');
-                nextBtn.className = 'pagination-btn';
-                nextBtn.textContent = '»';
-                nextBtn.addEventListener('click', () => loadSellerReviews(currentPage + 1));
-                container.appendChild(nextBtn);
-            }
-        }
-
-        // Verificar se o usuário já segue este vendedor
-        function checkFollowStatus() {
-            if (!currentUserId) return;
-            
-            db.collection('followers')
-                .where('followerId', '==', currentUserId)
-                .where('followedId', '==', currentSellerId)
-                .get()
-                .then(snapshot => {
-                    if (!snapshot.empty) {
-                        isFollowing = true;
-                        updateFollowButton();
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro ao verificar status de seguir:', error);
-                });
-        }
-
-        // Atualizar aparência do botão de seguir
-        function updateFollowButton() {
-            const followBtn = document.getElementById('follow-btn');
-            
-            if (isFollowing) {
-                followBtn.innerHTML = `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="8.5" cy="7" r="4"></circle>
-                        <polyline points="17 11 19 13 23 9"></polyline>
-                    </svg>
-                    Seguindo
-                `;
-                followBtn.className = 'action-btn following-btn';
-            } else {
-                followBtn.innerHTML = `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="8.5" cy="7" r="4"></circle>
-                        <line x1="20" y1="8" x2="20" y2="14"></line>
-                        <line x1="23" y1="11" x2="17" y2="11"></line>
-                    </svg>
-                    Seguir
-                `;
-                followBtn.className = 'action-btn secondary-btn';
-            }
-        }
-
-        // Alternar seguir/deixar de seguir
-        function toggleFollow() {
-            if (!currentUserId) {
-                showToast('Faça login para seguir este vendedor.');
-                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
-                return;
-            }
-            
-            if (isFollowing) {
-                // Remover da lista de seguidores
-                db.collection('followers')
-                    .where('followerId', '==', currentUserId)
-                    .where('followedId', '==', currentSellerId)
-                    .get()
-                    .then(snapshot => {
-                        if (!snapshot.empty) {
-                            snapshot.forEach(doc => {
-                                doc.ref.delete();
-                            });
-                            
-                            // Atualizar contagem de seguidores
-                            db.collection('users').doc(currentSellerId).get().then(doc => {
-                                if (doc.exists) {
-                                    const followersCount = (doc.data().followersCount || 1) - 1;
-                                    doc.ref.update({
-                                        followersCount: followersCount
-                                    });
-                                    document.getElementById('followers-count').textContent = followersCount;
-                                }
-                            });
-                            
-                            isFollowing = false;
-                            updateFollowButton();
-                            showToast('Deixou de seguir este vendedor.');
-                        }
-                    })
-                    .catch(error => {
-                        showToast('Erro: ' + error.message);
-                    });
-            } else {
-                // Adicionar à lista de seguidores
-                db.collection('followers').add({
-                    followerId: currentUserId,
-                    followedId: currentSellerId,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    // Atualizar contagem de seguidores
-                    db.collection('users').doc(currentSellerId).get().then(doc => {
-                        if (doc.exists) {
-                            const followersCount = (doc.data().followersCount || 0) + 1;
-                            doc.ref.update({
-                                followersCount: followersCount
-                            });
-                            document.getElementById('followers-count').textContent = followersCount;
-                        }
-                    });
-                    
-                    isFollowing = true;
-                    updateFollowButton();
-                    showToast('Agora está a seguir este vendedor.');
-                }).catch(error => {
-                    showToast('Erro: ' + error.message);
-                });
-            }
-        }
-
-        // Iniciar uma conversa com o vendedor
-        function startConversation() {
-            if (!currentUserId) {
-                showToast('Faça login para conversar com este vendedor.');
-                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
-                return;
-            }
-            
-            // Verificar se já existe uma conversa
-            db.collection('conversations')
-                .where('participants', 'array-contains', currentUserId)
-                .get()
-                .then(snapshot => {
-                    let conversationExists = false;
-                    let conversationId = '';
-                    
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        if (data.participants.includes(currentSellerId)) {
-                            conversationExists = true;
-                            conversationId = doc.id;
-                        }
-                    });
-                    
-                    if (conversationExists) {
-                        // Redirecionar para a conversa existente
-                        window.location.href = `mensagens.html?conversation=${conversationId}`;
-                    } else {
-                        // Criar uma nova conversa
-                        db.collection('conversations').add({
-                            participants: [currentUserId, currentSellerId],
-                            lastMessage: null,
-                            lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        }).then(docRef => {
-                            window.location.href = `mensagens.html?conversation=${docRef.id}`;
-                        }).catch(error => {
-                            showToast('Erro ao criar conversa: ' + error.message);
-                        });
-                    }
-                })
-                .catch(error => {
-                    showToast('Erro: ' + error.message);
-                });
-        }
-
-        // Utilitário: Formatar data
-        function formatDate(date) {
-            return date.toLocaleDateString('pt-PT', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            });
-        }
-
-        // Utilitário: Formatar tempo relativo
-        function formatTimeAgo(date) {
-            const now = new Date();
-            const diffMs = now - date;
-            const diffSec = Math.floor(diffMs / 1000);
-            const diffMin = Math.floor(diffSec / 60);
-            const diffHour = Math.floor(diffMin / 60);
-            const diffDay = Math.floor(diffHour / 24);
-            
-            if (diffDay > 30) {
-                return formatDate(date);
-            } else if (diffDay > 0) {
-                return `há ${diffDay} dia${diffDay > 1 ? 's' : ''}`;
-            } else if (diffHour > 0) {
-                return `há ${diffHour} hora${diffHour > 1 ? 's' : ''}`;
-            } else if (diffMin > 0) {
-                return `há ${diffMin} minuto${diffMin > 1 ? 's' : ''}`;
-            } else {
-                return 'agora mesmo';
-            }
-        }
-
-        // Utilitário: Mostrar mensagem toast
-        function showToast(message) {
-            const toast = document.getElementById('toast-message');
-            toast.textContent = message;
-            toast.style.display = 'block';
-            
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 3000);
-        }
+    // Tabs para alternar entre produtos, avaliações, seguidores e seguindo
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.onclick = () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+        document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
+      };
+    });
     </script>
 </body>
 </html>

@@ -285,321 +285,125 @@
       padding-bottom: 50px;
     }
   </style>
+  <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <!-- Header -->
-  <header>
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3">
-      <div class="container">
-        <a class="navbar-brand" href="#">Resell<span>Sneakers</span></a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <div class="collapse navbar-collapse" id="navbarContent">
-          <form class="d-flex mx-auto mt-3 mt-lg-0" style="max-width: 500px;">
-            <div class="input-group">
-              <input type="text" class="form-control" placeholder="Procurar por marcas, modelos ou estilos...">
-              <button class="btn btn-outline-secondary" type="submit">
-                <i class="fa fa-search"></i>
-              </button>
-            </div>
-          </form>
-          
-          <ul class="navbar-nav mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link" href="#">Explorar</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Vender</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Trocar</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Blog</a>
-            </li>
-          </ul>
-          <div class="d-flex mt-3 mt-lg-0 ms-lg-3">
-            <a href="log.html" class="btn btn-outline-primary me-2">Coneçar</a>
-          </div>
-        </div>
+  <!-- Navbar exclusiva da index -->
+  <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+    <div class="container-fluid">
+      <span class="navbar-brand fw-bold" style="font-size:1.8rem;">ResellSneakers</span>
+      <div class="d-flex">
+        <a href="log.html" class="btn btn-primary btn-lg">Entrar ou Criar Conta</a>
       </div>
-    </nav>
-  </header>
-  
+    </div>
+  </nav>
+
   <!-- Hero Section -->
-  <section class="hero">
-    <div class="container text-center py-5">
+  <section class="hero position-relative" style="background: url('images/banner1.png') center/cover no-repeat; min-height: 420px;">
+    <div class="container text-center py-5 position-relative" style="z-index:2;">
       <div class="row justify-content-center">
-        <div class="col-md-8">
-          <h1 class="display-4 fw-bold mb-3">Compre, Venda e Troque Sapatilhas Autênticas</h1>
-          <p class="lead mb-4">Junte-se à maior comunidade de entusiastas de sapatilhas e encontre o seu par perfeito.</p>
+        <div class="col-md-8 bg-dark bg-opacity-75 rounded-4 p-4">
+          <h1 class="display-4 fw-bold mb-3 text-white">O marketplace nº1 de sneakers originais</h1>
+          <p class="lead mb-4 text-white-50">Compre, venda e troque ténis autênticos com segurança e rapidez. Junte-se à comunidade ResellSneakers!</p>
           <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <a href="#" class="btn btn-primary btn-lg px-4 gap-3">Explorar Coleção</a>
-            <a href="#" class="btn btn-outline-light btn-lg px-4">Vender as Suas Sapatilhas</a>
+            <a href="log.html" class="btn btn-primary btn-lg px-4 gap-3">Explorar Produtos</a>
+            <a href="log.html" class="btn btn-outline-light btn-lg px-4">Vender Agora</a>
           </div>
         </div>
       </div>
     </div>
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(10,36,99,0.45);"></div>
   </section>
   
-  <!-- Filters Section -->
+  <!-- Marcas em Destaque -->
   <section class="bg-white border-bottom py-3">
     <div class="container">
-      <div class="filter-pills d-flex flex-wrap">
-        <span class="badge rounded-pill badge-active">Todos</span>
-        <span class="badge rounded-pill badge-light">Nike</span>
-        <span class="badge rounded-pill badge-light">Adidas</span>
-        <span class="badge rounded-pill badge-light">Jordan</span>
+      <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
+        <img src="images/banner2.png" alt="Nike" style="height:48px;object-fit:contain;" loading="lazy">
+        <img src="images/banner3.png" alt="Adidas" style="height:48px;object-fit:contain;" loading="lazy">
+        <span class="badge rounded-pill badge-active">Jordan</span>
         <span class="badge rounded-pill badge-light">Yeezy</span>
+        <span class="badge rounded-pill badge-light">Dunk</span>
         <span class="badge rounded-pill badge-light">New Balance</span>
         <span class="badge rounded-pill badge-light">Puma</span>
-        <span class="badge rounded-pill badge-light">Reebok</span>
-        <span class="badge rounded-pill badge-light">Converse</span>
         <span class="badge rounded-pill badge-light">Vans</span>
       </div>
     </div>
   </section>
   
-  <!-- Products Section -->
+  <!-- Produtos em Destaque (dinâmico) -->
   <section class="py-5">
     <div class="container">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h3 mb-0">Destaques</h2>
-        <div class="d-flex align-items-center">
-          <span class="me-2 text-muted">Ordenar por:</span>
-          <select class="form-select form-select-sm" style="width: auto;">
-            <option>Mais recentes</option>
-            <option>Preço: Mais baixo para mais alto</option>
-            <option>Preço: Mais alto para mais baixo</option>
-            <option>Mais populares</option>
-          </select>
-        </div>
+        <h2 class="h3 mb-0">Destaques do momento</h2>
+        <a href="log.html" class="btn btn-outline-primary btn-sm">Ver todos</a>
       </div>
-      
-      <div class="row g-4">
-        <!-- Product Card 1 -->
-        <div class="col-6 col-md-4 col-lg-3">
-          <div class="card product-card h-100">
-            <img src="/api/placeholder/400/320" class="card-img-top product-img" alt="Nike Air Jordan 1">
-            <div class="card-body">
-              <div class="product-brand">Nike</div>
-              <h5 class="product-name">Air Jordan 1 Chicago</h5>
-              <div class="d-flex justify-content-between align-items-center mt-2">
-                <div class="product-price">650€</div>
-                <div class="product-condition">Novas</div>
-              </div>
-              <div class="seller-info d-flex align-items-center mt-3">
-                <img src="/api/placeholder/50/50" alt="Vendedor" class="seller-avatar me-2">
-                <span>@sneakerhead</span>
-                <i class="fas fa-check-circle verified-badge ms-1"></i>
-              </div>
-              <a href="#" class="chat-icon" title="Conversar com o vendedor">
-                <i class="fas fa-comments"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Product Card 2 -->
-        <div class="col-6 col-md-4 col-lg-3">
-          <div class="card product-card h-100">
-            <img src="/api/placeholder/400/320" class="card-img-top product-img" alt="Adidas Yeezy">
-            <div class="card-body">
-              <div class="product-brand">Adidas</div>
-              <h5 class="product-name">Yeezy Boost 350 V2 Zebra</h5>
-              <div class="d-flex justify-content-between align-items-center mt-2">
-                <div class="product-price">320€</div>
-                <div class="product-condition">9/10</div>
-              </div>
-              <div class="seller-info d-flex align-items-center mt-3">
-                <img src="/api/placeholder/50/50" alt="Vendedor" class="seller-avatar me-2">
-                <span>@yeezyking</span>
-                <i class="fas fa-check-circle verified-badge ms-1"></i>
-              </div>
-              <a href="#" class="chat-icon" title="Conversar com o vendedor">
-                <i class="fas fa-comments"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Product Card 3 -->
-        <div class="col-6 col-md-4 col-lg-3">
-          <div class="card product-card h-100">
-            <img src="/api/placeholder/400/320" class="card-img-top product-img" alt="Nike Dunk">
-            <div class="card-body">
-              <div class="product-brand">Nike</div>
-              <h5 class="product-name">Dunk Low Panda</h5>
-              <div class="d-flex justify-content-between align-items-center mt-2">
-                <div class="product-price">180€</div>
-                <div class="product-condition">Novas</div>
-              </div>
-              <div class="seller-info d-flex align-items-center mt-3">
-                <img src="/api/placeholder/50/50" alt="Vendedor" class="seller-avatar me-2">
-                <span>@nikecollector</span>
-              </div>
-              <a href="#" class="chat-icon" title="Conversar com o vendedor">
-                <i class="fas fa-comments"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Product Card 4 -->
-        <div class="col-6 col-md-4 col-lg-3">
-          <div class="card product-card h-100">
-            <img src="/api/placeholder/400/320" class="card-img-top product-img" alt="New Balance">
-            <div class="card-body">
-              <div class="product-brand">New Balance</div>
-              <h5 class="product-name">550 White Green</h5>
-              <div class="d-flex justify-content-between align-items-center mt-2">
-                <div class="product-price">130€</div>
-                <div class="product-condition">8/10</div>
-              </div>
-              <div class="seller-info d-flex align-items-center mt-3">
-                <img src="/api/placeholder/50/50" alt="Vendedor" class="seller-avatar me-2">
-                <span>@nbfanatic</span>
-                <i class="fas fa-check-circle verified-badge ms-1"></i>
-              </div>
-              <a href="#" class="chat-icon" title="Conversar com o vendedor">
-                <i class="fas fa-comments"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Product Card 5 -->
-        <div class="col-6 col-md-4 col-lg-3">
-          <div class="card product-card h-100">
-            <img src="/api/placeholder/400/320" class="card-img-top product-img" alt="Travis Scott Jordan">
-            <div class="card-body">
-              <div class="product-brand">Nike</div>
-              <h5 class="product-name">Travis Scott x Air Jordan 1 Low</h5>
-              <div class="d-flex justify-content-between align-items-center mt-2">
-                <div class="product-price">1200€</div>
-                <div class="product-condition">Novas</div>
-              </div>
-              <div class="seller-info d-flex align-items-center mt-3">
-                <img src="/api/placeholder/50/50" alt="Vendedor" class="seller-avatar me-2">
-                <span>@hypecollector</span>
-                <i class="fas fa-check-circle verified-badge ms-1"></i>
-              </div>
-              <a href="#" class="chat-icon" title="Conversar com o vendedor">
-                <i class="fas fa-comments"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Product Card 6 -->
-        <div class="col-6 col-md-4 col-lg-3">
-          <div class="card product-card h-100">
-            <img src="/api/placeholder/400/320" class="card-img-top product-img" alt="Adidas Forum">
-            <div class="card-body">
-              <div class="product-brand">Adidas</div>
-              <h5 class="product-name">Forum Low Blue Stripes</h5>
-              <div class="d-flex justify-content-between align-items-center mt-2">
-                <div class="product-price">90€</div>
-                <div class="product-condition">9/10</div>
-              </div>
-              <div class="seller-info d-flex align-items-center mt-3">
-                <img src="/api/placeholder/50/50" alt="Vendedor" class="seller-avatar me-2">
-                <span>@classickicks</span>
-              </div>
-              <a href="#" class="chat-icon" title="Conversar com o vendedor">
-                <i class="fas fa-comments"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Product Card 7 -->
-        <div class="col-6 col-md-4 col-lg-3">
-          <div class="card product-card h-100">
-            <img src="/api/placeholder/400/320" class="card-img-top product-img" alt="Nike Sacai">
-            <div class="card-body">
-              <div class="product-brand">Nike</div>
-              <h5 class="product-name">Sacai x LDWaffle Black</h5>
-              <div class="d-flex justify-content-between align-items-center mt-2">
-                <div class="product-price">380€</div>
-                <div class="product-condition">Novas</div>
-              </div>
-              <div class="seller-info d-flex align-items-center mt-3">
-                <img src="/api/placeholder/50/50" alt="Vendedor" class="seller-avatar me-2">
-                <span>@tokyokicks</span>
-                <i class="fas fa-check-circle verified-badge ms-1"></i>
-              </div>
-              <a href="#" class="chat-icon" title="Conversar com o vendedor">
-                <i class="fas fa-comments"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Product Card 8 -->
-        <div class="col-6 col-md-4 col-lg-3">
-          <div class="card product-card h-100">
-            <img src="/api/placeholder/400/320" class="card-img-top product-img" alt="Jordan 4">
-            <div class="card-body">
-              <div class="product-brand">Jordan</div>
-              <h5 class="product-name">Air Jordan 4 University Blue</h5>
-              <div class="d-flex justify-content-between align-items-center mt-2">
-                <div class="product-price">420€</div>
-                <div class="product-condition">9/10</div>
-              </div>
-              <div class="seller-info d-flex align-items-center mt-3">
-                <img src="/api/placeholder/50/50" alt="Vendedor" class="seller-avatar me-2">
-                <span>@jordanhead</span>
-              </div>
-              <a href="#" class="chat-icon" title="Conversar com o vendedor">
-                <i class="fas fa-comments"></i>
-              </a>
-            </div>
-          </div>
-        </div>
+      <div class="row g-4" id="produtos-destaque">
+        <!-- Cards de produtos reais serão inseridos via JS -->
       </div>
-      
       <div class="text-center mt-5">
-        <a href="#" class="btn btn-outline-primary">Carregar Mais</a>
+        <a href="log.html" class="btn btn-outline-primary">Carregar Mais</a>
       </div>
     </div>
   </section>
   
-  <!-- Collections Section -->
+  <!-- Coleções Temáticas -->
   <section class="py-5 bg-white">
     <div class="container">
-      <h2 class="h3 mb-4">Coleções em Destaque</h2>
-      
+      <h2 class="h3 mb-4">Coleções em Alta</h2>
       <div class="row g-4">
-        <!-- Collection 1 -->
         <div class="col-md-4">
           <div class="collection-card">
-            <img src="/api/placeholder/500/400" alt="Jordan Collection" class="collection-img">
+            <img src="images/banner1.png" alt="Jordan" class="collection-img" loading="lazy">
             <div class="collection-overlay">
               <div class="collection-title">Jordan Retros</div>
             </div>
           </div>
         </div>
-        
-        <!-- Collection 2 -->
         <div class="col-md-4">
           <div class="collection-card">
-            <img src="/api/placeholder/500/400" alt="Yeezy Collection" class="collection-img">
+            <img src="images/banner2.png" alt="Yeezy" class="collection-img" loading="lazy">
             <div class="collection-overlay">
               <div class="collection-title">Yeezy Essentials</div>
             </div>
           </div>
         </div>
-        
-        <!-- Collection 3 -->
         <div class="col-md-4">
           <div class="collection-card">
-            <img src="/api/placeholder/500/400" alt="Nike Dunk Collection" class="collection-img">
+            <img src="images/banner3.png" alt="Dunk" class="collection-img" loading="lazy">
             <div class="collection-overlay">
               <div class="collection-title">Dunk Revival</div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Bloco de Confiança/Depoimentos -->
+  <section class="py-5 bg-light">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-6 mb-4 mb-md-0">
+          <h3 class="fw-bold mb-3">+10.000 vendas realizadas</h3>
+          <ul class="list-unstyled">
+            <li><i class="fa fa-shield-alt text-primary me-2"></i> Autenticação garantida</li>
+            <li><i class="fa fa-lock text-primary me-2"></i> Pagamento seguro</li>
+            <li><i class="fa fa-star text-primary me-2"></i> Avaliação média 4.9/5</li>
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <div class="bg-white rounded-4 shadow p-4">
+            <div class="d-flex align-items-center mb-3">
+              <img src="images/banner2.png" alt="User" class="rounded-circle me-3" style="width:56px;height:56px;object-fit:cover;">
+              <div>
+                <strong>@sneakerlover</strong>
+                <div class="text-warning small">
+                  <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-alt"></i>
+                </div>
+              </div>
+            </div>
+            <blockquote class="mb-0">“Comprei meu Jordan 1 aqui e chegou perfeito, autenticado e super rápido. Recomendo!”</blockquote>
           </div>
         </div>
       </div>
@@ -613,7 +417,7 @@
         <div class="col-md-8">
           <h2 class="h2 mb-3">Pronto para se juntar à nossa comunidade?</h2>
           <p class="lead mb-4">Registe-se hoje e comece a comprar, vender e trocar sapatilhas com outros entusiastas. É rápido, fácil e gratuito começar!</p>
-          <a href="#" class="btn btn-primary btn-lg">Criar Conta</a>
+          <a href="log.html" class="btn btn-primary btn-lg">Criar Conta</a>
         </div>
       </div>
     </div>
@@ -693,5 +497,6 @@
   <script type="module" src="script.js"></script>
   <!-- Bootstrap JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="chatbot.js"></script>
 </body>
 </html>

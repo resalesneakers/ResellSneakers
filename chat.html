@@ -4,160 +4,147 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Chat - ResellSneakers</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <style>
     body { background: #f8f9fa; }
-    .chat-container { max-width: 600px; margin: auto; margin-top: 50px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-    .message-box { height: 400px; overflow-y: auto; padding: 15px; }
-    .message { padding: 10px 15px; border-radius: 20px; margin-bottom: 10px; max-width: 75%; }
-    .me { background-color: #0d6efd; color: white; align-self: end; }
-    .other { background-color: #e9ecef; color: #333; align-self: start; }
-    .message-row { display: flex; flex-direction: column; }
-    .timestamp { font-size: 0.7rem; color: #888; margin-top: 2px; }
+    .chat-container { max-width: 600px; margin: auto; margin-top: 40px; background: white; border-radius: 12px; box-shadow: 0 0 16px rgba(0,0,0,0.07); padding: 0; }
+    .chat-header { display: flex; align-items: center; gap: 16px; border-bottom: 1px solid #eee; padding: 18px 24px 12px 24px; }
+    .chat-header img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #e9ecef; }
+    .chat-header .user-info { flex: 1; }
+    .chat-header .user-info .name { font-weight: 700; font-size: 1.1rem; }
+    .chat-header .user-info .subtitle { font-size: 0.95rem; color: #888; }
+    .chat-header .btn-back { font-size: 1.2rem; color: #666; background: none; border: none; margin-right: 8px; }
+    .product-mini-card { display: flex; align-items: center; gap: 12px; background: #f8f9fa; border-radius: 8px; padding: 8px 12px; margin: 0 24px 12px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
+    .product-mini-card img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; }
+    .product-mini-card .prod-info { flex: 1; }
+    .product-mini-card .prod-info .prod-name { font-weight: 600; font-size: 1rem; }
+    .product-mini-card .prod-info .prod-price { color: #0d6efd; font-weight: 700; font-size: 1rem; }
+    .message-box { height: 380px; overflow-y: auto; padding: 18px 24px; background: #fff; display: flex; flex-direction: column; }
+    .message-row { display: flex; margin-bottom: 8px; }
+    .message.me { margin-left: auto; background: #0d6efd; color: #fff; border-radius: 18px 18px 4px 18px; padding: 10px 16px; max-width: 70%; box-shadow: 0 1px 4px rgba(13,110,253,0.07); }
+    .message.other { margin-right: auto; background: #e9ecef; color: #333; border-radius: 18px 18px 18px 4px; padding: 10px 16px; max-width: 70%; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
+    .timestamp { font-size: 0.75rem; color: #888; margin-top: 2px; margin-left: 8px; }
+    .chat-input-row { border-top: 1px solid #eee; padding: 14px 24px; background: #fff; display: flex; gap: 8px; }
+    .chat-input-row input { flex: 1; border-radius: 8px; border: 1px solid #e9ecef; padding: 10px 14px; }
+    .chat-input-row button { border-radius: 8px; font-weight: 600; }
+    @media (max-width: 700px) {
+      .chat-container { max-width: 100vw; margin: 0; border-radius: 0; box-shadow: none; }
+      .chat-header, .product-mini-card, .message-box, .chat-input-row { padding-left: 8px; padding-right: 8px; }
+      .product-mini-card { margin: 0 8px 10px 8px; }
+    }
   </style>
 </head>
 <body>
-  <div class="chat-container p-4">
-    <h5 id="chat-title">Conversa</h5>
-    <div id="messages" class="message-box d-flex flex-column mb-3"></div>
-    <div class="input-group">
-      <input type="text" id="messageInput" class="form-control" placeholder="Digite sua mensagem..." />
-      <button id="sendBtn" class="btn btn-primary">Enviar</button>
+  <div id="menu-container"></div>
+  <div class="chat-container">
+    <div class="chat-header">
+      <button class="btn-back" onclick="window.history.back()"><i class="bi bi-arrow-left"></i></button>
+      <img id="userPhoto" src="images/default-profile.png" alt="Foto do usuário">
+      <div class="user-info">
+        <div class="name" id="userName">Usuário</div>
+        <div class="subtitle" id="userSubtitle">Online</div>
+      </div>
+      <a id="userProfileLink" href="#" class="btn btn-outline-secondary btn-sm">Ver Perfil</a>
     </div>
+    <div class="product-mini-card" id="productMiniCard" style="display:none;"></div>
+    <div id="messages" class="message-box"></div>
+    <form class="chat-input-row" id="formMensagem">
+      <input type="text" id="messageInput" placeholder="Digite sua mensagem..." autocomplete="off" />
+      <button id="sendBtn" class="btn btn-primary" type="submit">Enviar</button>
+    </form>
   </div>
-  <!-- Botão para abrir chat com o vendedor -->
-  <div class="container text-center my-4">
-    <a id="chatLink" href="#" class="btn btn-primary btn-lg">💬 Conversar com o Vendedor</a>
-  </div>
-
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, addDoc, collection, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { firebaseConfig } from './firebase-config.js';
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    const messagesContainer = document.getElementById('messages');
-    const messageInput = document.getElementById('messageInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const chatTitle = document.getElementById('chat-title');
-
+    import { auth, db } from './firebase-config.js';
+    import { getDoc, doc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    // Carregar menu universal
+    fetch('menu.html').then(res => res.text()).then(html => {
+      document.getElementById('menu-container').innerHTML = html;
+    });
     const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
-    if (!productId) {
-        alert('Produto não encontrado.');
-        return;
-      }
-
-
+    const productId = urlParams.get('produto') || urlParams.get('id');
+    const vendedorId = urlParams.get('vendedor');
     let currentUser = null;
-    let ownerId = null;
+    let otherUserId = null;
     let chatId = null;
-
+    let product = null;
     onAuthStateChanged(auth, async user => {
       if (!user) return window.location.href = 'log.html';
       currentUser = user;
-
-      // Obter o dono do produto
+      // Buscar produto
       const productRef = doc(db, 'produtos', productId);
       const productSnap = await getDoc(productRef);
       if (!productSnap.exists()) return alert('Produto não encontrado.');
-      const product = productSnap.data();
-      chatLink.href = `chat.html?id=${productId}`;
-
-      // Atualiza dinamicamente o título, preço, imagens, etc.
-      document.querySelector('.product-title').textContent = product.nome;
-      document.querySelector('.product-subtitle').textContent = product.marca || '';
-      document.querySelector('.current-price').textContent = `€${product.preco}`;
-      document.querySelector('.condition-badge').textContent = product.condicao;
-      document.querySelector('.condition-badge').classList.add(product.condicao === 'Novo' ? 'condition-new' : 'condition-used');
-
-      if (product.imagemPrincipal) {
-        const imgRef = ref(storage, product.imagemPrincipal);
-        const url = await getDownloadURL(imgRef);
-        document.getElementById('mainImage').src = url;
+      product = productSnap.data();
+      // Definir vendedorId se não veio na URL
+      const vendedor = vendedorId || product.vendedorId;
+      if (!vendedor || vendedor === currentUser.uid) {
+        document.getElementById('userName').textContent = 'Este é o seu produto.';
+        document.getElementById('sendBtn').disabled = true;
+        document.getElementById('messageInput').disabled = true;
+        return;
       }
-
-      // Atualizar thumbnails se tiver imagens
-      if (product.imagens && Array.isArray(product.imagens)) {
-        const thumbGrid = document.querySelector('.thumbnail-grid');
-        thumbGrid.innerHTML = '';
-        for (const path of product.imagens) {
-          const thumbRef = ref(storage, path);
-          const thumbUrl = await getDownloadURL(thumbRef);
-          const img = document.createElement('img');
-          img.src = thumbUrl;
-          img.className = 'thumbnail';
-          img.onclick = () => {
-            document.getElementById('mainImage').src = thumbUrl;
-            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-            img.classList.add('active');
-          };
-          thumbGrid.appendChild(img);
-        }
+      otherUserId = vendedor;
+      // Gerar chatId único para o par de utilizadores e produto
+      chatId = [productId, ...[currentUser.uid, otherUserId].sort()].join('_');
+      // Exibir nome, foto e link do vendedor
+      const vendedorRef = doc(db, 'usuarios', vendedor);
+      const vendedorSnap = await getDoc(vendedorRef);
+      let vendedorNome = 'Vendedor';
+      let vendedorFoto = 'images/default-profile.png';
+      if (vendedorSnap.exists()) {
+        const v = vendedorSnap.data();
+        vendedorNome = v.nome || 'Vendedor';
+        vendedorFoto = v.foto || 'images/default-profile.png';
+        document.getElementById('userProfileLink').href = `perfil.html?id=${vendedor}`;
       }
-    });
-
-    // Ação para botão "Ver detalhes" na homepage
-    window.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('[data-product-id]').forEach(card => {
-        card.addEventListener('click', () => {
-          const id = card.getAttribute('data-product-id');
-          window.location.href = `produto-detalhe.html?id=${id}`;
-        });
-      });
-    
-      ownerId = product.vendedorId;
-      if (!ownerId || ownerId === currentUser.uid) return alert('Este é o seu produto.');
-      chatTitle.textContent = `Chat sobre: ${product.nome}`;
-
-      // Gerar chatId
-      chatId = `${productId}_${currentUser.uid}`;
-
+      document.getElementById('userName').textContent = vendedorNome;
+      document.getElementById('userPhoto').src = vendedorFoto;
+      document.getElementById('userSubtitle').textContent = 'Online';
+      // Mini-card do produto
+      const miniCard = document.getElementById('productMiniCard');
+      miniCard.style.display = 'flex';
+      miniCard.innerHTML = `<img src='${(product.imagemPrincipal || (product.imagens && product.imagens[0]) || 'https://via.placeholder.com/80x80?text=Sneaker')}' alt='Produto'><div class='prod-info'><div class='prod-name'>${product.nome}</div><div class='prod-price'>€${product.preco || '--'}</div></div><a href='produto-detalhe.html?id=${productId}' class='btn btn-link p-0'>Ver Produto</a>`;
+      // Ouvir mensagens em tempo real
       const mensagensRef = collection(db, 'conversas', chatId, 'mensagens');
       const mensagensQuery = query(mensagensRef, orderBy('timestamp'));
-
-      // Ouvir mensagens em tempo real
+      const messagesContainer = document.getElementById('messages');
       onSnapshot(mensagensQuery, snapshot => {
         messagesContainer.innerHTML = '';
         snapshot.forEach(doc => {
           const msg = doc.data();
           const row = document.createElement('div');
           row.className = 'message-row';
-
           const msgDiv = document.createElement('div');
           msgDiv.className = `message ${msg.from === currentUser.uid ? 'me' : 'other'}`;
           msgDiv.textContent = msg.text;
-
-          const time = document.createElement('div');
-          time.className = 'timestamp';
-          time.textContent = new Date(msg.timestamp?.toDate()).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-
           row.appendChild(msgDiv);
-          row.appendChild(time);
+          if (msg.timestamp?.toDate) {
+            const time = document.createElement('span');
+            time.className = 'timestamp';
+            time.textContent = new Date(msg.timestamp.toDate()).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            row.appendChild(time);
+          }
           messagesContainer.appendChild(row);
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
         });
       });
-
-      sendBtn.onclick = async () => {
-        const text = messageInput.value.trim();
+      document.getElementById('formMensagem').onsubmit = async (e) => {
+        e.preventDefault();
+        const text = document.getElementById('messageInput').value.trim();
         if (!text) return;
-        messageInput.value = '';
-
+        document.getElementById('messageInput').value = '';
         await addDoc(collection(db, 'conversas', chatId, 'mensagens'), {
           text,
           from: currentUser.uid,
-          to: ownerId,
+          to: otherUserId,
           productId,
           timestamp: serverTimestamp()
         });
       };
     });
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,8 +1,4 @@
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-
-const db = getFirestore();
-const auth = getAuth();
+import { auth, db } from "./firebase-config.js";
 
 auth.onAuthStateChanged(async (user) => {
   if (user) {

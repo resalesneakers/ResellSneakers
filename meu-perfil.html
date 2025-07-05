@@ -556,6 +556,7 @@
     </style>
 </head>
 <body>
+    <div id="menu-container"></div>
     <div class="container">
         <header>
             <a href="index.html" class="logo">ResellSneakers</a>
@@ -568,8 +569,12 @@
         </header>
 
         <div class="profile-header">
-            <div class="profile-avatar">
-                <img id="profile-avatar" src="/api/placeholder/120/120" alt="Avatar do Utilizador">
+            <div class="profile-avatar" style="position:relative;">
+                <img id="profile-avatar" src="images/default-profile.png" alt="Avatar do Utilizador">
+                <label for="avatar-upload" style="position:absolute;bottom:8px;right:8px;background:#fff;border-radius:50%;padding:6px;box-shadow:0 1px 4px rgba(0,0,0,0.08);cursor:pointer;">
+                    <i class="bi bi-camera" style="font-size:18px;color:#888;"></i>
+                    <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+                </label>
             </div>
             <div class="profile-info">
                 <h1 id="profile-name">A carregar...</h1>
@@ -598,20 +603,19 @@
             <div class="wallet-info">
                 <div class="wallet-label">Saldo na Carteira</div>
                 <div class="wallet-amount" id="wallet-balance">€0.00</div>
-                <button class="add-funds-btn" id="add-funds-btn">Adicionar Fundos</button>
+                <button class="add-funds-btn" id="add-funds-btn" type="button">Adicionar Fundos</button>
             </div>
         </div>
 
         <div class="tabs">
-            <div class="tab active" data-tab="my-listings">Os Meus Produtos</div>
-            <div class="tab" data-tab="purchases">Compras</div>
-            <div class="tab" data-tab="trades">Trocas</div>
-            <div class="tab" data-tab="transactions">Transações</div>
-            <div class="tab" data-tab="settings">Definições</div>
+            <div class="tab active" data-tab="meus-produtos">Os Meus Produtos</div>
+            <div class="tab" data-tab="transacoes">Transações</div>
+            <div class="tab" data-tab="notificacoes">Notificações <span id="notificacoes-badge" style="display:none;background:var(--danger-color);color:#fff;border-radius:10px;padding:2px 8px;font-size:12px;margin-left:4px;">0</span></div>
+            <div class="tab" data-tab="definicoes">Definições</div>
         </div>
 
         <!-- Meus Produtos -->
-        <div class="tab-content active" id="my-listings">
+        <div class="tab-content active" id="meus-produtos">
             <h2>Os Meus Produtos</h2>
             <div class="grid-container" id="listings-container">
                 <!-- Produtos serão carregados aqui -->
@@ -619,158 +623,70 @@
                     <i>👟</i>
                     <h3>Sem Produtos Publicados</h3>
                     <p>Comece a vender os seus sapatilhas favoritos.</p>
-                    <a href="add-listing.html" class="action-btn">Adicionar Produto</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Compras -->
-        <div class="tab-content" id="purchases">
-            <h2>As Minhas Compras</h2>
-            <div class="grid-container" id="purchases-container">
-                <!-- Compras serão carregadas aqui -->
-                <div class="empty-state" id="empty-purchases">
-                    <i>🛒</i>
-                    <h3>Sem Compras</h3>
-                    <p>Os produtos que comprar aparecerão aqui.</p>
-                    <a href="listings.html" class="action-btn">Explorar Produtos</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Trocas -->
-        <div class="tab-content" id="trades">
-            <h2>As Minhas Trocas</h2>
-            <div class="grid-container" id="trades-container">
-                <!-- Trocas serão carregadas aqui -->
-                <div class="empty-state" id="empty-trades">
-                    <i>🔄</i>
-                    <h3>Sem Trocas</h3>
-                    <p>O histórico das suas trocas aparecerá aqui.</p>
-                    <a href="listings.html" class="action-btn">Explorar Produtos</a>
+                    <button class="action-btn" id="add-product-btn">Adicionar Produto</button>
                 </div>
             </div>
         </div>
 
         <!-- Transações -->
-        <div class="tab-content" id="transactions">
-            <h2>Transações da Carteira</h2>
-            <div class="transaction-list" id="transactions-container">
-                <!-- Transações serão carregadas aqui -->
-                <div class="empty-state" id="empty-transactions">
-                    <i>💰</i>
-                    <h3>Sem Transações</h3>
-                    <p>O histórico das suas transações aparecerá aqui.</p>
-                </div>
+        <div class="tab-content" id="transacoes">
+            <h2>Histórico de Transações</h2>
+            <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+                <select id="filtro-tipo" class="form-select w-auto">
+                    <option value="todos">Todos os Tipos</option>
+                    <option value="compra">Compra</option>
+                    <option value="venda">Venda</option>
+                    <option value="deposito">Depósito</option>
+                    <option value="saque">Saque</option>
+                </select>
+                <select id="filtro-status" class="form-select w-auto">
+                    <option value="todos">Todos os Status</option>
+                    <option value="concluida">Concluída</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="falha">Falha</option>
+                </select>
+                <input id="filtro-busca" class="form-control w-auto" placeholder="Buscar produto ou ID...">
+                <button id="btn-exportar-csv" class="btn btn-outline-primary ms-auto">Exportar CSV</button>
+            </div>
+            <div class="transaction-list" id="transaction-list"></div>
+            <div class="empty-state" id="empty-transactions" style="display:none;">
+                <i>💸</i>
+                <h3>Sem Transações</h3>
+                <p>Ainda não realizou nenhuma transação.</p>
+            </div>
+        </div>
+
+        <!-- Notificações -->
+        <div class="tab-content" id="notificacoes">
+            <h2>Notificações</h2>
+            <div id="notificacoes-list" class="transaction-list"></div>
+            <div class="empty-state" id="empty-notificacoes" style="display:none;">
+                <i>🔔</i>
+                <h3>Sem notificações</h3>
+                <p>Você ainda não recebeu nenhuma notificação.</p>
             </div>
         </div>
 
         <!-- Definições -->
-        <div class="tab-content" id="settings">
-            <h2>Definições da Conta</h2>
-            
-            <div class="settings-section">
-                <h3>Informações Pessoais</h3>
-                <div class="form-group">
-                    <label for="display-name">Nome de Apresentação</label>
-                    <input type="text" id="display-name" placeholder="O seu nome">
-                </div>
-                <div class="form-group">
-                    <label for="email">E-mail</label>
-                    <input type="email" id="email" placeholder="O seu e-mail" disabled>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Telefone</label>
-                    <input type="tel" id="phone" placeholder="O seu número de telefone">
-                </div>
-                <div class="form-group">
-                    <label for="location">Localização</label>
-                    <input type="text" id="location" placeholder="A sua cidade/região">
-                </div>
-                <button class="save-btn" id="save-info-btn">Guardar Alterações</button>
-            </div>
-
-            <div class="settings-section">
-                <h3>Alterar Fotografia</h3>
-                <div class="form-group">
-                    <label for="avatar-upload">Carregar Nova Fotografia</label>
-                    <input type="file" id="avatar-upload" accept="image/*">
-                </div>
-                <button class="save-btn" id="save-avatar-btn">Atualizar Fotografia</button>
-            </div>
-
-            <div class="settings-section">
-                <h3>Preferências</h3>
-                <div class="form-group">
-                    <label for="notification-preference">Notificações</label>
-                    <select id="notification-preference">
-                        <option value="all">Todas as notificações</option>
-                        <option value="important">Apenas importantes</option>
-                        <option value="none">Sem notificações</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="language-preference">Idioma</label>
-                    <select id="language-preference">
-                        <option value="pt">Português</option>
-                        <option value="en">English</option>
-                        <option value="es">Español</option>
-                    </select>
-                </div>
-                <button class="save-btn" id="save-preferences-btn">Guardar Preferências</button>
-            </div>
-
-            <div class="settings-section">
-                <h3>Segurança</h3>
-                <div class="form-group">
-                    <label for="current-password">Password Atual</label>
-                    <input type="password" id="current-password" placeholder="Introduza a sua password atual">
-                </div>
-                <div class="form-group">
-                    <label for="new-password">Nova Password</label>
-                    <input type="password" id="new-password" placeholder="Introduza a nova password">
-                </div>
-                <div class="form-group">
-                    <label for="confirm-password">Confirmar Password</label>
-                    <input type="password" id="confirm-password" placeholder="Confirme a nova password">
-                </div>
-                <button class="save-btn" id="change-password-btn">Atualizar Password</button>
-            </div>
-
-            <div class="settings-section danger-zone">
-                <h3>Zona de Perigo</h3>
-                <p>As ações abaixo são permanentes e não podem ser desfeitas.</p>
-                <div style="margin-top: 20px;">
-                    <button class="danger-btn" id="delete-account-btn">Eliminar Conta</button>
-                </div>
-            </div>
+        <div class="tab-content" id="definicoes">
+            <h2>Definições</h2>
+            <p>Funcionalidades de configurações em breve.</p>
         </div>
     </div>
 
     <!-- Modal para adicionar fundos -->
-    <div id="add-funds-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Adicionar Fundos</h2>
-                <span class="close-modal">&times;</span>
+    <div id="add-funds-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);z-index:1000;align-items:center;justify-content:center;">
+        <div style="background:#fff;padding:32px 24px;border-radius:12px;max-width:350px;margin:auto;position:relative;">
+            <h4>Adicionar Fundos</h4>
+            <label>Valor (€):<input type="number" id="funds-amount" class="form-control mb-2" min="1" step="0.01"></label>
+            <div class="mb-3">
+                <button id="stripe-checkout-btn" class="btn btn-primary w-100 mb-2">Pagar com Cartão (Stripe)</button>
+                <div id="paypal-button-container" class="mb-2"></div>
+                <button id="mbway-btn" class="btn btn-warning w-100 mb-2">Pagar com MB Way</button>
+                <button id="confirm-add-funds" class="btn btn-success w-100 mb-2">Confirmar (Simulação)</button>
+                <button id="cancel-add-funds" class="btn btn-outline-secondary w-100">Cancelar</button>
             </div>
-            <div class="form-group">
-                <label for="funds-amount">Montante (€)</label>
-                <input type="number" id="funds-amount" min="1" max="1000" step="1" value="50">
-            </div>
-            <div class="form-group">
-                <label for="payment-method">Método de Pagamento</label>
-                <select id="payment-method">
-                    <option value="card">Cartão de Crédito/Débito</option>
-                    <option value="paypal">PayPal</option>
-                    <option value="mbway">MB WAY</option>
-                    <option value="transfer">Transferência Bancária</option>
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn modal-cancel" id="cancel-add-funds">Cancelar</button>
-                <button class="modal-btn modal-confirm" id="confirm-add-funds">Adicionar Fundos</button>
-            </div>
+            <div class="small text-muted">Pagamentos reais requerem backend seguro. Veja instruções no código.</div>
         </div>
     </div>
 
@@ -811,6 +727,7 @@
                     loadUserPurchases(user.uid);
                     loadUserTrades(user.uid);
                     loadUserTransactions(user.uid);
+                    loadUserNotifications(user.uid);
                 } else {
                     // Utilizador não autenticado, redirecionar para login
                     window.location.href = 'login.html';
@@ -819,16 +736,14 @@
 
             // Setup dos tabs
             const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     // Atualizar classes ativas
-                    document.querySelector('.tab.active').classList.remove('active');
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
                     tab.classList.add('active');
-                    
-                    // Mostrar conteúdo correspondente
-                    const tabId = tab.getAttribute('data-tab');
-                    document.querySelector('.tab-content.active').classList.remove('active');
-                    document.getElementById(tabId).classList.add('active');
+                    document.getElementById(tab.dataset.tab).classList.add('active');
                 });
             });
 
@@ -1115,80 +1030,127 @@
                 });
         }
 
-        // Carregar transações do utilizador
+        // Carregar transações reais do Firestore com filtros e exportação CSV
         function loadUserTransactions(userId) {
-            db.collection('transactions')
+            let transacoes = [];
+            db.collection('transacoes')
                 .where('userId', '==', userId)
-                .orderBy('date', 'desc')
-                .get()
-                .then(snapshot => {
-                    const container = document.getElementById('transactions-container');
-                    const emptyState = document.getElementById('empty-transactions');
-                    
+                .orderBy('data', 'desc')
+                .onSnapshot(snapshot => {
+                    transacoes = [];
+                    snapshot.forEach(doc => {
+                        const t = doc.data();
+                        t.id = doc.id;
+                        transacoes.push(t);
+                    });
+                    renderTransacoes(transacoes);
+                });
+            // Filtros
+            document.getElementById('filtro-tipo').onchange = () => renderTransacoes(transacoes);
+            document.getElementById('filtro-status').onchange = () => renderTransacoes(transacoes);
+            document.getElementById('filtro-busca').oninput = () => renderTransacoes(transacoes);
+            document.getElementById('btn-exportar-csv').onclick = () => exportarTransacoesCSV(transacoes);
+        }
+        function renderTransacoes(transacoes) {
+            const tipo = document.getElementById('filtro-tipo').value;
+            const status = document.getElementById('filtro-status').value;
+            const busca = document.getElementById('filtro-busca').value.toLowerCase();
+            const container = document.getElementById('transaction-list');
+            const emptyState = document.getElementById('empty-transactions');
+            let filtradas = transacoes.filter(t => {
+                let ok = true;
+                if (tipo !== 'todos') ok = ok && t.tipo === tipo;
+                if (status !== 'todos') ok = ok && t.status === status;
+                if (busca) ok = ok && ((t.produtoNome && t.produtoNome.toLowerCase().includes(busca)) || (t.id && t.id.toLowerCase().includes(busca)));
+                return ok;
+            });
+            if (filtradas.length === 0) {
+                emptyState.style.display = 'block';
+                container.innerHTML = '';
+                return;
+            }
+            emptyState.style.display = 'none';
+            container.innerHTML = '';
+            filtradas.forEach(t => {
+                const isPositive = t.tipo === 'deposito' || t.tipo === 'venda';
+                const amountClass = isPositive ? 'amount-positive' : 'amount-negative';
+                const amountPrefix = isPositive ? '+' : '-';
+                let descricao = t.tipo.charAt(0).toUpperCase() + t.tipo.slice(1);
+                if (t.produtoNome) descricao += ': ' + t.produtoNome;
+                container.innerHTML += `
+                    <div class="transaction-item">
+                        <div class="transaction-details">
+                            <div class="transaction-title">${descricao}</div>
+                            <div class="transaction-date">${t.data && t.data.toDate ? new Date(t.data.toDate()).toLocaleString('pt-PT') : ''}</div>
+                            <div class="transaction-title small text-muted">Status: ${t.status || 'concluida'}</div>
+                        </div>
+                        <div class="transaction-amount ${amountClass}">${amountPrefix}€${Math.abs(t.valor || 0).toFixed(2)}</div>
+                    </div>
+                `;
+            });
+        }
+        function exportarTransacoesCSV(transacoes) {
+            const tipo = document.getElementById('filtro-tipo').value;
+            const status = document.getElementById('filtro-status').value;
+            const busca = document.getElementById('filtro-busca').value.toLowerCase();
+            let filtradas = transacoes.filter(t => {
+                let ok = true;
+                if (tipo !== 'todos') ok = ok && t.tipo === tipo;
+                if (status !== 'todos') ok = ok && t.status === status;
+                if (busca) ok = ok && ((t.produtoNome && t.produtoNome.toLowerCase().includes(busca)) || (t.id && t.id.toLowerCase().includes(busca)));
+                return ok;
+            });
+            let csv = 'ID,Tipo,Status,Produto,Valor,Data\n';
+            filtradas.forEach(t => {
+                csv += `${t.id},${t.tipo},${t.status || 'concluida'},${t.produtoNome || ''},${t.valor || 0},${t.data && t.data.toDate ? new Date(t.data.toDate()).toLocaleString('pt-PT') : ''}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'transacoes.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Carregar notificações do utilizador
+        function loadUserNotifications(userId) {
+            db.collection('notificacoes')
+                .where('userId', '==', userId)
+                .orderBy('timestamp', 'desc')
+                .onSnapshot(snapshot => {
+                    const container = document.getElementById('notificacoes-list');
+                    const emptyState = document.getElementById('empty-notificacoes');
+                    const badge = document.getElementById('notificacoes-badge');
                     if (snapshot.empty) {
                         emptyState.style.display = 'block';
+                        container.innerHTML = '';
+                        badge.style.display = 'none';
                         return;
                     }
-                    
                     emptyState.style.display = 'none';
                     container.innerHTML = '';
-                    
+                    let unread = 0;
                     snapshot.forEach(doc => {
-                        const transaction = doc.data();
-                        
-                        const isPositive = transaction.type === 'deposit' || transaction.type === 'sale';
-                        const amountClass = isPositive ? 'amount-positive' : 'amount-negative';
-                        const amountPrefix = isPositive ? '+' : '-';
-                        
-                        let description = '';
-                        let iconSrc = '';
-                        
-                        switch(transaction.type) {
-                            case 'deposit':
-                                description = 'Depósito de fundos';
-                                iconSrc = '/api/placeholder/60/60'; // Placeholder para ícone de depósito
-                                break;
-                            case 'withdrawal':
-                                description = 'Levantamento de fundos';
-                                iconSrc = '/api/placeholder/60/60'; // Placeholder para ícone de levantamento
-                                break;
-                            case 'purchase':
-                                description = `Compra: ${transaction.itemName || 'Produto'}`;
-                                iconSrc = transaction.itemImage || '/api/placeholder/60/60';
-                                break;
-                            case 'sale':
-                                description = `Venda: ${transaction.itemName || 'Produto'}`;
-                                iconSrc = transaction.itemImage || '/api/placeholder/60/60';
-                                break;
-                            default:
-                                description = 'Transação';
-                                iconSrc = '/api/placeholder/60/60';
-                        }
-                        
-                        const transactionItem = document.createElement('div');
-                        transactionItem.className = 'transaction-item';
-                        transactionItem.innerHTML = `
-                            <div class="transaction-image">
-                                <img src="${iconSrc}" alt="${description}">
-                            </div>
+                        const notif = doc.data();
+                        const notifDiv = document.createElement('div');
+                        notifDiv.className = 'transaction-item' + (notif.lida ? '' : ' amount-negative');
+                        notifDiv.innerHTML = `
                             <div class="transaction-details">
-                                <div class="transaction-title">${description}</div>
-                                <div class="transaction-date">${new Date(transaction.date.toDate()).toLocaleDateString('pt-PT', {
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })}</div>
+                                <div class="transaction-title">${notif.mensagem}</div>
+                                <div class="transaction-date">${notif.timestamp && notif.timestamp.toDate ? new Date(notif.timestamp.toDate()).toLocaleString('pt-PT') : ''}</div>
+                                ${notif.produtoNome ? `<div class='transaction-title'><b>Produto:</b> ${notif.produtoNome}</div>` : ''}
                             </div>
-                            <div class="transaction-amount ${amountClass}">${amountPrefix}€${Math.abs(transaction.amount).toFixed(2)}</div>
+                            <button class="product-action-btn edit-btn" style="margin-left:auto;" ${notif.lida ? 'disabled' : ''}>${notif.lida ? 'Lida' : 'Marcar como lida'}</button>
                         `;
-                        
-                        container.appendChild(transactionItem);
+                        if (!notif.lida) unread++;
+                        notifDiv.querySelector('button').onclick = async () => {
+                            await db.collection('notificacoes').doc(doc.id).update({ lida: true });
+                        };
+                        container.appendChild(notifDiv);
                     });
-                })
-                .catch(error => {
-                    showToast('Erro ao carregar transações: ' + error.message);
+                    badge.textContent = unread;
+                    badge.style.display = unread > 0 ? 'inline-block' : 'none';
                 });
         }
 
@@ -1425,7 +1387,7 @@
         // Mostrar modal de adicionar fundos
         function showAddFundsDialog() {
             const modal = document.getElementById('add-funds-modal');
-            modal.style.display = 'block';
+            modal.style.display = 'flex';
         }
 
         // Adicionar fundos à carteira
@@ -1547,433 +1509,172 @@
         }
     </script>
     <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged, EmailAuthProvider, reauthenticateWithCredential, updatePassword, deleteUser } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, orderBy, deleteDoc, serverTimestamp, addDoc, writeBatch } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+        import { auth, db, storage } from './firebase-config.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { doc, getDoc, collection, query, where, getDocs, updateDoc, addDoc, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
-    authDomain: "resalesneakers-e17cb.firebaseapp.com",
-    projectId: "resalesneakers-e17cb",
-    storageBucket: "resalesneakers-e17cb.appspot.com",
-    messagingSenderId: "698715655625",
-    appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
-  };
-
-  document.addEventListener("DOMContentLoaded", () => {
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = 'login.html';
-        return;
-      }
-
-      const userRef = doc(db, 'users', user.uid);
-      const userSnap = await getDoc(userRef);
-      const profileAvatar = document.getElementById('profile-avatar');
-      const profileName = document.getElementById('profile-name');
-      const profileEmail = document.getElementById('profile-email');
-
-      if (userSnap.exists()) {
-        const data = userSnap.data();
-        profileName.textContent = data.displayName || user.displayName || 'Utilizador';
-        profileEmail.textContent = user.email;
-        if (data.avatarUrl) {
-          profileAvatar.src = data.avatarUrl;
-        }
-      }
-
-      // Upload do avatar
-      document.getElementById('save-avatar-btn')?.addEventListener('click', async () => {
-        const input = document.getElementById('avatar-upload');
-        if (input.files.length === 0) return;
-
-        const file = input.files[0];
-        const storageRef = ref(storage, `avatars/${user.uid}/${file.name}`);
-        await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(storageRef);
-
-        await updateDoc(userRef, {
-          avatarUrl: downloadURL,
-          updatedAt: serverTimestamp()
-        });
-
-        profileAvatar.src = downloadURL;
-        input.value = '';
-        alert('Foto de perfil atualizada com sucesso.');
-      });
-
-      // Guardar alterações de dados pessoais
-      document.getElementById('save-info-btn')?.addEventListener('click', async () => {
-        const displayName = document.getElementById('display-name').value;
-        const phone = document.getElementById('phone').value;
-        const location = document.getElementById('location').value;
-
-        await updateDoc(userRef, {
-          displayName,
-          phone,
-          location,
-          updatedAt: serverTimestamp()
-        });
-
-        profileName.textContent = displayName;
-        alert('Dados atualizados com sucesso.');
-      });
-
-      // Guardar preferências
-      document.getElementById('save-preferences-btn')?.addEventListener('click', async () => {
-        const notifications = document.getElementById('notification-preference').value;
-        const language = document.getElementById('language-preference').value;
-
-        await updateDoc(userRef, {
-          preferences: { notifications, language },
-          updatedAt: serverTimestamp()
-        });
-
-        alert('Preferências atualizadas.');
-      });
-
-      // Alterar password
-      document.getElementById('change-password-btn')?.addEventListener('click', async () => {
-        const current = document.getElementById('current-password').value;
-        const nova = document.getElementById('new-password').value;
-        const confirmar = document.getElementById('confirm-password').value;
-
-        if (nova !== confirmar || nova.length < 6) {
-          alert('Passwords inválidas ou diferentes.');
-          return;
-        }
-
-        const credential = EmailAuthProvider.credential(user.email, current);
-        try {
-          await reauthenticateWithCredential(user, credential);
-          await updatePassword(user, nova);
-          alert('Password atualizada com sucesso.');
-        } catch (e) {
-          alert('Erro ao atualizar password: ' + e.message);
-        }
-      });
-
-      // Eliminar conta
-      document.getElementById('confirm-delete-account')?.addEventListener('click', async () => {
-        const confirmPwd = document.getElementById('delete-confirm-password').value;
-        const credential = EmailAuthProvider.credential(user.email, confirmPwd);
-
-        try {
-          await reauthenticateWithCredential(user, credential);
-          await deleteDoc(userRef);
-          await deleteUser(user);
-          alert('Conta eliminada com sucesso.');
-          window.location.href = 'index.html';
-        } catch (e) {
-          alert('Erro ao eliminar conta: ' + e.message);
-        }
-      });
-
-      // Exemplo de carregamento de produtos
-      const container = document.getElementById('listings-container');
-      const q = query(collection(db, 'listings'), where('sellerId', '==', user.uid), orderBy('createdAt', 'desc'));
-      const listingsSnap = await getDocs(q);
-
-      if (!listingsSnap.empty) {
-        document.getElementById('empty-listings').style.display = 'none';
-        listingsSnap.forEach(docSnap => {
-          const l = docSnap.data();
-          const div = document.createElement('div');
-          div.className = 'product-card';
-          div.innerHTML = `
-            <div class="product-image">
-              <img src="${l.imageUrl}" alt="${l.title}" />
-              <div class="product-status status-${l.status}">${l.status}</div>
-            </div>
-            <div class="product-info">
-              <div class="product-title">${l.title}</div>
-              <div class="product-price">€${l.price.toFixed(2)}</div>
-              <div style="font-size: 12px; color: var(--accent-color);">${l.brand} • Tamanho ${l.size}</div>
-              <div class="product-actions">
-                <button class="product-action-btn edit-btn" data-id="${docSnap.id}">Editar</button>
-                <button class="product-action-btn delete-btn" data-id="${docSnap.id}">Eliminar</button>
-              </div>
-            </div>
-          `;
-          container.appendChild(div);
-
-          div.querySelector('.edit-btn').addEventListener('click', () => {
-            window.location.href = `edit-listing.html?id=${docSnap.id}`;
-          });
-
-          div.querySelector('.delete-btn').addEventListener('click', async () => {
-            if (confirm('Eliminar este produto?')) {
-              await deleteDoc(doc(db, 'listings', docSnap.id));
-              div.remove();
-              alert('Produto eliminado.');
+        onAuthStateChanged(auth, async user => {
+            if (!user) return window.location.href = 'log.html';
+            // Dados do utilizador
+            const userRef = doc(db, 'usuarios', user.uid);
+            const userSnap = await getDoc(userRef);
+            let userData = userSnap.exists() ? userSnap.data() : {};
+            document.getElementById('profile-name').textContent = userData.nome || user.displayName || 'Sem Nome';
+            document.getElementById('profile-email').textContent = user.email;
+            document.getElementById('join-date').textContent = user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString('pt-PT') : '';
+            document.getElementById('profile-avatar').src = userData.foto || user.photoURL || 'images/default-profile.png';
+            // Upload de foto de perfil
+            document.getElementById('avatar-upload').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const storageRef = ref(storage, `usuarios/${user.uid}/avatar.jpg`);
+                await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(storageRef);
+                await updateDoc(userRef, { foto: url });
+                document.getElementById('profile-avatar').src = url;
+                alert('Foto de perfil atualizada!');
+            });
+            // Listar produtos publicados (vendedorId ou userId)
+            const listingsContainer = document.getElementById('listings-container');
+            const emptyListings = document.getElementById('empty-listings');
+            const q1 = query(collection(db, 'produtos'), where('vendedorId', '==', user.uid));
+            const q2 = query(collection(db, 'produtos'), where('userId', '==', user.uid));
+            const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+            listingsContainer.innerHTML = '';
+            let count = 0;
+            const allDocs = [...snap1.docs, ...snap2.docs].filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+            allDocs.forEach(docSnap => {
+                const produto = docSnap.data();
+                const div = document.createElement('div');
+                div.className = 'product-card';
+                div.innerHTML = `
+                    <div class='product-image'><img src='${produto.imagemPrincipal || 'images/no-image.png'}' alt='${produto.nome}'></div>
+                    <div class='product-info'>
+                        <div class='product-title'>${produto.nome}</div>
+                        <div class='product-price'>€${produto.preco}</div>
+                        <div class='product-status status-active'>${produto.disponibilidade || ''}</div>
+                        <div class='product-actions'>
+                            <a href='produto-detalhe.html?id=${docSnap.id}' class='product-action-btn edit-btn'>Ver</a>
+                        </div>
+                    </div>
+                `;
+                listingsContainer.appendChild(div);
+                count++;
+            });
+            document.getElementById('listings-count').textContent = count;
+            if (count === 0) emptyListings.style.display = 'block';
+            else emptyListings.style.display = 'none';
+            // Botões funcionais
+            document.getElementById('add-funds-btn')?.addEventListener('click', () => {
+                document.getElementById('add-funds-modal').style.display = 'flex';
+            });
+            document.getElementById('cancel-add-funds')?.addEventListener('click', () => {
+                document.getElementById('add-funds-modal').style.display = 'none';
+            });
+            document.getElementById('confirm-add-funds')?.addEventListener('click', async () => {
+                const amount = parseFloat(document.getElementById('funds-amount').value);
+                if (isNaN(amount) || amount <= 0) return alert('Valor inválido.');
+                // Atualizar saldo na coleção 'usuarios'
+                const saldoAtual = userData.saldo || 0;
+                await updateDoc(userRef, { saldo: saldoAtual + amount });
+                // Registrar transação
+                await addDoc(collection(db, 'transacoes'), {
+                    userId: user.uid,
+                    tipo: 'deposito',
+                    valor: amount,
+                    data: new Date(),
+                    metodo: document.getElementById('payment-method').value
+                });
+                alert('Fundos adicionados com sucesso!');
+                document.getElementById('add-funds-modal').style.display = 'none';
+                // Atualizar saldo na tela
+                userData.saldo = saldoAtual + amount;
+                document.getElementById('wallet-balance').textContent = '€' + userData.saldo.toFixed(2);
+                loadTransactions();
+            });
+            // Stripe Checkout (exemplo real)
+            document.getElementById('stripe-checkout-btn')?.addEventListener('click', async () => {
+                const amount = parseFloat(document.getElementById('funds-amount').value);
+                if (isNaN(amount) || amount <= 0) return alert('Valor inválido.');
+                // Chame seu backend para criar uma sessão Stripe Checkout
+                // Exemplo:
+                // const res = await fetch('/create-checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, userId: auth.currentUser.uid }) });
+                // const { sessionId } = await res.json();
+                // const stripe = Stripe('YOUR_STRIPE_PUBLISHABLE_KEY');
+                // await stripe.redirectToCheckout({ sessionId });
+                alert('Integração real com Stripe requer backend. Veja documentação Stripe Checkout para produção.');
+            });
+            // PayPal Button (exemplo real)
+            if (window.paypal) {
+                paypal.Buttons({
+                    createOrder: function(data, actions) {
+                        const amount = parseFloat(document.getElementById('funds-amount').value);
+                        if (isNaN(amount) || amount <= 0) return alert('Valor inválido.');
+                        // Chame seu backend para criar uma ordem PayPal e retornar orderID
+                        // return fetch('/create-paypal-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, userId: auth.currentUser.uid }) })
+                        //   .then(res => res.json())
+                        //   .then(data => data.orderID);
+                        alert('Integração real com PayPal requer backend. Veja documentação PayPal Checkout para produção.');
+                        return '';
+                    },
+                    onApprove: function(data, actions) {
+                        // Chame seu backend para capturar o pagamento e creditar saldo
+                        // fetch('/capture-paypal-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderID: data.orderID }) })
+                        alert('Pagamento PayPal aprovado (simulação).');
+                    }
+                }).render('#paypal-button-container');
             }
-          });
+            // MB Way (estrutura para integração)
+            document.getElementById('mbway-btn')?.addEventListener('click', async () => {
+                const amount = parseFloat(document.getElementById('funds-amount').value);
+                if (isNaN(amount) || amount <= 0) return alert('Valor inválido.');
+                // Chame seu backend para gerar referência MB Way e mostrar instruções ao usuário
+                // Exemplo:
+                // const res = await fetch('/create-mbway-payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, userId: auth.currentUser.uid }) });
+                // const { reference, instructions } = await res.json();
+                // alert('Referência MB Way: ' + reference + '\n' + instructions);
+                alert('Integração real com MB Way requer backend/gateway português. Veja documentação do seu gateway.');
+            });
+            document.getElementById('edit-profile-btn')?.addEventListener('click', () => window.location.href = 'editar-perfil.html');
+            document.getElementById('add-product-btn')?.addEventListener('click', () => window.location.href = 'vender.html');
+            document.getElementById('settings-btn')?.addEventListener('click', () => alert('Funcionalidade de definições em breve!'));
+            // Exibir saldo
+            document.getElementById('wallet-balance').textContent = '€' + (userData.saldo ? userData.saldo.toFixed(2) : '0.00');
+            // Carregar histórico de transações
+            loadTransactions();
         });
-      }
-      // Compras
-      const purchasesContainer = document.getElementById('purchases-container');
-      const emptyPurchases = document.getElementById('empty-purchases');
-      const purchasesQuery = query(collection(db, 'purchases'), where('buyerId', '==', user.uid), orderBy('purchaseDate', 'desc'));
-      const purchasesSnap = await getDocs(purchasesQuery);
 
-      if (!purchasesSnap.empty) {
-        emptyPurchases.style.display = 'none';
-        for (const docSnap of purchasesSnap.docs) {
-          const purchase = docSnap.data();
-          const listingRef = doc(db, 'listings', purchase.listingId);
-          const listingSnap = await getDoc(listingRef);
-          if (listingSnap.exists()) {
-            const l = listingSnap.data();
-            const div = document.createElement('div');
-            div.className = 'product-card';
-            div.innerHTML = `
-              <div class="product-image">
-                <img src="${l.imageUrl}" alt="${l.title}" />
-                <div class="product-status status-sold">Comprado</div>
-              </div>
-              <div class="product-info">
-                <div class="product-title">${l.title}</div>
-                <div class="product-price">€${l.price.toFixed(2)}</div>
-                <div style="font-size: 12px; color: var(--accent-color);">Comprado em ${new Date(purchase.purchaseDate.toDate()).toLocaleDateString('pt-PT')}</div>
-              </div>
-            `;
-            purchasesContainer.appendChild(div);
-          }
+        async function loadTransactions() {
+            const user = auth.currentUser;
+            if (!user) return;
+            const q = query(collection(db, 'transacoes'), where('userId', '==', user.uid), orderBy('data', 'desc'));
+            const snap = await getDocs(q);
+            const list = document.getElementById('transaction-list');
+            const empty = document.getElementById('empty-transactions');
+            list.innerHTML = '';
+            if (snap.empty) {
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+            snap.forEach(doc => {
+                const t = doc.data();
+                const div = document.createElement('div');
+                div.className = 'transaction-item';
+                div.innerHTML = `
+                    <div class='transaction-details'>
+                        <div class='transaction-title'>${t.tipo === 'deposito' ? 'Depósito' : t.tipo}</div>
+                        <div class='transaction-date'>${t.data ? new Date(t.data).toLocaleString('pt-PT') : ''}</div>
+                        <div class='transaction-amount amount-positive'>+€${t.valor.toFixed(2)}</div>
+                        <div class='transaction-method'>${t.metodo || ''}</div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
         }
-      }
-
-      // Transações
-      const transactionsContainer = document.getElementById('transactions-container');
-      const emptyTransactions = document.getElementById('empty-transactions');
-      const transactionsQuery = query(collection(db, 'transactions'), where('userId', '==', user.uid), orderBy('date', 'desc'));
-      const transactionsSnap = await getDocs(transactionsQuery);
-
-      if (!transactionsSnap.empty) {
-        emptyTransactions.style.display = 'none';
-        transactionsSnap.forEach(docSnap => {
-          const tx = docSnap.data();
-          const isPositive = ['deposit', 'sale'].includes(tx.type);
-          const amountClass = isPositive ? 'amount-positive' : 'amount-negative';
-          const prefix = isPositive ? '+' : '-';
-          const div = document.createElement('div');
-          div.className = 'transaction-item';
-          div.innerHTML = `
-            <div class="transaction-image">
-              <img src="${tx.itemImage || '/api/placeholder/60/60'}" alt="${tx.itemName || 'Transação'}">
-            </div>
-            <div class="transaction-details">
-              <div class="transaction-title">${tx.description || tx.type}</div>
-              <div class="transaction-date">${new Date(tx.date.toDate()).toLocaleString('pt-PT')}</div>
-            </div>
-            <div class="transaction-amount ${amountClass}">${prefix}€${Math.abs(tx.amount).toFixed(2)}</div>
-          `;
-          transactionsContainer.appendChild(div);
-        });
-      }
-
-      // Trocas
-      const tradesContainer = document.getElementById('trades-container');
-      const emptyTrades = document.getElementById('empty-trades');
-      const tradesQuery = query(collection(db, 'trades'), where('participants', 'array-contains', user.uid), orderBy('createdAt', 'desc'));
-      const tradesSnap = await getDocs(tradesQuery);
-
-      if (!tradesSnap.empty) {
-        emptyTrades.style.display = 'none';
-        for (const docSnap of tradesSnap.docs) {
-          const trade = docSnap.data();
-          const otherUserId = trade.initiatorId === user.uid ? trade.receiverId : trade.initiatorId;
-          const otherUserSnap = await getDoc(doc(db, 'users', otherUserId));
-          const otherName = otherUserSnap.exists() ? otherUserSnap.data().displayName : 'Utilizador';
-          const div = document.createElement('div');
-          div.className = 'product-card';
-          div.innerHTML = `
-            <div class="product-image">
-              <img src="${trade.imageUrl || '/api/placeholder/280/200'}" alt="Troca">
-              <div class="product-status status-${trade.status}">${trade.status}</div>
-            </div>
-            <div class="product-info">
-              <div class="product-title">Troca com ${otherName}</div>
-              <div style="font-size: 14px;">Oferta: ${trade.offerDescription}</div>
-              <div style="font-size: 12px; color: var(--accent-color);">Criado em ${new Date(trade.createdAt.toDate()).toLocaleDateString('pt-PT')}</div>
-            </div>
-          `;
-          tradesContainer.appendChild(div);
-        }
-      }
-      // Tabs dinâmicas
-      const tabs = document.querySelectorAll('.tab');
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          document.querySelector('.tab.active').classList.remove('active');
-          tab.classList.add('active');
-
-          document.querySelector('.tab-content.active').classList.remove('active');
-          document.getElementById(tab.dataset.tab).classList.add('active');
-
-          if (tab.dataset.tab === 'my-listings') carregarProdutos(user);
-          if (tab.dataset.tab === 'purchases') carregarCompras(user);
-          if (tab.dataset.tab === 'transactions') carregarTransacoes(user);
-          if (tab.dataset.tab === 'trades') carregarTrocas(user);
-        });
-      });
-
-      carregarProdutos(user);
-      carregarCompras(user);
-      carregarTransacoes(user);
-      carregarTrocas(user);
-
-      // Eliminar e aceitar trocas
-      document.getElementById('trades-container').addEventListener('click', async (e) => {
-        const tradeId = e.target.dataset.id;
-        if (!tradeId) return;
-
-        if (e.target.classList.contains('accept-btn')) {
-          await updateDoc(doc(db, 'trades', tradeId), {
-            status: 'completed',
-            completedAt: serverTimestamp()
-          });
-          alert('Troca aceite!');
-          carregarTrocas(user);
-        }
-
-        if (e.target.classList.contains('delete-btn')) {
-          await updateDoc(doc(db, 'trades', tradeId), {
-            status: 'rejected',
-            rejectedAt: serverTimestamp()
-          });
-          alert('Troca recusada.');
-          carregarTrocas(user);
-        }
-      });
-
-      async function carregarProdutos(user) {
-        const container = document.getElementById('listings-container');
-        const q = query(collection(db, 'listings'), where('sellerId', '==', user.uid), orderBy('createdAt', 'desc'));
-        const snap = await getDocs(q);
-        container.innerHTML = '';
-        document.getElementById('empty-listings').style.display = snap.empty ? 'block' : 'none';
-        snap.forEach(docSnap => {
-          const l = docSnap.data();
-          const div = document.createElement('div');
-          div.className = 'product-card';
-          div.innerHTML = `
-            <div class="product-image">
-              <img src="${l.imageUrl}" alt="${l.title}" />
-              <div class="product-status status-${l.status}">${l.status}</div>
-            </div>
-            <div class="product-info">
-              <div class="product-title">${l.title}</div>
-              <div class="product-price">€${l.price.toFixed(2)}</div>
-              <div style="font-size: 12px; color: var(--accent-color);">${l.brand} • Tamanho ${l.size}</div>
-              <div class="product-actions">
-                <button class="product-action-btn edit-btn" onclick="location.href='edit-listing.html?id=${docSnap.id}'">Editar</button>
-                <button class="product-action-btn delete-btn" onclick="deletarProduto('${docSnap.id}', this)">Eliminar</button>
-              </div>
-            </div>
-          `;
-          container.appendChild(div);
-        });
-      }
-
-      async function deletarProduto(id, btn) {
-        if (confirm('Eliminar produto?')) {
-          await deleteDoc(doc(db, 'listings', id));
-          btn.closest('.product-card').remove();
-          alert('Produto eliminado.');
-        }
-      }
-
-      async function carregarCompras(user) {
-        const container = document.getElementById('purchases-container');
-        const snap = await getDocs(query(collection(db, 'purchases'), where('buyerId', '==', user.uid), orderBy('purchaseDate', 'desc')));
-        container.innerHTML = '';
-        document.getElementById('empty-purchases').style.display = snap.empty ? 'block' : 'none';
-
-        for (const docSnap of snap.docs) {
-          const purchase = docSnap.data();
-          const listingSnap = await getDoc(doc(db, 'listings', purchase.listingId));
-          if (listingSnap.exists()) {
-            const l = listingSnap.data();
-            const div = document.createElement('div');
-            div.className = 'product-card';
-            div.innerHTML = `
-              <div class="product-image">
-                <img src="${l.imageUrl}" alt="${l.title}" />
-                <div class="product-status status-sold">Comprado</div>
-              </div>
-              <div class="product-info">
-                <div class="product-title">${l.title}</div>
-                <div class="product-price">€${l.price.toFixed(2)}</div>
-                <div style="font-size: 12px; color: var(--accent-color);">Comprado em ${new Date(purchase.purchaseDate.toDate()).toLocaleDateString('pt-PT')}</div>
-              </div>
-            `;
-            container.appendChild(div);
-          }
-        }
-      }
-
-      async function carregarTransacoes(user) {
-        const container = document.getElementById('transactions-container');
-        const snap = await getDocs(query(collection(db, 'transactions'), where('userId', '==', user.uid), orderBy('date', 'desc')));
-        container.innerHTML = '';
-        document.getElementById('empty-transactions').style.display = snap.empty ? 'block' : 'none';
-        snap.forEach(docSnap => {
-          const tx = docSnap.data();
-          const isPositive = ['deposit', 'sale'].includes(tx.type);
-          const div = document.createElement('div');
-          div.className = 'transaction-item';
-          div.innerHTML = `
-            <div class="transaction-image">
-              <img src="${tx.itemImage || '/api/placeholder/60/60'}" alt="${tx.description || 'Transação'}">
-            </div>
-            <div class="transaction-details">
-              <div class="transaction-title">${tx.description}</div>
-              <div class="transaction-date">${new Date(tx.date.toDate()).toLocaleString('pt-PT')}</div>
-            </div>
-            <div class="transaction-amount ${isPositive ? 'amount-positive' : 'amount-negative'}">${isPositive ? '+' : '-'}€${Math.abs(tx.amount).toFixed(2)}</div>
-          `;
-          container.appendChild(div);
-        });
-      }
-
-      async function carregarTrocas(user) {
-        const container = document.getElementById('trades-container');
-        const snap = await getDocs(query(collection(db, 'trades'), where('participants', 'array-contains', user.uid), orderBy('createdAt', 'desc')));
-        container.innerHTML = '';
-        document.getElementById('empty-trades').style.display = snap.empty ? 'block' : 'none';
-
-        for (const docSnap of snap.docs) {
-          const trade = docSnap.data();
-          const id = docSnap.id;
-          const otherUserId = trade.initiatorId === user.uid ? trade.receiverId : trade.initiatorId;
-          const otherUserSnap = await getDoc(doc(db, 'users', otherUserId));
-          const otherName = otherUserSnap.exists() ? otherUserSnap.data().displayName : 'Utilizador';
-
-          const div = document.createElement('div');
-          div.className = 'product-card';
-          div.innerHTML = `
-            <div class="product-image">
-              <img src="${trade.imageUrl || '/api/placeholder/280/200'}" alt="Troca">
-              <div class="product-status status-${trade.status}">${trade.status}</div>
-            </div>
-            <div class="product-info">
-              <div class="product-title">Troca com ${otherName}</div>
-              <div style="font-size: 14px;">Oferta: ${trade.offerDescription}</div>
-              <div style="font-size: 12px; color: var(--accent-color);">Criado em ${new Date(trade.createdAt.toDate()).toLocaleDateString('pt-PT')}</div>
-              ${trade.status === 'pending' ? `
-                <div class="product-actions">
-                  <button class="product-action-btn accept-btn" data-id="${id}">Aceitar</button>
-                  <button class="product-action-btn delete-btn" data-id="${id}">Recusar</button>
-                </div>` : ''}
-            </div>
-          `;
-          container.appendChild(div);
-        }
-      }
-    });
-  });
-</script>
-
+    </script>
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=EUR"></script>
+    <script src="https://js.stripe.com/v3/"></script>
 </body>
 </html>

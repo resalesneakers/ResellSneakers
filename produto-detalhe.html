@@ -3,11 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Produto Detalhe - ResellSneakers</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vz6VQ9MkzR9Cdc5bVhjZHXWSmoH0L1nzIlj3vWkQzO5ZjE+rrt4Q5pRwWp56J3bT" crossorigin="anonymous">
+  <title id="meta-title">Produto Detalhe - ResellSneakers</title>
+  <meta name="description" id="meta-desc" content="Veja detalhes do sneaker no ResellSneakers.">
+  <meta property="og:title" id="og-title" content="Produto Detalhe - ResellSneakers">
+  <meta property="og:description" id="og-desc" content="Veja detalhes do sneaker no ResellSneakers.">
+  <meta property="og:image" id="og-image" content="images/banner1.png">
+  <meta property="og:url" id="og-url" content="https://resellsneakers.com/produto-detalhe.html">
+  <meta property="og:type" content="product">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" id="tw-title" content="Produto Detalhe - ResellSneakers">
+  <meta name="twitter:description" id="tw-desc" content="Veja detalhes do sneaker no ResellSneakers.">
+  <meta name="twitter:image" id="tw-image" content="images/banner1.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <style>
     * {
       margin: 0;
@@ -23,9 +34,9 @@
     }
 
     .container {
-      max-width: 1400px;
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 0 16px;
     }
 
     /* Header */
@@ -79,9 +90,13 @@
 
     /* Breadcrumb */
     .breadcrumb {
-      padding: 20px 0;
-      font-size: 14px;
-      color: #666;
+      background: #fff;
+      border-radius: 8px;
+      margin-top: 24px;
+      margin-bottom: 24px;
+      padding: 12px 18px;
+      font-size: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
 
     .breadcrumb a {
@@ -95,42 +110,53 @@
 
     /* Product Section */
     .product-section {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 60px;
-      margin-bottom: 60px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      padding: 32px 24px;
+      margin-bottom: 32px;
     }
 
     /* Image Gallery */
     .image-gallery {
-      position: sticky;
-      top: 100px;
-      height: fit-content;
+      flex: 1 1 320px;
+      min-width: 280px;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
     }
 
     .main-image {
       width: 100%;
+      max-width: 380px;
       aspect-ratio: 1;
-      border-radius: 16px;
+      border-radius: 14px;
       object-fit: cover;
-      margin-bottom: 15px;
-      border: 1px solid #e9ecef;
       background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 8px;
     }
 
     .thumbnail-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .thumbnail {
-      aspect-ratio: 1;
+      width: 56px;
+      height: 56px;
       border-radius: 8px;
       object-fit: cover;
       cursor: pointer;
       border: 2px solid transparent;
-      transition: all 0.3s ease;
+      transition: border 0.2s;
       background: #fff;
     }
 
@@ -140,22 +166,25 @@
     }
 
     /* Product Info */
-    .product-info {
-      padding-top: 20px;
+    .product-info-col {
+      flex: 2 1 400px;
+      min-width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
     }
 
     .product-title {
-      font-size: 32px;
+      font-size: 2.1rem;
       font-weight: 700;
       color: #000;
-      margin-bottom: 10px;
-      line-height: 1.2;
+      margin-bottom: 0.2em;
     }
 
     .product-subtitle {
-      font-size: 18px;
+      font-size: 1.1rem;
       color: #666;
-      margin-bottom: 20px;
+      margin-bottom: 0.5em;
     }
 
     .price-section {
@@ -167,10 +196,9 @@
     }
 
     .current-price {
-      font-size: 36px;
+      font-size: 2rem;
       font-weight: 800;
       color: #000;
-      margin-bottom: 8px;
     }
 
     .price-change {
@@ -241,16 +269,14 @@
     }
 
     .btn {
-      padding: 16px 24px;
-      border-radius: 8px;
+      font-size: 1rem;
       font-weight: 600;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: none;
-      text-align: center;
-      text-decoration: none;
+      border-radius: 8px;
+      padding: 12px 0;
+      margin-bottom: 8px;
     }
+
+    .btn-lg { font-size: 1.15rem; }
 
     .btn-primary {
       background: #000;
@@ -287,29 +313,28 @@
     /* Product Details */
     .product-details {
       background: #fff;
-      border: 1px solid #e9ecef;
       border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      padding: 20px 18px;
+      margin-bottom: 18px;
     }
 
     .details-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: #000;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
     }
 
     .details-grid {
       display: grid;
-      gap: 12px;
+      gap: 10px;
     }
 
     .detail-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 0;
+      padding: 6px 0;
       border-bottom: 1px solid #f8f9fa;
     }
 
@@ -328,14 +353,12 @@
     }
 
     .condition-badge {
-      padding: 4px 12px;
+      padding: 4px 14px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
       text-transform: uppercase;
-    }
-
-    .condition-new {
+      margin-left: 8px;
       background: #dcfce7;
       color: #166534;
     }
@@ -345,70 +368,73 @@
       color: #92400e;
     }
 
+    #estoqueBaixo {
+      font-size: 13px;
+      font-weight: 600;
+      background: #fff3cd;
+      color: #856404;
+      border-radius: 20px;
+      padding: 4px 12px;
+      margin-left: 8px;
+    }
+
     /* Seller Info */
     .seller-info {
       background: #fff;
-      border: 1px solid #e9ecef;
       border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      padding: 20px 18px;
+      margin-bottom: 18px;
     }
 
     .seller-header {
       display: flex;
       align-items: center;
       gap: 16px;
-      margin-bottom: 16px;
+      margin-bottom: 10px;
     }
 
     .seller-avatar {
-      width: 50px;
-      height: 50px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       object-fit: cover;
       border: 2px solid #e9ecef;
     }
 
     .seller-details h3 {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 4px;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 2px;
     }
 
     .seller-rating {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 14px;
+      font-size: 0.95rem;
       color: #666;
     }
 
-    .stars {
-      color: #fbbf24;
-    }
-
     .seller-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-top: 16px;
+      display: flex;
+      gap: 18px;
+      margin-top: 8px;
     }
 
     .stat {
       text-align: center;
-      padding: 12px;
       background: #f8f9fa;
       border-radius: 8px;
+      padding: 10px 8px;
+      min-width: 70px;
     }
 
     .stat-number {
-      font-size: 18px;
+      font-size: 1.1rem;
       font-weight: 700;
       color: #000;
     }
 
     .stat-label {
-      font-size: 12px;
+      font-size: 0.8rem;
       color: #666;
       text-transform: uppercase;
       font-weight: 500;
@@ -483,44 +509,34 @@
     }
 
     /* Responsive Design */
-    @media (max-width: 1024px) {
+    @media (max-width: 991px) {
       .product-section {
-        grid-template-columns: 1fr;
-        gap: 40px;
+        flex-direction: column;
+        padding: 18px 6px;
       }
-
-      .image-gallery {
-        position: static;
+      .image-gallery, .product-info-col {
+        max-width: 100%;
+        min-width: 0;
       }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 600px) {
       .container {
-        padding: 0 15px;
+        padding: 0 4px;
       }
-
-      .nav-links {
-        display: none;
+      .product-section {
+        padding: 8px 2px;
+        gap: 18px;
       }
-
+      .main-image {
+        max-width: 98vw;
+      }
+      .btn {
+        font-size: 0.98rem;
+        padding: 10px 0;
+      }
       .product-title {
-        font-size: 24px;
-      }
-
-      .current-price {
-        font-size: 28px;
-      }
-
-      .size-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-
-      .seller-stats {
-        grid-template-columns: 1fr;
-      }
-
-      .protection-badges {
-        flex-direction: column;
+        font-size: 1.2rem;
       }
     }
 
@@ -541,325 +557,284 @@
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="container">
-      <div class="header-content">
-        <a href="home.html" class="logo">👟 ResellSneakers</a>
-        <nav class="nav-links">
-          <a href="#" class="nav-link">Explorar</a>
-          <a href="vender.html" class="nav-link">Vender</a>
-          <a href="#" class="nav-link">Sobre</a>
-          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" alt="User" class="user-avatar">
-        </nav>
-      </div>
-    </div>
-  </header>
-
-  <div class="container">
-    <!-- Breadcrumb -->
-    <nav class="breadcrumb">
-      <a href="#" class="back-button">← Voltar aos produtos</a>
-      <span>Sneakers > Nike > Air Jordan 1 > Retro High OG</span>
+  <div id="menu-container"></div>
+  <script>
+    fetch('menu.html').then(res => res.text()).then(html => {
+      document.getElementById('menu-container').innerHTML = html;
+    });
+  </script>
+  <div class="container py-4">
+    <nav class="breadcrumb bg-white rounded mb-4 px-3 py-2">
+      <a href="produtos.html" class="back-button">← Voltar aos produtos</a>
+      <span id="breadcrumbProduto" class="ms-2">Sneakers</span>
     </nav>
-
-    <!-- Product Section -->
-    <div class="product-section">
-      <!-- Image Gallery -->
+    <div class="product-section d-flex flex-wrap">
       <div class="image-gallery">
-        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop" alt="Nike Air Jordan 1" class="main-image" id="mainImage">
-        <div class="thumbnail-grid">
-          <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&h=150&fit=crop" alt="Thumbnail 1" class="thumbnail active" onclick="changeImage(this)">
-          <img src="https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=150&h=150&fit=crop" alt="Thumbnail 2" class="thumbnail" onclick="changeImage(this)">
-          <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=150&h=150&fit=crop" alt="Thumbnail 3" class="thumbnail" onclick="changeImage(this)">
-          <img src="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=150&h=150&fit=crop" alt="Thumbnail 4" class="thumbnail" onclick="changeImage(this)">
-        </div>
+        <img src="images/no-image.png" alt="Imagem principal" class="main-image mb-3 rounded shadow" id="mainImage" loading="lazy">
+        <div class="thumbnail-grid"></div>
       </div>
-
-      <!-- Product Info -->
-      <div class="product-info">
-        <h1 class="product-title">Nike Air Jordan 1 Retro High OG</h1>
-        <p class="product-subtitle">Chicago (2015)</p>
-
-        <!-- Price Section -->
-        <div class="price-section">
-          <div class="current-price">€1,245</div>
-          <div class="price-change price-up">
-            ↗ +€85 (7.3%) nos últimos 30 dias
-          </div>
+      <div class="product-info-col">
+        <h1 class="product-title fw-bold mb-2">...</h1>
+        <div class="product-subtitle text-muted mb-3"></div>
+        <div class="d-flex align-items-center mb-3">
+          <span class="current-price display-5 fw-bold me-3">...</span>
+          <span class="condition-badge ms-2"></span>
+          <span class="badge bg-warning ms-2 d-none" id="estoqueBaixo">Últimas unidades!</span>
         </div>
-
-        <!-- Size Selector -->
-        <div class="size-selector">
-          <div class="size-title">Selecionar Tamanho</div>
-          <div class="size-grid">
-            <div class="size-option unavailable">38</div>
-            <div class="size-option">39</div>
-            <div class="size-option">40</div>
-            <div class="size-option selected">41</div>
-            <div class="size-option">42</div>
-            <div class="size-option">43</div>
-            <div class="size-option">44</div>
-            <div class="size-option unavailable">45</div>
-          </div>
+        <div class="mb-3" id="sizeSelector"></div>
+        <div class="mb-3">
+          <button class="btn btn-primary btn-lg me-2 w-100 mb-2" id="btnComprar">Comprar Agora</button>
+          <button class="btn btn-outline-dark btn-lg w-100 mb-2" id="btnCarrinho">Adicionar ao Carrinho</button>
+          <button class="btn btn-outline-secondary w-100 mb-2" id="btnFavorito">💙 Adicionar aos Favoritos</button>
+          <button class="btn btn-success w-100 mb-2 d-flex align-items-center justify-content-center gap-2" id="btnChatVendedor"><i class="bi bi-chat-dots"></i> Conversar com o Vendedor</button>
+          <button class="btn btn-outline-info w-100 mb-2" id="btnCompartilhar">🔗 Compartilhar</button>
         </div>
-
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-          <button class="btn btn-primary">Comprar Agora</button>
-          <button class="btn btn-secondary">Adicionar ao Carrinho</button>
-          <button class="btn btn-outline">💙 Adicionar aos Favoritos</button>
+        <div class="product-details mb-4">
+          <h3 class="details-title mb-3">Detalhes do Produto</h3>
+          <div class="details-grid" id="detailsGrid"></div>
         </div>
-
-        <!-- Product Details -->
-        <div class="product-details">
-          <h3 class="details-title">Detalhes do Produto</h3>
-          <div class="details-grid">
-            <div class="detail-row">
-              <span class="detail-label">Marca</span>
-              <span class="detail-value">Nike</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Modelo</span>
-              <span class="detail-value">Air Jordan 1 Retro High OG</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Colorway</span>
-              <span class="detail-value">Chicago</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Ano de Lançamento</span>
-              <span class="detail-value">2015</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">SKU</span>
-              <span class="detail-value">555088-101</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Condição</span>
-              <span class="condition-badge condition-used">Usado</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Seller Info -->
-        <div class="seller-info">
-          <div class="seller-header">
-            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" alt="Seller" class="seller-avatar">
-            <div class="seller-details">
-              <h3>João Silva</h3>
-              <div class="seller-rating">
-                <span class="stars">★★★★★</span>
-                <span>4.9 (127 avaliações)</span>
-              </div>
-            </div>
-          </div>
-          <div class="seller-stats">
-            <div class="stat">
-              <div class="stat-number">156</div>
-              <div class="stat-label">Vendas</div>
-            </div>
-            <div class="stat">
-              <div class="stat-number">98%</div>
-              <div class="stat-label">Positivas</div>
-            </div>
-            <div class="stat">
-              <div class="stat-number">2.1</div>
-              <div class="stat-label">Dias Envio</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Shipping Info -->
-        <div class="shipping-info">
-          <h3 class="details-title">Opções de Envio</h3>
-          <div class="shipping-options">
-            <div class="shipping-option">
-              <div class="shipping-details">
-                <span class="shipping-icon">📦</span>
-                <div>
-                  <div class="shipping-text">Envio Standard</div>
-                  <div class="shipping-time">3-5 dias úteis</div>
-                </div>
-              </div>
-              <div class="shipping-price">Grátis</div>
-            </div>
-            <div class="shipping-option">
-              <div class="shipping-details">
-                <span class="shipping-icon">⚡</span>
-                <div>
-                  <div class="shipping-text">Envio Expresso</div>
-                  <div class="shipping-time">1-2 dias úteis</div>
-                </div>
-              </div>
-              <div class="shipping-price">€15</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Protection Badges -->
-        <div class="protection-badges">
-          <div class="protection-badge">
-            <span>🛡️</span>
-            <span>Proteção do Comprador</span>
-          </div>
-          <div class="protection-badge">
-            <span>✅</span>
-            <span>Produto Autenticado</span>
-          </div>
-          <div class="protection-badge">
-            <span>🔄</span>
-            <span>Devolução Gratuita 14 dias</span>
-          </div>
-        </div>
+        <div class="seller-info mb-4" id="sellerInfo"></div>
+        <div class="product-reviews mb-4" id="reviews"></div>
+        <div class="suggested-products mb-4" id="suggestedProducts"></div>
       </div>
     </div>
   </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+  <!-- Lightbox Modal -->
+  <div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-transparent border-0">
+        <img id="lightboxImg" src="" class="w-100 rounded shadow" style="max-height:80vh; object-fit:contain;">
+      </div>
+    </div>
+  </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
-      authDomain: "resalesneakers-e17cb.firebaseapp.com",
-      projectId: "resalesneakers-e17cb",
-      storageBucket: "resalesneakers-e17cb.appspot.com",
-      messagingSenderId: "698715655625",
-      appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
-    };
+  <script type="module">
+    import { auth, db, storage } from "./firebase-config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { doc, getDoc, collection, query, where, limit, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+    function showLightbox(url) {
+      document.getElementById('lightboxImg').src = url;
+      const modal = new bootstrap.Modal(document.getElementById('lightboxModal'));
+      modal.show();
+    }
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = 'log.html';
         return;
       }
-
       const urlParams = new URLSearchParams(window.location.search);
       const productId = urlParams.get('id');
       if (!productId) {
         alert('Produto não encontrado.');
         return;
       }
-
+      // Registrar visualização no histórico
+      try {
+        await addDoc(collection(db, 'historico_usuario'), {
+          userId: user.uid,
+          produtoId: productId,
+          acao: 'visualizacao',
+          timestamp: new Date()
+        });
+      } catch (e) { console.warn('Não foi possível registrar histórico:', e); }
       const productRef = doc(db, 'produtos', productId);
       const productSnap = await getDoc(productRef);
-
       if (!productSnap.exists()) {
         alert('Produto não encontrado.');
         return;
       }
-
       const product = productSnap.data();
-
-      // Atualiza dinamicamente o título, preço, imagens, etc.
-      document.querySelector('.product-title').textContent = product.nome;
+      // Título, marca, preço, condição
+      document.querySelector('.product-title').textContent = product.nome || 'Produto';
       document.querySelector('.product-subtitle').textContent = product.marca || '';
-      document.querySelector('.current-price').textContent = `€${product.preco}`;
-      document.querySelector('.condition-badge').textContent = product.condicao;
-      document.querySelector('.condition-badge').classList.add(product.condicao === 'Novo' ? 'condition-new' : 'condition-used');
-
-      if (product.imagemPrincipal) {
-        const imgRef = ref(storage, product.imagemPrincipal);
-        const url = await getDownloadURL(imgRef);
-        document.getElementById('mainImage').src = url;
+      document.querySelector('.current-price').textContent = product.preco ? `€${product.preco}` : '--';
+      // Condição badge
+      let condBadge = document.querySelector('.condition-badge');
+      condBadge.textContent = product.condicao || 'Usado';
+      condBadge.classList.remove('condition-new', 'condition-used');
+      condBadge.classList.add(product.condicao === 'Novo' ? 'condition-new' : 'condition-used');
+      // Estoque baixo
+      if (product.estoque && product.estoque <= 3) {
+        document.getElementById('estoqueBaixo').classList.remove('d-none');
       }
-
-      // Atualizar thumbnails se tiver imagens
-      if (product.imagens && Array.isArray(product.imagens)) {
+      // Breadcrumb
+      document.getElementById('breadcrumbProduto').textContent = `${product.marca || ''} > ${product.nome || ''}`;
+      // Galeria de imagens
+      const mainImage = document.getElementById('mainImage');
+      let mainUrl = 'https://via.placeholder.com/400x400?text=Sem+Imagem';
+      // Se houver imagemPrincipal, usa ela; senão, usa a primeira do array imagens
+      if (product.imagemPrincipal) {
+        try {
+          const imgRef = ref(storage, product.imagemPrincipal);
+          mainUrl = await getDownloadURL(imgRef);
+          mainImage.src = mainUrl;
+        } catch {}
+      } else if (product.imagens && Array.isArray(product.imagens) && product.imagens.length > 0) {
+        try {
+          const imgRef = ref(storage, product.imagens[0]);
+          mainUrl = await getDownloadURL(imgRef);
+          mainImage.src = mainUrl;
+        } catch {}
+      } else {
+        mainImage.src = mainUrl;
+      }
+      // Miniaturas
+      if (product.imagens && Array.isArray(product.imagens) && product.imagens.length > 0) {
         const thumbGrid = document.querySelector('.thumbnail-grid');
         thumbGrid.innerHTML = '';
-        for (const path of product.imagens) {
-          const thumbRef = ref(storage, path);
-          const thumbUrl = await getDownloadURL(thumbRef);
-          const img = document.createElement('img');
-          img.src = thumbUrl;
-          img.className = 'thumbnail';
-          img.onclick = () => {
-            document.getElementById('mainImage').src = thumbUrl;
-            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-            img.classList.add('active');
-          };
-          thumbGrid.appendChild(img);
-        }
-      }
-    });
-
-    // Ação para botão "Ver detalhes" na homepage
-    window.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('[data-product-id]').forEach(card => {
-        card.addEventListener('click', () => {
-          const id = card.getAttribute('data-product-id');
-          window.location.href = `produto-detalhe.html?id=${id}`;
+        product.imagens.forEach(async (path, idx) => {
+          try {
+            const thumbRef = ref(storage, path);
+            const thumbUrl = await getDownloadURL(thumbRef);
+            const img = document.createElement('img');
+            img.src = thumbUrl;
+            img.className = 'thumbnail rounded shadow-sm';
+            img.style.width = '60px';
+            img.style.height = '60px';
+            img.style.objectFit = 'cover';
+            img.onclick = () => {
+              mainImage.src = thumbUrl;
+            };
+            img.ondblclick = () => showLightbox(thumbUrl);
+            // Deixa a primeira miniatura ativa
+            if (idx === 0 && !product.imagemPrincipal) img.classList.add('active');
+            thumbGrid.appendChild(img);
+          } catch {}
         });
-      });
-    });
-    // Image Gallery
-    function changeImage(thumbnail) {
-      const mainImage = document.getElementById('mainImage');
-      const thumbnails = document.querySelectorAll('.thumbnail');
-      
-      // Remove active class from all thumbnails
-      thumbnails.forEach(thumb => thumb.classList.remove('active'));
-      
-      // Add active class to clicked thumbnail
-      thumbnail.classList.add('active');
-      
-      // Change main image
-      mainImage.src = thumbnail.src.replace('w=150&h=150', 'w=600&h=600');
-    }
-
-    // Size Selection
-    document.querySelectorAll('.size-option:not(.unavailable)').forEach(option => {
-      option.addEventListener('click', function() {
-        document.querySelectorAll('.size-option').forEach(opt => opt.classList.remove('selected'));
-        this.classList.add('selected');
-      });
-    });
-
-    // Add to Cart Animation
-    document.querySelector('.btn-primary').addEventListener('click', function() {
-      const button = this;
-      const originalText = button.textContent;
-      
-      button.textContent = 'Adicionando...';
-      button.style.background = '#10b981';
-      
-      setTimeout(() => {
-        button.textContent = '✓ Adicionado!';
-        
-        setTimeout(() => {
-          button.textContent = originalText;
-          button.style.background = '#000';
-        }, 2000);
-      }, 1000);
-    });
-
-    // Favorite Button
-    document.querySelector('.btn-outline').addEventListener('click', function() {
-      const button = this;
-      const isFavorited = button.textContent.includes('❤️');
-      
-      if (isFavorited) {
-        button.textContent = '💙 Adicionar aos Favoritos';
-        button.style.color = '#666';
-      } else {
-        button.textContent = '❤️ Nos Favoritos';
-        button.style.color = '#ef4444';
+        // Lightbox na imagem principal
+        mainImage.onclick = () => showLightbox(mainImage.src);
       }
-    });
-
-    // Smooth scroll for back button
-    document.querySelector('.back-button').addEventListener('click', function(e) {
-      e.preventDefault();
-      window.history.back();
+      // Detalhes do produto
+      const details = [
+        { label: 'Marca', value: product.marca },
+        { label: 'Modelo', value: product.modelo },
+        { label: 'Colorway', value: product.colorway },
+        { label: 'Ano de Lançamento', value: product.ano },
+        { label: 'SKU', value: product.sku },
+        { label: 'Condição', value: product.condicao },
+        { label: 'Descrição', value: product.descricao }
+      ];
+      const detailsGrid = document.getElementById('detailsGrid');
+      detailsGrid.innerHTML = '';
+      details.forEach(d => {
+        if (d.value) {
+          detailsGrid.innerHTML += `<div class='detail-row'><span class='detail-label'>${d.label}</span><span class='detail-value'>${d.value}</span></div>`;
+        }
+      });
+      // Tamanhos
+      if (product.tamanhos && Array.isArray(product.tamanhos) && product.tamanhos.length > 0) {
+        const sizeSelector = document.getElementById('sizeSelector');
+        sizeSelector.innerHTML = `<div class='size-title mb-2'>Selecionar Tamanho</div><div class='size-grid mb-2'>${product.tamanhos.map(t => `<div class='size-option'>${t}</div>`).join('')}</div>`;
+        // Seleção de tamanho
+        sizeSelector.querySelectorAll('.size-option').forEach(opt => {
+          opt.onclick = function() {
+            sizeSelector.querySelectorAll('.size-option').forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+          };
+        });
+      }
+      // Vendedor
+      if (product.vendedorId) {
+        try {
+          const userRef = doc(db, 'usuarios', product.vendedorId);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const vendedor = userSnap.data();
+            document.getElementById('sellerInfo').innerHTML = `
+              <div class='seller-header d-flex align-items-center gap-3 mb-2'>
+                <img src='${vendedor.foto || 'images/default-profile.png'}' alt='Seller' class='seller-avatar'>
+                <div class='seller-details'>
+                  <h3 class='mb-0'>${vendedor.nome || 'Vendedor'}</h3>
+                  <div class='seller-rating'><span class='stars'>★★★★★</span><span>4.9 (127 avaliações)</span></div>
+                  <a href='perfil.html?id=${product.vendedorId}' class='btn btn-link p-0'>Ver perfil</a>
+                </div>
+                <button class='btn btn-outline-success ms-auto' id='btnChatVendedor2'><i class='bi bi-chat-dots'></i> Chat</button>
+              </div>
+              <div class='seller-stats d-flex gap-3 mt-2'>
+                <div class='stat'><div class='stat-number'>156</div><div class='stat-label'>Vendas</div></div>
+                <div class='stat'><div class='stat-number'>98%</div><div class='stat-label'>Positivas</div></div>
+                <div class='stat'><div class='stat-number'>2.1</div><div class='stat-label'>Dias Envio</div></div>
+              </div>
+            `;
+            document.getElementById('btnChatVendedor').onclick = () => {
+              window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
+            };
+            document.getElementById('btnChatVendedor2').onclick = () => {
+              window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
+            };
+          }
+        } catch {}
+      }
+      // Favoritos (simples, localStorage)
+      const favBtn = document.getElementById('btnFavorito');
+      favBtn.onclick = () => {
+        let favs = JSON.parse(localStorage.getItem('favoritos') || '[]');
+        if (favs.includes(productId)) {
+          favs = favs.filter(f => f !== productId);
+          favBtn.textContent = '💙 Adicionar aos Favoritos';
+        } else {
+          favs.push(productId);
+          favBtn.textContent = '❤️ Nos Favoritos';
+        }
+        localStorage.setItem('favoritos', JSON.stringify(favs));
+      };
+      // Comprar agora
+      document.getElementById('btnComprar').onclick = () => {
+        window.location.href = `checkout.html?id=${productId}`;
+      };
+      // Adicionar ao carrinho
+      document.getElementById('btnCarrinho').onclick = async () => {
+        // Exemplo: adicionar ao carrinho do Firestore
+        const carrinhoRef = doc(db, 'carrinhos', user.uid);
+        let carrinhoSnap = await getDoc(carrinhoRef);
+        let produtos = carrinhoSnap.exists() ? (carrinhoSnap.data().produtos || []) : [];
+        if (!produtos.includes(productId)) produtos.push(productId);
+        await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js').then(({ setDoc }) => setDoc(carrinhoRef, { produtos }));
+        document.getElementById('btnCarrinho').textContent = '✓ Adicionado ao Carrinho!';
+        setTimeout(() => {
+          document.getElementById('btnCarrinho').textContent = 'Adicionar ao Carrinho';
+        }, 2000);
+      };
+      // Compartilhar
+      document.getElementById('btnCompartilhar').onclick = () => {
+        const url = window.location.href;
+        if (navigator.share) {
+          navigator.share({ title: product.nome, url });
+        } else {
+          navigator.clipboard.writeText(url);
+          alert('Link copiado!');
+        }
+      };
+      // Sugestão de produtos
+      const suggestedDiv = document.getElementById('suggestedProducts');
+      const q = query(collection(db, 'produtos'), where('marca', '==', product.marca), limit(4));
+      const snap = await getDocs(q);
+      let html = '<h5 class="mb-3">Você também pode gostar</h5><div class="row">';
+      snap.forEach(docu => {
+        if (docu.id !== productId) {
+          const p = docu.data();
+          html += `<div class='col-6 col-md-3 mb-2'><div class='card h-100 shadow-sm' style='cursor:pointer' onclick="window.location.href='produto-detalhe.html?id=${docu.id}'"><img src='${(p.imagemPrincipal || 'https://via.placeholder.com/200x200?text=Sneaker')}' class='card-img-top' style='object-fit:cover; height:120px;'><div class='card-body p-2'><div class='fw-bold small'>${p.nome}</div><div class='text-muted small'>${p.marca}</div></div></div></div>`;
+        }
+      });
+      html += '</div>';
+      suggestedDiv.innerHTML = html;
+      // Atualizar meta tags dinamicamente
+      if (product) {
+        document.title = `${product.nome} - ${product.marca} | ResellSneakers`;
+        document.getElementById('meta-title').content = document.title;
+        document.getElementById('meta-desc').content = product.descricao || 'Veja detalhes do sneaker no ResellSneakers.';
+        document.getElementById('og-title').content = document.title;
+        document.getElementById('og-desc').content = product.descricao || 'Veja detalhes do sneaker no ResellSneakers.';
+        document.getElementById('og-image').content = product.imagemPrincipal || 'images/banner1.png';
+        document.getElementById('og-url').content = window.location.href;
+        document.getElementById('tw-title').content = document.title;
+        document.getElementById('tw-desc').content = product.descricao || 'Veja detalhes do sneaker no ResellSneakers.';
+        document.getElementById('tw-image').content = product.imagemPrincipal || 'images/banner1.png';
+      }
     });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>

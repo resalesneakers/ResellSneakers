@@ -1,71 +1,45 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  deleteDoc,
-  updateDoc,
-  orderBy
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-import {
-  getAuth,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
-  authDomain: "resalesneakers-e17cb.firebaseapp.com",
-  projectId: "resalesneakers-e17cb",
-  storageBucket: "resalesneakers-e17cb.appspot.com",
-  messagingSenderId: "698715655625",
-  appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+import { app, auth, db, storage } from './firebase-config.js';
+import { collection, query, where, orderBy, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 const container = document.getElementById("produtosContainer");
 
 let allProducts = [];
 
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, (user) => {
   if (!user) {
     alert("Por favor, faça login para ver os seus produtos.");
     window.location.href = "log.html";
     return;
   }
 
-  await loadProducts(user.uid);
+  loadProductsRealtime(user.uid);
 });
 
-async function loadProducts(userId) {
+function loadProductsRealtime(userId) {
   const q = query(
     collection(db, "produtos"),
     where("userId", "==", userId),
     orderBy("dataCriacao", "desc")
   );
 
-  const snapshot = await getDocs(q);
-  container.innerHTML = "";
-  allProducts = [];
+  onSnapshot(q, (snapshot) => {
+    container.innerHTML = "";
+    allProducts = [];
 
-  if (snapshot.empty) {
-    container.innerHTML = "<p class='text-center'>Você ainda não publicou nenhum produto.</p>";
-    return;
-  }
+    if (snapshot.empty) {
+      container.innerHTML = "<p class='text-center'>Você ainda não publicou nenhum produto.</p>";
+      return;
+    }
 
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    data.id = doc.id;
-    allProducts.push(data);
-    renderProductCard(data);
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      data.id = doc.id;
+      allProducts.push(data);
+      renderProductCard(data);
+    });
+
+    updateStats();
   });
-
-  updateStats();
 }
 
 function renderProductCard(produto) {

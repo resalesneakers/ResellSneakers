@@ -246,6 +246,7 @@
 </head>
 
 <body>
+  <div id="menu-container"></div>
   <div class="container">
     <header>
       <div class="logo">ResellSneakers</div>
@@ -297,172 +298,145 @@
   </div>
 
   <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-  <script src="firebase-config.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, query, where, orderBy, doc, getDoc, getDocs, onSnapshot, addDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    import { firebaseConfig } from './firebase-config.js';
 
-<script>
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  const storage = firebase.storage();
+    // Carregar menu universal
+    fetch('menu.html').then(res => res.text()).then(html => {
+      document.getElementById('menu-container').innerHTML = html;
+    });
 
-  const conversationsList = document.getElementById("conversation-list");
-  const messagesContainer = document.getElementById("messages-container");
-  const messageInput = document.getElementById("message-input");
-  const sendButton = document.getElementById("send-button");
-  const imageInput = document.getElementById("image-upload");
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
 
-  const emptyChat = document.getElementById("empty-chat");
-  const activeChat = document.getElementById("active-chat");
-  const chatUserAvatar = document.getElementById("chat-user-avatar");
-  const chatUserName = document.getElementById("chat-user-name");
-  const chatUserStatus = document.getElementById("chat-user-status");
-  const productImage = document.getElementById("product-image");
-  const productName = document.getElementById("product-name");
+    const conversationsList = document.getElementById("conversation-list");
+    const messagesContainer = document.getElementById("messages-container");
+    const messageInput = document.getElementById("message-input");
+    const sendButton = document.getElementById("send-button");
+    const imageInput = document.getElementById("image-upload");
+    const emptyChat = document.getElementById("empty-chat");
+    const activeChat = document.getElementById("active-chat");
+    const chatUserAvatar = document.getElementById("chat-user-avatar");
+    const chatUserName = document.getElementById("chat-user-name");
+    const chatUserStatus = document.getElementById("chat-user-status");
+    const productImage = document.getElementById("product-image");
+    const productName = document.getElementById("product-name");
 
-  let currentUser = null;
-  let currentChatId = null;
-  let currentReceiverId = null;
+    let currentUser = null;
+    let currentChatId = null;
+    let currentReceiverId = null;
+    let currentProduct = null;
 
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      currentUser = user;
-      carregarConversas();
-    } else {
-      window.location.href = "log.html";
-    }
-  });
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUser = user;
+        carregarConversas();
+      } else {
+        window.location.href = "log.html";
+      }
+    });
 
-  function carregarConversas() {
-    db.collection("conversations")
-      .where("to", "==", currentUser.uid)
-      .orderBy("lastMessageTime", "desc")
-      .onSnapshot(snapshot => {
+    function carregarConversas() {
+      const q = query(collection(db, "conversas"), where("participants", "array-contains", currentUser.uid));
+      onSnapshot(q, async snapshot => {
         conversationsList.innerHTML = "";
-        snapshot.forEach(async doc => {
-          const conversa = doc.data();
-          const chatId = doc.id;
+        for (const docSnap of snapshot.docs) {
+          const conversa = docSnap.data();
+          const chatId = docSnap.id;
           const otherUserId = conversa.participants.find(uid => uid !== currentUser.uid);
-
-          const userDoc = await db.collection("users").doc(otherUserId).get();
-          const userData = userDoc.exists ? userDoc.data() : { nome: "Utilizador", avatar: "" };
-
-          const produtoDoc = await db.collection("produtos").doc(conversa.produtoId).get();
-          const produto = produtoDoc.exists ? produtoDoc.data() : { nome: "Produto", imagemPrincipal: "" };
-
+          const userDoc = await getDoc(doc(db, "usuarios", otherUserId));
+          const userData = userDoc.exists() ? userDoc.data() : { nome: "Utilizador", foto: "" };
+          const produtoDoc = await getDoc(doc(db, "produtos", conversa.produtoId));
+          const produto = produtoDoc.exists() ? produtoDoc.data() : { nome: "Produto", imagemPrincipal: "" };
           const div = document.createElement("div");
           div.classList.add("conversation");
           div.dataset.chatId = chatId;
           div.dataset.receiverId = otherUserId;
-
+          div.onclick = () => abrirConversa(chatId, otherUserId, userData, produto);
           div.innerHTML = `
             <div class="user-avatar">
-              <img src="${userData.avatar || 'https://via.placeholder.com/50'}" alt="Avatar">
+              <img src="${userData.foto || 'https://via.placeholder.com/50'}" alt="Avatar">
             </div>
             <div class="conversation-info">
               <div class="user-name">${userData.nome}</div>
               <div class="last-message">${conversa.lastMessage || ''}</div>
             </div>
           `;
-
-          div.addEventListener("click", () => abrirConversa(chatId, otherUserId, userData, produto));
           conversationsList.appendChild(div);
-        });
+        }
       });
-  }
+    }
 
-  function abrirConversa(chatId, receiverId, userData, produto) {
-    currentChatId = chatId;
-    currentReceiverId = receiverId;
-
-    emptyChat.style.display = "none";
-    activeChat.style.display = "flex";
-
-    chatUserAvatar.src = userData.avatar || 'https://via.placeholder.com/50';
-    chatUserName.textContent = userData.nome || "Utilizador";
-    chatUserStatus.textContent = "Online agora";
-    productImage.src = produto.imagemPrincipal || 'https://via.placeholder.com/30';
-    productName.textContent = produto.nome || "Produto";
-
-    // Carregar mensagens
-    db.collection("conversations").doc(chatId)
-      .collection("messages")
-      .orderBy("timestamp")
-      .onSnapshot(snapshot => {
+    function abrirConversa(chatId, receiverId, userData, produto) {
+      currentChatId = chatId;
+      currentReceiverId = receiverId;
+      currentProduct = produto;
+      emptyChat.style.display = "none";
+      activeChat.style.display = "flex";
+      chatUserAvatar.src = userData.foto || 'https://via.placeholder.com/50';
+      chatUserName.textContent = userData.nome || "Utilizador";
+      chatUserStatus.textContent = "Online agora";
+      productImage.src = produto.imagemPrincipal || 'https://via.placeholder.com/30';
+      productName.textContent = produto.nome || "Produto";
+      // Carregar mensagens
+      const msgsQ = query(collection(db, "conversas", chatId, "mensagens"), orderBy("timestamp"));
+      onSnapshot(msgsQ, snapshot => {
         messagesContainer.innerHTML = "";
         snapshot.forEach(doc => {
           const msg = doc.data();
           const div = document.createElement("div");
-          div.classList.add("message", msg.senderId === currentUser.uid ? "sender" : "receiver");
-
+          div.classList.add("message", msg.from === currentUser.uid ? "sender" : "receiver");
           if (msg.imageUrl) {
-            div.innerHTML = `<img src="${msg.imageUrl}" alt="imagem" style="max-width: 200px; border-radius: 10px;">`;
+            div.innerHTML = `<img src='${msg.imageUrl}' style='max-width:200px; border-radius:8px;'><br>${msg.text || ''}`;
           } else {
-            const time = msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "";
-            div.innerHTML = `<div>${msg.text}</div><small class="text-muted d-block mt-1" style="font-size: 0.75rem;">${time}</small>`;
+            div.textContent = msg.text;
           }
-
           messagesContainer.appendChild(div);
         });
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        if ('vibrate' in navigator) navigator.vibrate(100);
-        const audio = new Audio('notificacao.mp3');
-        audio.play().catch(() => {});
       });
-  }
-
-  sendButton.addEventListener("click", async () => {
-    const texto = messageInput.value.trim();
-    if (!texto || !currentChatId || !currentReceiverId) return;
-
-    await db.collection("conversations").doc(currentChatId)
-      .collection("messages").add({
-        senderId: currentUser.uid,
-        receiverId: currentReceiverId,
-        text: texto,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-    await db.collection("conversations").doc(currentChatId).update({
-      lastMessage: texto,
-      lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    messageInput.value = "";
-  });
-
-  imageInput.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    if (!file || !currentChatId || !currentReceiverId) return;
-
-    const imgRef = storage.ref().child(`chat-images/${currentChatId}/${Date.now()}_${file.name}`);
-    await imgRef.put(file);
-    const imageUrl = await imgRef.getDownloadURL();
-
-    await db.collection("conversations").doc(currentChatId)
-      .collection("messages").add({
-        senderId: currentUser.uid,
-        receiverId: currentReceiverId,
-        imageUrl,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-    await db.collection("conversations").doc(currentChatId).update({
-      lastMessage: "📷 Imagem",
-      lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    imageInput.value = "";
-  });
-
-  messageInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      sendButton.click();
     }
-  });
-</script>
+
+    sendButton.onclick = async () => {
+      if (!currentChatId || !messageInput.value.trim()) return;
+      await addDoc(collection(db, "conversas", currentChatId, "mensagens"), {
+        text: messageInput.value.trim(),
+        from: currentUser.uid,
+        to: currentReceiverId,
+        produtoId: currentProduct?.id,
+        timestamp: new Date()
+      });
+      await updateDoc(doc(db, "conversas", currentChatId), {
+        lastMessage: messageInput.value.trim(),
+        lastMessageTime: new Date()
+      });
+      messageInput.value = "";
+    };
+
+    imageInput.onchange = async (e) => {
+      if (!currentChatId || !e.target.files[0]) return;
+      const file = e.target.files[0];
+      const storageRef = ref(storage, `conversas/${currentChatId}/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      await addDoc(collection(db, "conversas", currentChatId, "mensagens"), {
+        imageUrl: url,
+        from: currentUser.uid,
+        to: currentReceiverId,
+        produtoId: currentProduct?.id,
+        timestamp: new Date()
+      });
+      await updateDoc(doc(db, "conversas", currentChatId), {
+        lastMessage: "[imagem]",
+        lastMessageTime: new Date()
+      });
+    };
+  </script>
 </body>
 </html>

@@ -338,7 +338,7 @@
   </style>
 </head>
 <body>
-  <div id="navbar-container"></div>
+  <div id="menu-container"></div>
   <div class="container">
     <div class="header">
       <h1>🛒 O teu Carrinho</h1>
@@ -364,7 +364,96 @@
   <script src="js/navbar.js"></script>
 
   <!-- Script do carrinho -->
-  <script src="js/carrinho.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { firebaseConfig } from './firebase-config.js';
+
+    // Carregar menu universal
+    fetch('menu.html').then(res => res.text()).then(html => {
+      document.getElementById('menu-container').innerHTML = html;
+    });
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const carrinhoDiv = document.getElementById("carrinho-lista");
+    const totalSpan = document.getElementById("total");
+    const finalizarBtn = document.getElementById("finalizar-compra");
+    const resumoDiv = document.getElementById("resumo");
+
+    let user = null;
+    let carrinhoIds = [];
+    let produtosCarrinho = [];
+
+    onAuthStateChanged(auth, async u => {
+      if (!u) return window.location.href = 'log.html';
+      user = u;
+      await carregarCarrinho();
+    });
+
+    async function carregarCarrinho() {
+      carrinhoDiv.innerHTML = '<div class="carrinho-vazio"><div class="icon">🛍️</div><h3>A carregar...</h3></div>';
+      const carrinhoRef = doc(db, 'carrinhos', user.uid);
+      const carrinhoSnap = await getDoc(carrinhoRef);
+      carrinhoIds = carrinhoSnap.exists() ? (carrinhoSnap.data().produtos || []) : [];
+      if (carrinhoIds.length === 0) {
+        carrinhoDiv.innerHTML = `<div class='carrinho-vazio'><div class='icon'>🛍️</div><h3>O teu carrinho está vazio</h3><p>Adiciona alguns produtos incríveis para começar!</p></div>`;
+        resumoDiv.style.display = 'none';
+        return;
+      }
+      // Buscar produtos reais
+      const proms = carrinhoIds.map(id => getDoc(doc(db, 'produtos', id)));
+      const prodsSnap = await Promise.all(proms);
+      produtosCarrinho = prodsSnap.filter(doc => doc.exists()).map(doc => ({ id: doc.id, ...doc.data() }));
+      renderizarCarrinho();
+    }
+
+    function renderizarCarrinho() {
+      carrinhoDiv.innerHTML = '';
+      let total = 0;
+      if (produtosCarrinho.length === 0) {
+        carrinhoDiv.innerHTML = `<div class='carrinho-vazio'><div class='icon'>🛍️</div><h3>O teu carrinho está vazio</h3><p>Adiciona alguns produtos incríveis para começar!</p></div>`;
+        resumoDiv.style.display = 'none';
+        return;
+      }
+      produtosCarrinho.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'produto-item';
+        div.innerHTML = `
+          <div class='produto-content'>
+            <img src='${item.imagemPrincipal || 'images/no-image.png'}' alt='${item.nome}' class='produto-imagem' />
+            <div class='produto-info'>
+              <h3>${item.nome}</h3>
+              <div class='produto-preco'>€${item.preco}</div>
+            </div>
+            <div class='produto-acoes'>
+              <button class='btn-remover' data-index='${index}'>🗑️ Remover</button>
+            </div>
+          </div>
+        `;
+        carrinhoDiv.appendChild(div);
+        total += parseFloat(item.preco);
+      });
+      totalSpan.textContent = total.toFixed(2);
+      resumoDiv.style.display = 'block';
+      document.querySelectorAll('.btn-remover').forEach(btn => {
+        btn.onclick = async () => {
+          const idx = parseInt(btn.getAttribute('data-index'));
+          carrinhoIds.splice(idx, 1);
+          await setDoc(doc(db, 'carrinhos', user.uid), { produtos: carrinhoIds });
+          await carregarCarrinho();
+        };
+      });
+    }
+
+    finalizarBtn.onclick = () => {
+      if (produtosCarrinho.length === 0) return;
+      window.location.href = 'checkout.html';
+    };
+  </script>
 
 </body>
 </html>

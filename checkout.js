@@ -1,23 +1,10 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore, doc, getDoc
+  getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   getAuth, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBa5JgoDsj-sqSbe2hzuJQwA-SFfAyxvBY",
-  authDomain: "resalesneakers-e17cb.firebaseapp.com",
-  projectId: "resalesneakers-e17cb",
-  storageBucket: "resalesneakers-e17cb.firebasestorage.app",
-  messagingSenderId: "698715655625",
-  appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+import { auth, db } from "./firebase-config.js";
 
 const params = new URLSearchParams(window.location.search);
 const produtoId = params.get("id");
@@ -33,27 +20,39 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  if (!produtoId) {
-    detalhesDiv.textContent = "Produto não encontrado.";
+  // Buscar carrinho do utilizador
+  const carrinhoRef = doc(db, 'carrinhos', user.uid);
+  const carrinhoSnap = await getDoc(carrinhoRef);
+  const carrinhoIds = carrinhoSnap.exists() ? (carrinhoSnap.data().produtos || []) : [];
+  if (carrinhoIds.length === 0) {
+    detalhesDiv.textContent = "O teu carrinho está vazio.";
+    form.style.display = 'none';
     return;
   }
+  // Buscar produtos reais
+  const proms = carrinhoIds.map(id => getDoc(doc(db, 'produtos', id)));
+  const prodsSnap = await Promise.all(proms);
+  const produtos = prodsSnap.filter(doc => doc.exists()).map(doc => ({ id: doc.id, ...doc.data() }));
+  let total = 0;
+  detalhesDiv.innerHTML = produtos.map(p => {
+    total += parseFloat(p.preco);
+    return `<div style='margin-bottom:20px;'><h2>${p.nome}</h2><p>Preço: €${p.preco}</p><img src='${p.imagemPrincipal}' width='200'/></div>`;
+  }).join('') + `<h3>Total: €${total.toFixed(2)}</h3>`;
 
-  const docSnap = await getDoc(doc(db, "produtos", produtoId));
-  if (!docSnap.exists()) {
-    detalhesDiv.textContent = "Produto não encontrado.";
-    return;
-  }
-
-  const produto = docSnap.data();
-  detalhesDiv.innerHTML = `
-    <h2>${produto.nome}</h2>
-    <p>Preço: €${produto.preco}</p>
-    <img src="${produto.imagemPrincipal}" width="200" />
-  `;
-
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    mensagem.textContent = "Pagamento processado com sucesso! (simulação)";
+    // Criar pedido na coleção 'compras' do utilizador
+    await addDoc(collection(db, 'compras'), {
+      userId: user.uid,
+      produtos: produtos.map(p => ({ id: p.id, nome: p.nome, preco: p.preco, imagem: p.imagemPrincipal })),
+      total,
+      data: new Date()
+    });
+    // Limpar carrinho
+    await setDoc(carrinhoRef, { produtos: [] });
+    mensagem.textContent = "Pagamento processado com sucesso! Obrigado pela compra.";
+    detalhesDiv.innerHTML = '';
     form.reset();
+    form.style.display = 'none';
   });
 });
