@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dashboard - Admin</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="dashboard.js"></script>
@@ -15,7 +17,8 @@
       document.getElementById('menu-container').innerHTML = html;
     });
   </script>
-  <h1>Dashboard Administrativo</h1>
+  <div class="container mt-4">
+    <h1>Dashboard Administrativo</h1>
   <div id="resumo">
     <p><strong>Total de Produtos:</strong> <span id="total-produtos">0</span></p>
     <p><strong>Total de Utilizadores:</strong> <span id="total-users">0</span></p>
@@ -25,5 +28,7 @@
 
   <canvas id="grafico-disponibilidade" width="400" height="200"></canvas>
   <canvas id="grafico-condicao" width="400" height="200"></canvas>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

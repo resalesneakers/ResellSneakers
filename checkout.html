@@ -4,12 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pagamento - ResellSneakers</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <script type="module" src="checkout.js"></script>
 </head>
 <body>
   <div id="menu-container"></div>
-  <h1>Finalizar Compra</h1>
+  <script>
+    fetch('menu.html').then(res => res.text()).then(html => {
+      document.getElementById('menu-container').innerHTML = html;
+    });
+  </script>
+  <div class="container mt-4">
+    <h1>Finalizar Compra</h1>
   <div id="detalhes-produto"></div>
 
   <div class="container" style="max-width:500px;margin:auto;">
@@ -31,9 +39,11 @@
     <div id="checkout-mensagem" class="mt-3"></div>
     <div class="small text-muted">Pagamentos reais requerem backend seguro. Veja instruções no código.</div>
   </div>
+  </div>
 
   <script src="https://js.stripe.com/v3/"></script>
   <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=EUR"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script type="module">
     // Stripe Elements (modo demo)
     const stripe = Stripe('YOUR_STRIPE_PUBLISHABLE_KEY');

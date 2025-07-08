@@ -35,35 +35,7 @@
             padding: 20px;
         }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 30px;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .nav-links {
-            display: flex;
-        }
-
-        .nav-links a {
-            margin-left: 20px;
-            color: var(--secondary-color);
-            text-decoration: none;
-        }
-
-        .nav-links a.active {
-            color: var(--primary-color);
-            font-weight: bold;
-        }
+        /* Removido: estilos de header customizado - agora usa menu.html unificado */
 
         .profile-header {
             display: flex;
@@ -558,53 +530,32 @@
 <body>
     <div id="menu-container"></div>
     <div class="container">
-        <header>
-            <a href="index.html" class="logo">ResellSneakers</a>
-            <div class="nav-links">
-                <a href="index.html">Início</a>
-                <a href="listings.html">Produtos</a>
-                <a href="mensagens.html">Mensagens</a>
-                <a href="meu-perfil.html" class="active">Perfil</a>
-            </div>
-        </header>
-
-        <div class="profile-header">
-            <div class="profile-avatar" style="position:relative;">
-                <img id="profile-avatar" src="images/default-profile.png" alt="Avatar do Utilizador">
-                <label for="avatar-upload" style="position:absolute;bottom:8px;right:8px;background:#fff;border-radius:50%;padding:6px;box-shadow:0 1px 4px rgba(0,0,0,0.08);cursor:pointer;">
-                    <i class="bi bi-camera" style="font-size:18px;color:#888;"></i>
-                    <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
-                </label>
-            </div>
-            <div class="profile-info">
-                <h1 id="profile-name">A carregar...</h1>
-                <p id="profile-email">email@exemplo.com</p>
-                <p id="profile-joined">Membro desde <span id="join-date">...</span></p>
-
-                <div class="profile-stats">
-                    <div class="stat">
-                        <div class="stat-number" id="listings-count">0</div>
-                        <div class="stat-label">Produtos</div>
+        <div class="container mt-4">
+          <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+              <div class="card shadow-sm p-4 mb-4 text-center">
+                <div class="d-flex flex-column flex-md-row align-items-center justify-content-center gap-4">
+                  <img id="profile-avatar" src="images/default-profile.png" alt="Avatar" class="rounded-circle border border-3" style="width:120px;height:120px;object-fit:cover;">
+                  <div class="flex-grow-1 text-md-start">
+                    <h2 id="profile-name" class="fw-bold mb-1">Nome do Usuário</h2>
+                    <div id="profile-email" class="text-muted mb-2">email@exemplo.com</div>
+                    <div class="mb-2"><span class="badge bg-light text-dark">Membro desde <span id="join-date"></span></span></div>
+                    <div class="d-flex flex-wrap gap-3 mt-2">
+                      <div><span class="fw-bold" id="listings-count">0</span> Produtos</div>
+                      <div><span class="fw-bold" id="sales-count">0</span> Vendas</div>
+                      <div><span class="fw-bold" id="purchases-count">0</span> Compras</div>
+                      <div><span class="fw-bold" id="rating">0.0</span> Classificação</div>
                     </div>
-                    <div class="stat">
-                        <div class="stat-number" id="sales-count">0</div>
-                        <div class="stat-label">Vendas</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number" id="purchase-count">0</div>
-                        <div class="stat-label">Compras</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number" id="rating">0.0</div>
-                        <div class="stat-label">Classificação</div>
-                    </div>
+                  </div>
+                  <div class="text-center text-md-end">
+                    <div class="fs-4 fw-bold text-success" id="wallet-balance">€0.00</div>
+                    <div class="text-muted">Saldo na Carteira</div>
+                    <button class="btn btn-primary mt-2" id="add-funds-btn">Adicionar Fundos</button>
+                  </div>
                 </div>
+              </div>
             </div>
-            <div class="wallet-info">
-                <div class="wallet-label">Saldo na Carteira</div>
-                <div class="wallet-amount" id="wallet-balance">€0.00</div>
-                <button class="add-funds-btn" id="add-funds-btn" type="button">Adicionar Fundos</button>
-            </div>
+          </div>
         </div>
 
         <div class="tabs">
