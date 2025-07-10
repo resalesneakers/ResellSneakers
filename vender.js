@@ -23,7 +23,7 @@ const progressText = document.getElementById("progressText");
 
 function showImagePreview(files) {
   preview.innerHTML = '';
-  files.forEach((file) => {image.png
+  files.forEach((file) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = document.createElement("img");
