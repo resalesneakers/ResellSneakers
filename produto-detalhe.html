@@ -103,72 +103,96 @@
       document.getElementById('breadcrumbProduto').textContent = `${product.marca || ''} > ${product.nome || ''}`;
       // Imagens
       let imagensUrls = [];
+      // Aceita tanto downloadURL (http) quanto caminho do Storage
       if (product.imagemPrincipal) {
-        try {
-          let url = product.imagemPrincipal;
-          if (url.startsWith('http')) {
+        let url = product.imagemPrincipal;
+        if (url.startsWith('http')) {
+          imagensUrls.push(url);
+        } else {
+          try {
+            const downloadUrl = await getDownloadURL(ref(storage, url));
+            imagensUrls.push(downloadUrl);
+          } catch (e) {
             imagensUrls.push(url);
-          } else {
-            try {
-              const downloadUrl = await getDownloadURL(ref(storage, url));
-              imagensUrls.push(downloadUrl);
-            } catch (e) {
-              console.warn('Erro ao buscar downloadURL da imagem principal:', e, url);
-              imagensUrls.push(url);
-            }
           }
-        } catch (e) {
-          console.warn('Erro inesperado ao processar imagem principal:', e);
         }
       }
       if (product.imagens && Array.isArray(product.imagens) && product.imagens.length > 0) {
         for (let idx = 0; idx < product.imagens.length; idx++) {
-          try {
-            let path = product.imagens[idx];
-            if (path.startsWith('http')) {
+          let path = product.imagens[idx];
+          if (path.startsWith('http')) {
+            if (!imagensUrls.includes(path)) imagensUrls.push(path);
+          } else {
+            try {
+              const downloadUrl = await getDownloadURL(ref(storage, path));
+              if (!imagensUrls.includes(downloadUrl)) imagensUrls.push(downloadUrl);
+            } catch (e) {
               if (!imagensUrls.includes(path)) imagensUrls.push(path);
-            } else {
-              try {
-                const downloadUrl = await getDownloadURL(ref(storage, path));
-                if (!imagensUrls.includes(downloadUrl)) imagensUrls.push(downloadUrl);
-              } catch (e) {
-                console.warn('Erro ao buscar downloadURL de imagem extra:', e, path);
-                if (!imagensUrls.includes(path)) imagensUrls.push(path);
-              }
             }
-          } catch (e) {
-            console.warn('Erro inesperado ao processar imagem extra:', e);
           }
         }
       }
-      const mainImage = document.getElementById('mainImage');
-      if (imagensUrls.length > 0) {
-        mainImage.src = imagensUrls[0];
-        mainImage.onerror = () => { mainImage.src = 'images/no-image.png'; };
-      } else {
-        mainImage.src = 'images/no-image.png';
+      // Se não houver imagens reais, usar apenas a imagem padrão
+      if (imagensUrls.length === 0) {
+        imagensUrls = [
+          'images/no-image.png'
+        ];
       }
-      // Galeria
+      // Galeria manual
+      let currentImgIdx = 0;
+      const mainImage = document.getElementById('mainImage');
       const thumbGrid = document.getElementById('thumbnailGrid');
-      thumbGrid.innerHTML = '';
-      if (imagensUrls.length > 1) {
+      function renderMainImage(idx) {
+        mainImage.src = imagensUrls[idx];
+        mainImage.onerror = () => { mainImage.src = 'images/no-image.png'; };
+        thumbGrid.querySelectorAll('.thumbnail').forEach((t, i) => {
+          t.classList.toggle('active', i === idx);
+        });
+      }
+      function renderThumbnails() {
+        thumbGrid.innerHTML = '';
         imagensUrls.forEach((url, idx) => {
           const img = document.createElement('img');
           img.src = url;
           img.className = 'thumbnail';
-          if (idx === 0) img.classList.add('active');
+          if (idx === currentImgIdx) img.classList.add('active');
           img.onclick = () => {
-            mainImage.src = url;
-            thumbGrid.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-            img.classList.add('active');
+            currentImgIdx = idx;
+            renderMainImage(currentImgIdx);
           };
           img.ondblclick = () => showLightbox(url);
           thumbGrid.appendChild(img);
         });
-        mainImage.onclick = () => showLightbox(mainImage.src);
-      } else {
-        mainImage.onclick = null;
       }
+      // Botões de navegação
+      let navPrev = document.getElementById('galleryPrev');
+      let navNext = document.getElementById('galleryNext');
+      if (!navPrev) {
+        navPrev = document.createElement('button');
+        navPrev.id = 'galleryPrev';
+        navPrev.className = 'btn btn-outline-secondary btn-sm me-2';
+        navPrev.innerHTML = '<i class="fa fa-chevron-left"></i>';
+        mainImage.parentNode.insertBefore(navPrev, mainImage);
+      }
+      if (!navNext) {
+        navNext = document.createElement('button');
+        navNext.id = 'galleryNext';
+        navNext.className = 'btn btn-outline-secondary btn-sm ms-2';
+        navNext.innerHTML = '<i class="fa fa-chevron-right"></i>';
+        mainImage.parentNode.insertBefore(navNext, mainImage.nextSibling);
+      }
+      navPrev.onclick = () => {
+        currentImgIdx = (currentImgIdx - 1 + imagensUrls.length) % imagensUrls.length;
+        renderMainImage(currentImgIdx);
+      };
+      navNext.onclick = () => {
+        currentImgIdx = (currentImgIdx + 1) % imagensUrls.length;
+        renderMainImage(currentImgIdx);
+      };
+      // Inicializar galeria
+      renderThumbnails();
+      renderMainImage(currentImgIdx);
+      mainImage.onclick = () => showLightbox(imagensUrls[currentImgIdx]);
       // Detalhes
       const details = [
         { label: 'Marca', value: product.marca },
