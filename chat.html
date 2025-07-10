@@ -66,6 +66,11 @@
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('produto') || urlParams.get('id');
     let vendedorId = urlParams.get('vendedor');
+    // Validação robusta dos parâmetros
+    if (!productId || productId === 'undefined' || !vendedorId || vendedorId === 'undefined') {
+      document.querySelector('.chat-container').innerHTML = `<div class='p-5 text-center text-danger'><h4>Erro: Parâmetros de chat inválidos.<br>Por favor, acesse o chat a partir de um produto válido.</h4></div>`;
+      throw new Error('Parâmetros de chat inválidos: produtoId ou vendedorId ausentes.');
+    }
     let currentUser = null;
     let otherUserId = null;
     let chatId = null;
@@ -76,7 +81,10 @@
       // Buscar produto
       const productRef = doc(db, 'produtos', productId);
       const productSnap = await getDoc(productRef);
-      if (!productSnap.exists()) return alert('Produto não encontrado.');
+      if (!productSnap.exists()) {
+        document.querySelector('.chat-container').innerHTML = `<div class='p-5 text-center text-danger'><h4>Produto não encontrado.</h4></div>`;
+        return;
+      }
       product = productSnap.data();
       // Corrigir vendedorId: sempre buscar do produto se não vier na URL ou se vier como undefined
       if (!vendedorId || vendedorId === 'undefined') {
