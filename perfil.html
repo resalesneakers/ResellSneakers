@@ -4,13 +4,130 @@
   <meta charset="UTF-8" />
   <title>Perfil - ResellSneakers</title>
   <link href="navbar-styles.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    body { background: #f8f9fa; }
+    .profile-header { display: flex; align-items: center; gap: 32px; background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 32px 24px; margin-bottom: 32px; }
+    .profile-header img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 3px solid #e9ecef; }
+    .profile-info { flex: 1; }
+    .profile-info h2 { font-weight: 700; margin-bottom: 8px; }
+    .profile-info .email { color: #666; font-size: 1.1rem; margin-bottom: 8px; }
+    .profile-info .joined { color: #888; font-size: 0.98rem; margin-bottom: 12px; }
+    .profile-stats { display: flex; gap: 32px; margin-bottom: 8px; }
+    .profile-stats .stat { text-align: center; }
+    .profile-stats .stat .value { color: #dc2626; font-size: 1.3rem; font-weight: 700; }
+    .profile-stats .stat .label { color: #444; font-size: 1rem; }
+    .profile-actions { display: flex; gap: 12px; margin-top: 12px; }
+    .products-section { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 24px; }
+    .products-section h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 18px; }
+    .products-list { display: flex; flex-wrap: wrap; gap: 18px; }
+    .product-card { background: #f8f9fa; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); width: 220px; padding: 14px; display: flex; flex-direction: column; align-items: center; }
+    .product-card img { width: 90px; height: 90px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
+    .product-card .prod-name { font-weight: 600; font-size: 1rem; text-align: center; margin-bottom: 4px; }
+    .product-card .prod-price { color: #dc2626; font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+    .product-card .prod-status { font-size: 0.9rem; color: #666; margin-bottom: 4px; }
+    .product-card .btn { font-size: 0.95rem; }
+    @media (max-width: 700px) {
+      .profile-header, .products-section { padding: 12px 4px; }
+      .profile-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .products-list { flex-direction: column; gap: 12px; }
+      .product-card { width: 100%; }
+      .profile-stats { flex-direction: column; gap: 8px; }
+    }
+  </style>
 </head>
 <body>
-    <div id="menu-container"></div>
+  <div id="menu-container"></div>
   <script>fetch('menu.html').then(res => res.text()).then(html => {document.getElementById('menu-container').innerHTML = html;});</script>
   <div class="container mt-4">
-    <h1>O perfil estará disponível em breve!</h1>
-    <a href="home.html">Voltar ao início</a>
+    <div id="profileHeader" class="profile-header"></div>
+    <div class="products-section">
+      <h3>Meus Produtos</h3>
+      <div id="productsList" class="products-list"></div>
+    </div>
+  </div>
+  <script type="module">
+    import { db, storage, auth } from './firebase-config.js';
+    import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    const profileHeader = document.getElementById('profileHeader');
+    const productsList = document.getElementById('productsList');
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'log.html';
+        return;
+      }
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) {
+        profileHeader.innerHTML = '<h2>Usuário não encontrado.</h2>';
+        return;
+      }
+      const u = userSnap.data();
+      let foto = u.foto || user.photoURL || 'images/default-profile.png';
+      if (foto && !foto.startsWith('http') && foto !== 'images/default-profile.png') {
+        try { foto = await getDownloadURL(ref(storage, foto)); } catch {}
+      }
+      const nome = u.nome || user.displayName || user.email || 'Usuário';
+      const email = user.email || '';
+      const joined = u.dataCriacao ? new Date(u.dataCriacao.seconds*1000).toLocaleDateString('pt-PT') : '';
+      // Buscar estatísticas
+      let produtos = 0, vendas = 0, compras = 0, rating = 0.0;
+      // Produtos publicados
+      const qProdutos = query(collection(db, 'produtos'), where('vendedorId', '==', user.uid));
+      const snapProdutos = await getDocs(qProdutos);
+      produtos = snapProdutos.size;
+      // Vendas (produtos vendidos)
+      vendas = snapProdutos.docs.filter(doc => (doc.data().vendido === true)).length;
+      // Compras (pedidos feitos pelo usuário)
+      const qCompras = query(collection(db, 'pedidos'), where('compradorId', '==', user.uid));
+      const snapCompras = await getDocs(qCompras);
+      compras = snapCompras.size;
+      // Classificação (rating médio)
+      if (u.rating) rating = Number(u.rating).toFixed(1);
+      else rating = '0.0';
+      profileHeader.innerHTML = `
+        <img src="${foto}" alt="Foto do usuário">
+        <div class="profile-info">
+          <h2>${nome}</h2>
+          <div class="email"><i class="fa fa-envelope"></i> ${email}</div>
+          <div class="joined"><span class="badge bg-light text-dark">Membro desde</span> ${joined}</div>
+          <div class="profile-stats">
+            <div class="stat"><div class="value">${produtos}</div><div class="label">Produtos</div></div>
+            <div class="stat"><div class="value">${vendas}</div><div class="label">Vendas</div></div>
+            <div class="stat"><div class="value">${compras}</div><div class="label">Compras</div></div>
+            <div class="stat"><div class="value">${rating}</div><div class="label">Classificação</div></div>
           </div>
+          <div class="profile-actions">
+            <a href="editar-perfil.html" class="btn btn-outline-primary"><i class="fa fa-edit"></i> Editar Perfil</a>
+          </div>
+        </div>
+      `;
+      // Carregar produtos do usuário
+      productsList.innerHTML = '<div class="text-muted">Carregando produtos...</div>';
+      if (snapProdutos.empty) {
+        productsList.innerHTML = '<div class="text-muted">Nenhum produto publicado.</div>';
+        return;
+      }
+      let html = '';
+      for (const docSnap of snapProdutos.docs) {
+        const p = docSnap.data();
+        let img = p.imagemPrincipal || (p.imagens && p.imagens[0]) || 'images/no-image.png';
+        if (img && !img.startsWith('http') && img !== 'images/no-image.png') {
+          try { img = await getDownloadURL(ref(storage, img)); } catch {}
+        }
+        html += `<div class="product-card">
+          <img src="${img}" alt="${p.nome}">
+          <div class="prod-name">${p.nome}</div>
+          <div class="prod-price">€${p.preco || '--'}</div>
+          <div class="prod-status">${p.condicao || ''}</div>
+          <a href="produto-detalhe.html?id=${docSnap.id}" class="btn btn-outline-primary btn-sm mt-2">Ver Detalhes</a>
+        </div>`;
+      }
+      productsList.innerHTML = html;
+    });
+  </script>
 </body>
 </html>

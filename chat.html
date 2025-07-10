@@ -64,12 +64,12 @@
       document.getElementById('menu-container').innerHTML = html;
     });
     const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('produto') || urlParams.get('id');
+    const productId = urlParams.get('produto');
     let vendedorId = urlParams.get('vendedor');
     // Validação robusta dos parâmetros
-    if (!productId || productId === 'undefined' || !vendedorId || vendedorId === 'undefined') {
-      document.querySelector('.chat-container').innerHTML = `<div class='p-5 text-center text-danger'><h4>Erro: Parâmetros de chat inválidos.<br>Por favor, acesse o chat a partir de um produto válido.</h4></div>`;
-      throw new Error('Parâmetros de chat inválidos: produtoId ou vendedorId ausentes.');
+    if (!vendedorId || vendedorId === 'undefined') {
+      document.querySelector('.chat-container').innerHTML = `<div class='p-5 text-center text-danger'><h4>Erro: Parâmetro do vendedor ausente.<br>Por favor, acesse o chat a partir de um usuário válido.</h4></div>`;
+      throw new Error('Parâmetro de chat inválido: vendedorId ausente.');
     }
     let currentUser = null;
     let otherUserId = null;
@@ -78,56 +78,67 @@
     onAuthStateChanged(auth, async user => {
       if (!user) return window.location.href = 'log.html';
       currentUser = user;
-      // Buscar produto
-      const productRef = doc(db, 'produtos', productId);
-      const productSnap = await getDoc(productRef);
-      if (!productSnap.exists()) {
-        document.querySelector('.chat-container').innerHTML = `<div class='p-5 text-center text-danger'><h4>Produto não encontrado.</h4></div>`;
-        return;
+      // Se for chat de produto
+      if (productId && productId !== 'undefined') {
+        const productRef = doc(db, 'produtos', productId);
+        const productSnap = await getDoc(productRef);
+        if (!productSnap.exists()) {
+          document.querySelector('.chat-container').innerHTML = `<div class='p-5 text-center text-danger'><h4>Produto não encontrado.</h4></div>`;
+          return;
+        }
+        product = productSnap.data();
+        if (!vendedorId || vendedorId === currentUser.uid) {
+          document.getElementById('userName').textContent = 'Este é o seu produto.';
+          document.getElementById('sendBtn').disabled = true;
+          document.getElementById('messageInput').disabled = true;
+          document.getElementById('userProfileLink').href = `perfil.html?id=${currentUser.uid}`;
+          return;
+        }
+        otherUserId = vendedorId;
+        chatId = [productId, ...[currentUser.uid, otherUserId].sort()].join('_');
+      } else {
+        // Chat direto entre usuários
+        if (vendedorId === currentUser.uid) {
+          document.getElementById('userName').textContent = 'Este é o seu perfil.';
+          document.getElementById('sendBtn').disabled = true;
+          document.getElementById('messageInput').disabled = true;
+          document.getElementById('userProfileLink').href = `perfil.html?id=${currentUser.uid}`;
+          return;
+        }
+        otherUserId = vendedorId;
+        chatId = `direct_${[currentUser.uid, otherUserId].sort().join('_')}`;
       }
-      product = productSnap.data();
-      // Corrigir vendedorId: sempre buscar do produto se não vier na URL ou se vier como undefined
-      if (!vendedorId || vendedorId === 'undefined') {
-        vendedorId = product.vendedorId;
+      // Exibir nome, foto e link do outro usuário
+      const userRef = doc(db, 'users', otherUserId);
+      const userSnap = await getDoc(userRef);
+      let nome = 'Usuário';
+      let foto = 'images/default-profile.png';
+      let email = '';
+      if (userSnap.exists()) {
+        const u = userSnap.data();
+        nome = u.nome || u.displayName || u.email || 'Usuário';
+        foto = u.foto || 'images/default-profile.png';
+        email = u.email || '';
+        document.getElementById('userProfileLink').href = `perfil-vendedor.html?id=${otherUserId}`;
       }
-      if (!vendedorId || vendedorId === currentUser.uid) {
-        document.getElementById('userName').textContent = 'Este é o seu produto.';
-        document.getElementById('sendBtn').disabled = true;
-        document.getElementById('messageInput').disabled = true;
-        document.getElementById('userProfileLink').href = `perfil.html?id=${currentUser.uid}`;
-        return;
+      if (foto && !foto.startsWith('http') && foto !== 'images/default-profile.png') {
+        try { foto = await getDownloadURL(ref(storage, foto)); } catch {}
       }
-      otherUserId = vendedorId;
-      // Gerar chatId único para o par de utilizadores e produto
-      chatId = [productId, ...[currentUser.uid, otherUserId].sort()].join('_');
-      // Exibir nome, foto e link do vendedor
-      const vendedorRef = doc(db, 'users', vendedorId); // corrigido para 'users'
-      const vendedorSnap = await getDoc(vendedorRef);
-      let vendedorNome = 'Vendedor';
-      let vendedorFoto = 'images/default-profile.png';
-      let vendedorEmail = '';
-      if (vendedorSnap.exists()) {
-        const v = vendedorSnap.data();
-        vendedorNome = v.nome || v.displayName || v.email || 'Vendedor';
-        vendedorFoto = v.foto || 'images/default-profile.png';
-        vendedorEmail = v.email || '';
-        document.getElementById('userProfileLink').href = `perfil.html?id=${vendedorId}`;
-      }
-      // Se a foto for caminho do Storage, buscar downloadURL
-      if (vendedorFoto && !vendedorFoto.startsWith('http') && vendedorFoto !== 'images/default-profile.png') {
-        try { vendedorFoto = await getDownloadURL(ref(storage, vendedorFoto)); } catch {}
-      }
-      document.getElementById('userName').textContent = vendedorNome;
-      document.getElementById('userPhoto').src = vendedorFoto;
-      document.getElementById('userSubtitle').textContent = vendedorEmail;
-      // Mini-card do produto
+      document.getElementById('userName').textContent = nome;
+      document.getElementById('userPhoto').src = foto;
+      document.getElementById('userSubtitle').textContent = email;
+      // Mini-card do produto (apenas se houver produto)
       const miniCard = document.getElementById('productMiniCard');
-      miniCard.style.display = 'flex';
-      let prodImg = product.imagemPrincipal || (product.imagens && product.imagens[0]) || 'images/banner1.png';
-      if (prodImg && !prodImg.startsWith('http') && prodImg !== 'images/banner1.png') {
-        try { prodImg = await getDownloadURL(ref(storage, prodImg)); } catch {}
+      if (product) {
+        miniCard.style.display = 'flex';
+        let prodImg = product.imagemPrincipal || (product.imagens && product.imagens[0]) || 'images/banner1.png';
+        if (prodImg && !prodImg.startsWith('http') && prodImg !== 'images/banner1.png') {
+          try { prodImg = await getDownloadURL(ref(storage, prodImg)); } catch {}
+        }
+        miniCard.innerHTML = `<img src='${prodImg}' alt='Produto'><div class='prod-info'><div class='prod-name'>${product.nome}</div><div class='prod-price'>€${product.preco || '--'}</div></div><a href='produto-detalhe.html?id=${productId}' class='btn btn-link p-0'>Ver Produto</a>`;
+      } else {
+        miniCard.style.display = 'none';
       }
-      miniCard.innerHTML = `<img src='${prodImg}' alt='Produto'><div class='prod-info'><div class='prod-name'>${product.nome}</div><div class='prod-price'>€${product.preco || '--'}</div></div><a href='produto-detalhe.html?id=${productId}' class='btn btn-link p-0'>Ver Produto</a>`;
       // Ouvir mensagens em tempo real
       const mensagensRef = collection(db, 'conversas', chatId, 'mensagens');
       const mensagensQuery = query(mensagensRef, orderBy('timestamp'));
@@ -161,7 +172,7 @@
           text,
           from: currentUser.uid,
           to: otherUserId,
-          productId,
+          productId: productId || null,
           timestamp: serverTimestamp()
         });
       };
