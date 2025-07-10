@@ -22,22 +22,41 @@
       <h1><i class="fa fa-comments"></i> As Suas Mensagens</h1>
       <p>Selecione uma conversa ou inicie uma nova a partir de um produto.</p>
     </div>
-    <div class="messages-list" id="messages-list"></div>
-    <div class="chat-area" id="chat-area"><div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Selecione uma conversa para ver as mensagens.</h5></div></div>
+    <div class="row g-4">
+      <div class="col-12 col-md-4">
+        <div class="messages-list" id="messages-list"></div>
+      </div>
+      <div class="col-12 col-md-8">
+        <div class="chat-area" id="chat-area"><div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Selecione uma conversa para ver as mensagens.</h5></div></div>
+        <form id="sendMsgForm" class="d-none mt-3" style="display:flex;gap:8px;">
+          <input type="text" id="msgInput" class="form-control" placeholder="Digite sua mensagem..." autocomplete="off" />
+          <button type="submit" class="btn btn-primary"><i class="fa fa-paper-plane"></i></button>
+        </form>
+      </div>
+    </div>
   </div>
   <script type="module">
     import { auth, db } from './firebase-config.js';
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { collection, query, where, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { collection, query, where, onSnapshot, doc, getDoc, addDoc, orderBy, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
     const messagesList = document.getElementById('messages-list');
     const chatArea = document.getElementById('chat-area');
-    onAuthStateChanged(auth, user => {
-      if (!user) return (window.location.href = "log.html");
+    const sendMsgForm = document.getElementById('sendMsgForm');
+    const msgInput = document.getElementById('msgInput');
+    let currentConvId = null;
+    let user = null;
+    onAuthStateChanged(auth, u => {
+      if (!u) return (window.location.href = "log.html");
+      user = u;
+      carregarConversas();
+    });
+    function carregarConversas() {
       messagesList.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin fa-2x mb-2"></i><h5>A carregar...</h5></div>`;
       onSnapshot(query(collection(db, "conversas"), where("participantes", "array-contains", user.uid)), async (convsSnap) => {
         if (convsSnap.empty) {
           messagesList.innerHTML = "<div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Sem conversas ainda.</h5></div>";
           chatArea.innerHTML = "<div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Selecione uma conversa para ver as mensagens.</h5></div>";
+          sendMsgForm.classList.add('d-none');
           return;
         }
         let html = '';
@@ -47,7 +66,7 @@
           let nome = 'Outro utilizador';
           let foto = 'images/default-profile.png';
           if (otherId) {
-            const userRef = doc(db, 'usuarios', otherId);
+            const userRef = doc(db, 'users', otherId); // padronizado para 'users'
             const userSnap = await getDoc(userRef);
             if (userSnap.exists()) {
               const u = userSnap.data();
@@ -55,14 +74,58 @@
               foto = u.foto || 'images/default-profile.png';
             }
           }
-          html += `<div class='d-flex align-items-center gap-3 mb-3' style='cursor:pointer;' onclick='window.open("chat.html?id=${docSnap.id}", "_self")'>
+          html += `<div class='d-flex align-items-center gap-3 mb-3 conv-item' style='cursor:pointer;' data-id='${docSnap.id}'>
             <img src='${foto}' alt='Foto' style='width:48px;height:48px;border-radius:50%;object-fit:cover;'>
             <div><div style='font-weight:600;'>${nome}</div><div style='font-size:0.95em;color:#888;'>${conv.ultimaMensagem || 'Sem mensagens ainda.'}</div></div>
           </div>`;
         }
         messagesList.innerHTML = html;
+        document.querySelectorAll('.conv-item').forEach(item => {
+          item.onclick = () => abrirConversa(item.getAttribute('data-id'));
+        });
       });
-    });
+    }
+    function abrirConversa(convId) {
+      currentConvId = convId;
+      chatArea.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin fa-2x mb-2"></i><h5>Carregando mensagens...</h5></div>`;
+      sendMsgForm.classList.remove('d-none');
+      msgInput.value = '';
+      const msgsRef = collection(db, "conversas", convId, "mensagens");
+      onSnapshot(query(msgsRef, orderBy("data", "asc")), (msgsSnap) => {
+        if (msgsSnap.empty) {
+          chatArea.innerHTML = "<div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Sem mensagens ainda.</h5></div>";
+          return;
+        }
+        let html = '<div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">';
+        msgsSnap.forEach(docSnap => {
+          const m = docSnap.data();
+          const isMe = m.remetente === user.uid;
+          html += `<div style='align-self:${isMe ? 'flex-end' : 'flex-start'};background:${isMe ? '#e0e7ff' : '#f1f5f9'};padding:8px 14px;border-radius:12px;max-width:70%;'>
+            <div style='font-size:0.98em;'>${m.texto}</div>
+            <div style='font-size:0.8em;color:#888;text-align:right;'>${m.data?.toDate ? m.data.toDate().toLocaleString('pt-PT') : ''}</div>
+          </div>`;
+        });
+        html += '</div>';
+        chatArea.innerHTML = html;
+        chatArea.scrollTop = chatArea.scrollHeight;
+      });
+    }
+    sendMsgForm.onsubmit = async (e) => {
+      e.preventDefault();
+      if (!currentConvId || !msgInput.value.trim()) return;
+      const msgsRef = collection(db, "conversas", currentConvId, "mensagens");
+      await addDoc(msgsRef, {
+        texto: msgInput.value,
+        remetente: user.uid,
+        data: serverTimestamp()
+      });
+      // Atualizar última mensagem na conversa
+      await updateDoc(doc(db, "conversas", currentConvId), {
+        ultimaMensagem: msgInput.value,
+        ultimaData: serverTimestamp()
+      });
+      msgInput.value = '';
+    };
   </script>
 </body>
 </html>

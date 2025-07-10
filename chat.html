@@ -56,10 +56,9 @@
   </div>
   <script type="module">
     import { auth, db, storage } from './firebase-config.js';
-    import { getDoc, doc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getDoc, doc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
     import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
-    import { getDatabase, ref as dbRef, onValue, set, serverTimestamp as rtdbTimestamp, onDisconnect } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
     // Carregar menu universal
     fetch('menu.html').then(res => res.text()).then(html => {
       document.getElementById('menu-container').innerHTML = html;
@@ -74,11 +73,6 @@
     onAuthStateChanged(auth, async user => {
       if (!user) return window.location.href = 'log.html';
       currentUser = user;
-      // Presence: marcar como online no RTDB
-      const rtdb = getDatabase();
-      const userStatusRef = dbRef(rtdb, `status/${currentUser.uid}`);
-      set(userStatusRef, { state: 'online', lastChanged: Date.now() });
-      onDisconnect(userStatusRef).set({ state: 'offline', lastChanged: Date.now() });
       // Buscar produto
       const productRef = doc(db, 'produtos', productId);
       const productSnap = await getDoc(productRef);
@@ -96,23 +90,16 @@
       // Gerar chatId único para o par de utilizadores e produto
       chatId = [productId, ...[currentUser.uid, otherUserId].sort()].join('_');
       // Exibir nome, foto e link do vendedor
-      const vendedorRef = doc(db, 'usuarios', vendedor);
+      const vendedorRef = doc(db, 'users', vendedor); // corrigido para 'users'
       const vendedorSnap = await getDoc(vendedorRef);
       let vendedorNome = 'Vendedor';
       let vendedorFoto = 'images/default-profile.png';
-      let vendedorOnline = 'Offline';
+      let vendedorEmail = '';
       if (vendedorSnap.exists()) {
         const v = vendedorSnap.data();
         vendedorNome = v.nome || v.displayName || v.email || 'Vendedor';
         vendedorFoto = v.foto || 'images/default-profile.png';
-        // Buscar estado online/offline (Realtime Database)
-        const rtdb = getDatabase();
-        const statusRef = dbRef(rtdb, `status/${vendedor}`);
-        onValue(statusRef, (snap) => {
-          const val = snap.val();
-          vendedorOnline = (val && val.state === 'online') ? 'Online' : 'Offline';
-          document.getElementById('userSubtitle').textContent = vendedorOnline;
-        });
+        vendedorEmail = v.email || '';
         document.getElementById('userProfileLink').href = `perfil.html?id=${vendedor}`;
       }
       // Se a foto for caminho do Storage, buscar downloadURL
@@ -121,10 +108,7 @@
       }
       document.getElementById('userName').textContent = vendedorNome;
       document.getElementById('userPhoto').src = vendedorFoto;
-      // Mostrar nome/email do utilizador autenticado no topo do chat
-      const myName = currentUser.displayName || currentUser.email || 'Eu';
-      document.title = `Chat com ${vendedorNome} - ${myName}`;
-      // Opcional: mostrar também o nome do utilizador autenticado em algum local do chat
+      document.getElementById('userSubtitle').textContent = vendedorEmail;
       // Mini-card do produto
       const miniCard = document.getElementById('productMiniCard');
       miniCard.style.display = 'flex';
