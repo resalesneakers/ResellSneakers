@@ -130,10 +130,35 @@ function configurarFiltrosInteligentes() {
   }
 }
 
+// Toast para feedback visual
+function showToast(msg, success = true) {
+  let toast = document.getElementById('toast-feedback');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast-feedback';
+    toast.style.position = 'fixed';
+    toast.style.bottom = '30px';
+    toast.style.right = '30px';
+    toast.style.zIndex = '9999';
+    toast.style.padding = '16px 28px';
+    toast.style.borderRadius = '12px';
+    toast.style.background = success ? '#28a745' : '#dc3545';
+    toast.style.color = 'white';
+    toast.style.fontWeight = 'bold';
+    toast.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
+    toast.style.fontSize = '1rem';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.background = success ? '#28a745' : '#dc3545';
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 2000);
+}
+
 window.toggleFavorito = async function(produtoId) {
   const user = auth.currentUser;
   if (!user) {
-    alert('Faça login para favoritar produtos.');
+    showToast('Faça login para favoritar produtos.', false);
     return;
   }
   const favRef = query(collection(db, "favoritos"), where("userId", "==", user.uid), where("produtoId", "==", produtoId));
@@ -145,12 +170,18 @@ window.toggleFavorito = async function(produtoId) {
     favoritosIds.add(produtoId);
     wishlistIcon.classList.remove('far');
     wishlistIcon.classList.add('fas');
+    wishlistIcon.classList.add('animate__animated', 'animate__bounceIn');
+    showToast('Adicionado aos favoritos!');
+    setTimeout(() => wishlistIcon.classList.remove('animate__animated', 'animate__bounceIn'), 800);
   } else {
     // Remover favorito
     await deleteDoc(favSnap.docs[0].ref);
     favoritosIds.delete(produtoId);
     wishlistIcon.classList.remove('fas');
     wishlistIcon.classList.add('far');
+    wishlistIcon.classList.add('animate__animated', 'animate__fadeOut');
+    showToast('Removido dos favoritos.', false);
+    setTimeout(() => wishlistIcon.classList.remove('animate__animated', 'animate__fadeOut'), 800);
   }
 };
 

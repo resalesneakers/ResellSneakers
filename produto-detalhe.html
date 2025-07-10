@@ -516,41 +516,39 @@
       document.getElementById('menu-container').innerHTML = html;
     });
   </script>
-  <div class="container py-4">
-    <nav class="breadcrumb bg-white rounded mb-4 px-3 py-2">
-      <a href="produtos.html" class="back-button">← Voltar aos produtos</a>
-      <span id="breadcrumbProduto" class="ms-2">Sneakers</span>
+  <div class="container">
+    <nav class="breadcrumb mt-4">
+      <a href="home.html">← Voltar aos produtos Sneakers</a>
+      <span id="breadcrumbProduto"></span>
     </nav>
-    <div class="product-section d-flex flex-wrap">
-      <div class="image-gallery">
-        <img src="images/no-image.png" alt="Imagem principal" class="main-image mb-3 rounded shadow" id="mainImage" loading="lazy">
+    <div class="product-section row g-4">
+      <div class="col-12 col-md-5 image-gallery">
+        <img id="mainImage" src="https://via.placeholder.com/400x400?text=Sem+Imagem" class="main-image mb-2" alt="Imagem principal">
         <div class="thumbnail-grid"></div>
       </div>
-      <div class="product-info-col">
-        <h1 class="product-title fw-bold mb-2">...</h1>
-        <div class="product-subtitle text-muted mb-3"></div>
-        <div class="d-flex align-items-center mb-3">
-          <span class="current-price display-5 fw-bold me-3">...</span>
-          <span class="condition-badge ms-2"></span>
-          <span class="badge bg-warning ms-2 d-none" id="estoqueBaixo">Últimas unidades!</span>
+      <div class="col-12 col-md-7 product-info-col">
+        <div class="product-title"></div>
+        <div class="product-subtitle"></div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="current-price"></span>
+          <span class="badge bg-light text-dark condition-badge"></span>
+          <span id="estoqueBaixo" class="badge bg-danger d-none">Estoque Baixo!</span>
         </div>
-        <div class="mb-3" id="sizeSelector"></div>
-        <div class="mb-3">
-          <button class="btn btn-primary btn-lg me-2 w-100 mb-2" id="btnComprar">Comprar Agora</button>
-          <button class="btn btn-outline-dark btn-lg w-100 mb-2" id="btnCarrinho">Adicionar ao Carrinho</button>
-          <button class="btn btn-outline-secondary w-100 mb-2" id="btnFavorito">💙 Adicionar aos Favoritos</button>
-          <button class="btn btn-success w-100 mb-2 d-flex align-items-center justify-content-center gap-2" id="btnChatVendedor"><i class="bi bi-chat-dots"></i> Conversar com o Vendedor</button>
-          <button class="btn btn-outline-info w-100 mb-2" id="btnCompartilhar">🔗 Compartilhar</button>
+        <div id="detailsGrid"></div>
+        <div id="sizeSelector"></div>
+        <div class="d-flex gap-2 flex-wrap mt-3">
+          <button class="btn btn-dark btn-lg flex-grow-1" id="btnComprar">Comprar Agora</button>
+          <button class="btn btn-outline-dark btn-lg flex-grow-1" id="btnCarrinho">Adicionar ao Carrinho</button>
+          <button class="btn btn-outline-primary btn-lg flex-grow-1" id="btnFavorito">💙 Adicionar aos Favoritos</button>
         </div>
-        <div class="product-details mb-4">
-          <h3 class="details-title mb-3">Detalhes do Produto</h3>
-          <div class="details-grid" id="detailsGrid"></div>
+        <div class="d-flex gap-2 flex-wrap mt-2">
+          <button class="btn btn-success flex-grow-1" id="btnChatVendedor"><i class="bi bi-chat-dots"></i> Conversar com o Vendedor</button>
+          <button class="btn btn-outline-info flex-grow-1" id="btnCompartilhar"><i class="bi bi-share"></i> Compartilhar</button>
         </div>
-        <div class="seller-info mb-4" id="sellerInfo"></div>
-        <div class="product-reviews mb-4" id="reviews"></div>
-        <div class="suggested-products mb-4" id="suggestedProducts"></div>
+        <div id="sellerInfo" class="mt-4"></div>
       </div>
     </div>
+    <div id="suggestedProducts" class="mt-5"></div>
   </div>
 
   <!-- Lightbox Modal -->
@@ -563,63 +561,81 @@
   </div>
 
   <script type="module">
-    import { auth, db, storage } from "./firebase-config.js";
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { doc, getDoc, collection, query, where, limit, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs, addDoc, setDoc, updateDoc, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    import { firebaseConfig } from './firebase-config.js';
 
-    function showLightbox(url) {
-      document.getElementById('lightboxImg').src = url;
-      const modal = new bootstrap.Modal(document.getElementById('lightboxModal'));
-      modal.show();
+    // Toast para feedback visual
+    function showToast(msg, success = true) {
+      let toast = document.getElementById('toast-feedback');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast-feedback';
+        toast.style.position = 'fixed';
+        toast.style.bottom = '30px';
+        toast.style.right = '30px';
+        toast.style.zIndex = '9999';
+        toast.style.padding = '16px 28px';
+        toast.style.borderRadius = '12px';
+        toast.style.background = success ? '#28a745' : '#dc3545';
+        toast.style.color = 'white';
+        toast.style.fontWeight = 'bold';
+        toast.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
+        toast.style.fontSize = '1rem';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.style.background = success ? '#28a745' : '#dc3545';
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2000);
     }
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = 'log.html';
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // Obter ID do produto da URL
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+    if (!productId) {
+      document.body.innerHTML = '<div class="container py-5 text-center"><h2>Produto não encontrado.</h2></div>';
+      throw new Error('Produto não encontrado');
+    }
+
+    let user = null;
+    let product = null;
+
+    onAuthStateChanged(auth, async (u) => {
+      user = u;
+      await carregarProduto();
+    });
+
+    async function carregarProduto() {
+      const docRef = doc(db, 'produtos', productId);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        document.body.innerHTML = '<div class="container py-5 text-center"><h2>Produto não encontrado.</h2></div>';
         return;
       }
-      const urlParams = new URLSearchParams(window.location.search);
-      const productId = urlParams.get('id');
-      if (!productId) {
-        alert('Produto não encontrado.');
-        return;
-      }
-      // Registrar visualização no histórico
-      try {
-        await addDoc(collection(db, 'historico_usuario'), {
-          userId: user.uid,
-          produtoId: productId,
-          acao: 'visualizacao',
-          timestamp: new Date()
-        });
-      } catch (e) { console.warn('Não foi possível registrar histórico:', e); }
-      const productRef = doc(db, 'produtos', productId);
-      const productSnap = await getDoc(productRef);
-      if (!productSnap.exists()) {
-        alert('Produto não encontrado.');
-        return;
-      }
-      const product = productSnap.data();
-      // Título, marca, preço, condição
+      product = docSnap.data();
+      // Título, subtítulo, preço, condição
       document.querySelector('.product-title').textContent = product.nome || 'Produto';
       document.querySelector('.product-subtitle').textContent = product.marca || '';
       document.querySelector('.current-price').textContent = product.preco ? `€${product.preco}` : '--';
-      // Condição badge
       let condBadge = document.querySelector('.condition-badge');
       condBadge.textContent = product.condicao || 'Usado';
       condBadge.classList.remove('condition-new', 'condition-used');
       condBadge.classList.add(product.condicao === 'Novo' ? 'condition-new' : 'condition-used');
-      // Estoque baixo
       if (product.estoque && product.estoque <= 3) {
         document.getElementById('estoqueBaixo').classList.remove('d-none');
       }
-      // Breadcrumb
       document.getElementById('breadcrumbProduto').textContent = `${product.marca || ''} > ${product.nome || ''}`;
       // Galeria de imagens
       const mainImage = document.getElementById('mainImage');
       let mainUrl = 'https://via.placeholder.com/400x400?text=Sem+Imagem';
-      // Se houver imagemPrincipal, usa ela; senão, usa a primeira do array imagens
       if (product.imagemPrincipal) {
         try {
           const imgRef = ref(storage, product.imagemPrincipal);
@@ -636,11 +652,12 @@
         mainImage.src = mainUrl;
       }
       // Miniaturas
+      const thumbGrid = document.querySelector('.thumbnail-grid');
+      thumbGrid.innerHTML = '';
       if (product.imagens && Array.isArray(product.imagens) && product.imagens.length > 0) {
-        const thumbGrid = document.querySelector('.thumbnail-grid');
-        thumbGrid.innerHTML = '';
-        product.imagens.forEach(async (path, idx) => {
+        for (let idx = 0; idx < product.imagens.length; idx++) {
           try {
+            const path = product.imagens[idx];
             const thumbRef = ref(storage, path);
             const thumbUrl = await getDownloadURL(thumbRef);
             const img = document.createElement('img');
@@ -653,12 +670,10 @@
               mainImage.src = thumbUrl;
             };
             img.ondblclick = () => showLightbox(thumbUrl);
-            // Deixa a primeira miniatura ativa
             if (idx === 0 && !product.imagemPrincipal) img.classList.add('active');
             thumbGrid.appendChild(img);
           } catch {}
-        });
-        // Lightbox na imagem principal
+        }
         mainImage.onclick = () => showLightbox(mainImage.src);
       }
       // Detalhes do produto
@@ -682,7 +697,6 @@
       if (product.tamanhos && Array.isArray(product.tamanhos) && product.tamanhos.length > 0) {
         const sizeSelector = document.getElementById('sizeSelector');
         sizeSelector.innerHTML = `<div class='size-title mb-2'>Selecionar Tamanho</div><div class='size-grid mb-2'>${product.tamanhos.map(t => `<div class='size-option'>${t}</div>`).join('')}</div>`;
-        // Seleção de tamanho
         sizeSelector.querySelectorAll('.size-option').forEach(opt => {
           opt.onclick = function() {
             sizeSelector.querySelectorAll('.size-option').forEach(o => o.classList.remove('selected'));
@@ -725,22 +739,38 @@
       // Favoritos (Firestore)
       const favBtn = document.getElementById('btnFavorito');
       async function atualizarFavoritoBtn() {
+        if (!user) {
+          favBtn.textContent = '💙 Adicionar aos Favoritos';
+          favBtn.classList.remove('btn-danger');
+          favBtn.classList.add('btn-outline-primary');
+          return;
+        }
         const favRef = query(collection(db, "favoritos"), where("userId", "==", user.uid), where("produtoId", "==", productId));
         const favSnap = await getDocs(favRef);
         if (favSnap.empty) {
           favBtn.textContent = '💙 Adicionar aos Favoritos';
+          favBtn.classList.remove('btn-danger');
+          favBtn.classList.add('btn-outline-primary');
         } else {
           favBtn.textContent = '❤️ Nos Favoritos';
+          favBtn.classList.remove('btn-outline-primary');
+          favBtn.classList.add('btn-danger');
         }
       }
       atualizarFavoritoBtn();
       favBtn.onclick = async () => {
+        if (!user) {
+          showToast('Faça login para favoritar produtos.', false);
+          return;
+        }
         const favRef = query(collection(db, "favoritos"), where("userId", "==", user.uid), where("produtoId", "==", productId));
         const favSnap = await getDocs(favRef);
         if (favSnap.empty) {
           await addDoc(collection(db, "favoritos"), { userId: user.uid, produtoId: productId });
+          showToast('Adicionado aos favoritos!');
         } else {
           await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js').then(({ deleteDoc }) => deleteDoc(favSnap.docs[0].ref));
+          showToast('Removido dos favoritos.', false);
         }
         atualizarFavoritoBtn();
       };
@@ -750,16 +780,17 @@
       };
       // Adicionar ao carrinho
       document.getElementById('btnCarrinho').onclick = async () => {
-        // Exemplo: adicionar ao carrinho do Firestore
+        if (!user) {
+          showToast('Faça login para adicionar ao carrinho.', false);
+          return;
+        }
         const carrinhoRef = doc(db, 'carrinhos', user.uid);
         let carrinhoSnap = await getDoc(carrinhoRef);
         let produtos = carrinhoSnap.exists() ? (carrinhoSnap.data().produtos || []) : [];
         if (!produtos.includes(productId)) produtos.push(productId);
-        await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js').then(({ setDoc }) => setDoc(carrinhoRef, { produtos }));
-        document.getElementById('btnCarrinho').textContent = '✓ Adicionado ao Carrinho!';
-        setTimeout(() => {
-          document.getElementById('btnCarrinho').textContent = 'Adicionar ao Carrinho';
-        }, 2000);
+        await setDoc(carrinhoRef, { produtos });
+        showToast('Adicionado ao carrinho!');
+        setTimeout(() => window.location.href = 'carrinho.html', 1000);
       };
       // Compartilhar
       document.getElementById('btnCompartilhar').onclick = () => {
@@ -768,7 +799,7 @@
           navigator.share({ title: product.nome, url });
         } else {
           navigator.clipboard.writeText(url);
-          alert('Link copiado!');
+          showToast('Link copiado!');
         }
       };
       // Sugestão de produtos
@@ -797,7 +828,29 @@
         document.getElementById('tw-desc').content = product.descricao || 'Veja detalhes do sneaker no ResellSneakers.';
         document.getElementById('tw-image').content = product.imagemPrincipal || 'images/banner1.png';
       }
-    });
+    }
+    // Lightbox para imagens
+    function showLightbox(url) {
+      const overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.top = 0;
+      overlay.style.left = 0;
+      overlay.style.width = '100vw';
+      overlay.style.height = '100vh';
+      overlay.style.background = 'rgba(0,0,0,0.8)';
+      overlay.style.display = 'flex';
+      overlay.style.alignItems = 'center';
+      overlay.style.justifyContent = 'center';
+      overlay.style.zIndex = 9999;
+      overlay.onclick = () => document.body.removeChild(overlay);
+      const img = document.createElement('img');
+      img.src = url;
+      img.style.maxWidth = '90vw';
+      img.style.maxHeight = '90vh';
+      img.style.borderRadius = '16px';
+      overlay.appendChild(img);
+      document.body.appendChild(overlay);
+    }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 </body>
