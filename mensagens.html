@@ -234,50 +234,56 @@
       document.getElementById('menu-container').innerHTML = html;
     });
   </script>
-  <div class="container">
-    <header>
-      <div class="logo">ResellSneakers</div>
-      <div class="nav-links">
-        <a href="home.html">Início</a>
-        <a href="produto.html">Produtos</a>
-        <a href="mensagens.html" class="active">Mensagens</a>
-        <a href="perfil.html">Perfil</a>
-      </div>
-    </header>
-
-    <div class="chat-container">
-    <div class="conversations" id="conversation-list"></div>
-     <div class="chat-area" id="chat-area">
-        <div class="empty-state" id="empty-chat">
-          <i class="fas fa-comments fa-2x"></i>
-          <h3>As Suas Mensagens</h3>
-          <p>Selecione uma conversa ou inicie uma nova a partir de um produto.</p>
-        </div>
-
-        <div id="active-chat" style="display: none; flex-direction: column; height: 100%;">
-          <div class="chat-header">
-            <div class="user-avatar">
-              <img id="chat-user-avatar" src="https://via.placeholder.com/50" alt="Avatar">
+  <div class="container-fluid py-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10">
+        <div class="card shadow-lg rounded-4 overflow-hidden" style="min-height: 70vh;">
+          <div class="row g-0">
+            <!-- Conversas -->
+            <div class="col-12 col-md-4 border-end bg-white" style="min-height: 400px; max-height: 70vh; overflow-y: auto;">
+              <div class="p-3 border-bottom">
+                <h5 class="fw-bold mb-0"><i class="fas fa-comments"></i> Conversas</h5>
+              </div>
+              <div id="conversation-list" class="list-group list-group-flush"></div>
+              <div id="conversations-loading" class="text-center py-4 text-muted" style="display:none;">A carregar conversas...</div>
+              <div id="conversations-empty" class="text-center py-4 text-muted" style="display:none;">Sem conversas.</div>
             </div>
-            <div>
-              <div class="user-name" id="chat-user-name">Utilizador</div>
-              <div class="last-seen" id="chat-user-status">Visto recentemente</div>
+            <!-- Chat -->
+            <div class="col-12 col-md-8 bg-light d-flex flex-column" style="min-height: 400px; max-height: 70vh;">
+              <div id="chat-area" class="flex-grow-1 d-flex flex-column justify-content-between" style="height:100%;">
+                <div id="empty-chat" class="d-flex flex-column align-items-center justify-content-center h-100 text-muted" style="min-height:300px;">
+                  <i class="fas fa-comments fa-3x mb-3"></i>
+                  <h4>As Suas Mensagens</h4>
+                  <p>Selecione uma conversa ou inicie uma nova a partir de um produto.</p>
+                </div>
+                <div id="active-chat" style="display: none; flex-direction: column; height: 100%;">
+                  <div class="chat-header d-flex align-items-center border-bottom p-3 bg-white">
+                    <div class="user-avatar me-3">
+                      <img id="chat-user-avatar" src="https://via.placeholder.com/50" alt="Avatar">
+                    </div>
+                    <div>
+                      <div class="user-name fw-bold" id="chat-user-name">Utilizador</div>
+                      <div class="last-seen small text-muted" id="chat-user-status">Online agora</div>
+                    </div>
+                    <div class="product-info ms-auto d-flex align-items-center bg-light rounded px-2 py-1" id="product-info">
+                      <img id="product-image" src="https://via.placeholder.com/30" alt="Produto" class="me-2">
+                      <span id="product-name">Produto</span>
+                    </div>
+                  </div>
+                  <div class="messages flex-grow-1 p-3" id="messages-container" style="overflow-y:auto;"></div>
+                  <div class="input-area d-flex align-items-center border-top p-3 bg-white">
+                    <div class="image-upload me-2">
+                      <label title="Anexar Imagem" style="cursor:pointer;">
+                        <i class="fas fa-paperclip fa-lg"></i>
+                        <input type="file" id="image-upload" accept="image/*" style="display:none;">
+                      </label>
+                    </div>
+                    <input type="text" id="message-input" class="form-control me-2" placeholder="Escreva uma mensagem...">
+                    <button id="send-button" class="btn btn-primary" title="Enviar"><i class="fas fa-paper-plane"></i></button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="product-info" id="product-info">
-              <img id="product-image" src="https://via.placeholder.com/30" alt="Produto">
-              <span id="product-name">Produto</span>
-            </div>
-          </div>
-
-          <div class="messages" id="messages-container"></div>
-
-          <div class="input-area">
-            <div class="image-upload">
-              <button title="Anexar Imagem">📷</button>
-              <input type="file" id="image-upload" accept="image/*">
-            </div>
-            <input type="text" id="message-input" placeholder="Escreva uma mensagem...">
-            <button id="send-button" title="Enviar">📤</button>
           </div>
         </div>
       </div>
@@ -292,17 +298,14 @@
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
     import { firebaseConfig } from './firebase-config.js';
 
-    // Carregar menu universal
-    // fetch('menu.html').then(res => res.text()).then(html => {
-    //   document.getElementById('menu-container').innerHTML = html;
-    // });
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
 
     const conversationsList = document.getElementById("conversation-list");
+    const conversationsLoading = document.getElementById("conversations-loading");
+    const conversationsEmpty = document.getElementById("conversations-empty");
     const messagesContainer = document.getElementById("messages-container");
     const messageInput = document.getElementById("message-input");
     const sendButton = document.getElementById("send-button");
@@ -330,9 +333,18 @@
     });
 
     function carregarConversas() {
+      conversationsLoading.style.display = 'block';
+      conversationsEmpty.style.display = 'none';
+      conversationsList.innerHTML = '';
       const q = query(collection(db, "conversas"), where("participants", "array-contains", currentUser.uid));
       onSnapshot(q, async snapshot => {
-        conversationsList.innerHTML = "";
+        conversationsLoading.style.display = 'none';
+        conversationsList.innerHTML = '';
+        if (snapshot.empty) {
+          conversationsEmpty.style.display = 'block';
+          return;
+        }
+        conversationsEmpty.style.display = 'none';
         for (const docSnap of snapshot.docs) {
           const conversa = docSnap.data();
           const chatId = docSnap.id;
@@ -341,26 +353,28 @@
           const userData = userDoc.exists() ? userDoc.data() : { nome: "Utilizador", foto: "" };
           const produtoDoc = await getDoc(doc(db, "produtos", conversa.produtoId));
           const produto = produtoDoc.exists() ? produtoDoc.data() : { nome: "Produto", imagemPrincipal: "" };
-          const div = document.createElement("div");
-          div.classList.add("conversation");
+          const div = document.createElement("button");
+          div.className = "list-group-item list-group-item-action d-flex align-items-center gap-2 conversation-btn";
           div.dataset.chatId = chatId;
           div.dataset.receiverId = otherUserId;
-          div.onclick = () => abrirConversa(chatId, otherUserId, userData, produto);
+          div.onclick = () => abrirConversa(chatId, otherUserId, userData, produto, div);
           div.innerHTML = `
-            <div class="user-avatar">
-              <img src="${userData.foto || 'https://via.placeholder.com/50'}" alt="Avatar">
-            </div>
-            <div class="conversation-info">
-              <div class="user-name">${userData.nome}</div>
-              <div class="last-message">${conversa.lastMessage || ''}</div>
-            </div>
+            <span class="user-avatar"><img src="${userData.foto || 'https://via.placeholder.com/50'}" alt="Avatar" style="width:40px;height:40px;border-radius:50%;object-fit:cover;"></span>
+            <span class="flex-grow-1">
+              <span class="fw-bold">${userData.nome}</span><br>
+              <span class="text-muted small">${conversa.lastMessage || ''}</span>
+            </span>
+            <span class="badge bg-light text-dark">${produto.nome || ''}</span>
           `;
           conversationsList.appendChild(div);
         }
       });
     }
 
-    function abrirConversa(chatId, receiverId, userData, produto) {
+    function abrirConversa(chatId, receiverId, userData, produto, btn) {
+      // Estado visual
+      document.querySelectorAll('.conversation-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
       currentChatId = chatId;
       currentReceiverId = receiverId;
       currentProduct = produto;
