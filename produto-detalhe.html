@@ -112,17 +112,36 @@
       if (product.imagemPrincipal) {
         try {
           let url = product.imagemPrincipal;
-          if (!url.startsWith('http')) url = await getDownloadURL(ref(storage, url));
-          mainUrl = url;
-          imagensUrls.push(url);
+          if (url.startsWith('http')) {
+            mainUrl = url;
+            imagensUrls.push(url);
+          } else {
+            // Tenta buscar downloadURL, se falhar usa o caminho como fallback
+            try {
+              const downloadUrl = await getDownloadURL(ref(storage, url));
+              mainUrl = downloadUrl;
+              imagensUrls.push(downloadUrl);
+            } catch {
+              mainUrl = url;
+              imagensUrls.push(url);
+            }
+          }
         } catch {}
       }
       if (product.imagens && Array.isArray(product.imagens) && product.imagens.length > 0) {
         for (let idx = 0; idx < product.imagens.length; idx++) {
           try {
             let path = product.imagens[idx];
-            if (!path.startsWith('http')) path = await getDownloadURL(ref(storage, path));
-            if (!imagensUrls.includes(path)) imagensUrls.push(path);
+            if (path.startsWith('http')) {
+              if (!imagensUrls.includes(path)) imagensUrls.push(path);
+            } else {
+              try {
+                const downloadUrl = await getDownloadURL(ref(storage, path));
+                if (!imagensUrls.includes(downloadUrl)) imagensUrls.push(downloadUrl);
+              } catch {
+                if (!imagensUrls.includes(path)) imagensUrls.push(path);
+              }
+            }
           } catch {}
         }
       }
