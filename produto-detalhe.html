@@ -52,13 +52,13 @@
         <div class="thumbnail-grid" id="thumbnailGrid"></div>
       </div>
       <div class="col-12 col-md-7 product-info-col">
-        <div class="product-title" id="productTitle"></div>
+        <div class="product-title" id="productTitle">A carregar...</div>
         <div class="product-subtitle" id="productSubtitle"></div>
         <div class="d-flex align-items-center gap-2 mb-2">
           <span class="current-price" id="productPrice"></span>
           <span class="badge bg-light text-dark" id="productCondition"></span>
         </div>
-        <div id="detailsGrid" class="details-grid"></div>
+        <div id="detailsGrid" class="details-grid"><div class='detail-row'><span class='detail-label'>Marca</span><span class='detail-value'>...</span></div></div>
         <div class="action-buttons">
           <button class="btn btn-primary btn-lg w-100" id="btnComprar">Comprar Agora</button>
           <button class="btn btn-outline-dark btn-lg w-100" id="btnCarrinho">Adicionar ao Carrinho</button>
@@ -66,14 +66,14 @@
           <button class="btn btn-success btn-lg w-100" id="btnChatVendedor"><i class="fa fa-comments"></i> Conversar com o Vendedor</button>
           <button class="btn btn-outline-info btn-lg w-100" id="btnCompartilhar"><i class="fa fa-share"></i> Compartilhar</button>
         </div>
-        <div id="sellerInfo" class="mt-4"></div>
+        <div id="sellerInfo" class="mt-4"><div class='seller-header d-flex align-items-center gap-3 mb-2'><img src='images/default-profile.png' alt='Seller' class='seller-avatar'><div class='seller-details'><h3 class='mb-0'>A carregar vendedor...</h3></div></div></div>
       </div>
     </div>
     <div id="suggestedProducts" class="mt-5"></div>
   </div>
   <script type="module">
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { doc, getDoc, collection, query, where, getDocs, addDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { doc, getDoc, collection, query, where, getDocs, addDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
     import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
     import { auth, db, storage } from './firebase-config.js';
     const params = new URLSearchParams(window.location.search);
@@ -84,6 +84,13 @@
     }
     let user = null;
     let product = null;
+    // Exibir placeholders imediatamente
+    document.getElementById('productTitle').textContent = 'A carregar...';
+    document.getElementById('productSubtitle').textContent = '';
+    document.getElementById('productPrice').textContent = '';
+    document.getElementById('productCondition').textContent = '';
+    document.getElementById('detailsGrid').innerHTML = "<div class='detail-row'><span class='detail-label'>Marca</span><span class='detail-value'>...</span></div>";
+    document.getElementById('sellerInfo').innerHTML = "<div class='seller-header d-flex align-items-center gap-3 mb-2'><img src='images/default-profile.png' alt='Seller' class='seller-avatar'><div class='seller-details'><h3 class='mb-0'>A carregar vendedor...</h3></div></div>";
     onAuthStateChanged(auth, async (u) => {
       user = u;
       await carregarProduto();
@@ -96,18 +103,27 @@
         return;
       }
       product = docSnap.data();
-      // Exibir informações básicas imediatamente
+      // Atualizar informações principais imediatamente
       document.getElementById('productTitle').textContent = product.nome || 'Produto';
       document.getElementById('productSubtitle').textContent = product.marca || '';
       document.getElementById('productPrice').textContent = product.preco ? `€${product.preco}` : '--';
       document.getElementById('productCondition').textContent = product.condicao || 'Usado';
       document.getElementById('breadcrumbProduto').textContent = `${product.marca || ''} > ${product.nome || ''}`;
-      // Mostrar placeholder de imagem imediatamente
-      const mainImage = document.getElementById('mainImage');
-      mainImage.src = 'images/no-image.png';
-      // Imagens
+      // Detalhes
+      const details = [
+        { label: 'Marca', value: product.marca },
+        { label: 'Modelo', value: product.modelo },
+        { label: 'Colorway', value: product.colorway },
+        { label: 'Ano de Lançamento', value: product.ano },
+        { label: 'SKU', value: product.sku },
+        { label: 'Condição', value: product.condicao },
+        { label: 'Descrição', value: product.descricao }
+      ];
+      const detailsGrid = document.getElementById('detailsGrid');
+      detailsGrid.innerHTML = '';
+      details.forEach(d => { if (d.value) detailsGrid.innerHTML += `<div class='detail-row'><span class='detail-label'>${d.label}</span><span class='detail-value'>${d.value}</span></div>`; });
+      // Imagens (carregar de forma assíncrona)
       let imagensUrls = [];
-      // Aceita tanto downloadURL (http) quanto caminho do Storage
       if (product.imagemPrincipal) {
         let url = product.imagemPrincipal;
         if (url.startsWith('http')) {
@@ -136,19 +152,15 @@
           }
         }
       }
-      // Se não houver imagens reais, usar apenas a imagem padrão
       if (imagensUrls.length === 0) {
-        imagensUrls = [
-          'images/no-image.png'
-        ];
+        imagensUrls = [ 'images/no-image.png' ];
       }
-      // Galeria manual
       let currentImgIdx = 0;
-      const mainImageElement = document.getElementById('mainImage');
+      const mainImage = document.getElementById('mainImage');
       const thumbGrid = document.getElementById('thumbnailGrid');
       function renderMainImage(idx) {
-        mainImageElement.src = imagensUrls[idx];
-        mainImageElement.onerror = () => { mainImageElement.src = 'images/no-image.png'; };
+        mainImage.src = imagensUrls[idx];
+        mainImage.onerror = () => { mainImage.src = 'images/no-image.png'; };
         thumbGrid.querySelectorAll('.thumbnail').forEach((t, i) => {
           t.classList.toggle('active', i === idx);
         });
@@ -168,7 +180,6 @@
           thumbGrid.appendChild(img);
         });
       }
-      // Botões de navegação
       let navPrev = document.getElementById('galleryPrev');
       let navNext = document.getElementById('galleryNext');
       if (!navPrev) {
@@ -176,14 +187,14 @@
         navPrev.id = 'galleryPrev';
         navPrev.className = 'btn btn-outline-secondary btn-sm me-2';
         navPrev.innerHTML = '<i class="fa fa-chevron-left"></i>';
-        mainImageElement.parentNode.insertBefore(navPrev, mainImageElement);
+        mainImage.parentNode.insertBefore(navPrev, mainImage);
       }
       if (!navNext) {
         navNext = document.createElement('button');
         navNext.id = 'galleryNext';
         navNext.className = 'btn btn-outline-secondary btn-sm ms-2';
         navNext.innerHTML = '<i class="fa fa-chevron-right"></i>';
-        mainImageElement.parentNode.insertBefore(navNext, mainImageElement.nextSibling);
+        mainImage.parentNode.insertBefore(navNext, mainImage.nextSibling);
       }
       navPrev.onclick = () => {
         currentImgIdx = (currentImgIdx - 1 + imagensUrls.length) % imagensUrls.length;
@@ -193,24 +204,10 @@
         currentImgIdx = (currentImgIdx + 1) % imagensUrls.length;
         renderMainImage(currentImgIdx);
       };
-      // Inicializar galeria
       renderThumbnails();
       renderMainImage(currentImgIdx);
-      mainImageElement.onclick = () => showLightbox(imagensUrls[currentImgIdx]);
-      // Detalhes
-      const details = [
-        { label: 'Marca', value: product.marca },
-        { label: 'Modelo', value: product.modelo },
-        { label: 'Colorway', value: product.colorway },
-        { label: 'Ano de Lançamento', value: product.ano },
-        { label: 'SKU', value: product.sku },
-        { label: 'Condição', value: product.condicao },
-        { label: 'Descrição', value: product.descricao }
-      ];
-      const detailsGrid = document.getElementById('detailsGrid');
-      detailsGrid.innerHTML = '';
-      details.forEach(d => { if (d.value) detailsGrid.innerHTML += `<div class='detail-row'><span class='detail-label'>${d.label}</span><span class='detail-value'>${d.value}</span></div>`; });
-      // Vendedor
+      mainImage.onclick = () => showLightbox(imagensUrls[currentImgIdx]);
+      // Vendedor (carregar de forma assíncrona)
       if (product.vendedorId) {
         try {
           const userRef = doc(db, 'usuarios', product.vendedorId);
