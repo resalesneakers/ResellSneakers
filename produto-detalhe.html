@@ -210,7 +210,7 @@
       // Vendedor (carregar de forma assíncrona)
       if (product.vendedorId) {
         try {
-          const userRef = doc(db, 'usuarios', product.vendedorId);
+          const userRef = doc(db, 'users', product.vendedorId);
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const vendedor = userSnap.data();
