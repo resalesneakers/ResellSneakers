@@ -23,7 +23,7 @@ const progressText = document.getElementById("progressText");
 
 function showImagePreview(files) {
   preview.innerHTML = '';
-  files.forEach((file) => {
+  files.forEach((file) => {image.png
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = document.createElement("img");
@@ -67,13 +67,12 @@ function uploadImages(userId) {
         },
         reject,
         () => {
-          // Em vez de getDownloadURL, resolve com o caminho do Storage
+          // Salva apenas o caminho do Storage, não o downloadURL
           resolve(filePath);
         }
       );
     });
   });
-
   return Promise.all(uploadPromises);
 }
 
@@ -133,7 +132,7 @@ onAuthStateChanged(auth, (u) => {
         favorito: false,
         verificado: false,
         dataCriacao: serverTimestamp(),
-        userId: user.uid,
+        vendedorId: user.uid,
       };
 
       await addDoc(collection(db, "produtos"), produto);

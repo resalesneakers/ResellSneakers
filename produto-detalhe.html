@@ -102,23 +102,18 @@
       document.getElementById('productCondition').textContent = product.condicao || 'Usado';
       document.getElementById('breadcrumbProduto').textContent = `${product.marca || ''} > ${product.nome || ''}`;
       // Imagens
-      let mainUrl = 'images/banner1.png';
       let imagensUrls = [];
       if (product.imagemPrincipal) {
         try {
           let url = product.imagemPrincipal;
           if (url.startsWith('http')) {
-            mainUrl = url;
             imagensUrls.push(url);
           } else {
-            // Tenta buscar downloadURL, se falhar usa o caminho como fallback
             try {
               const downloadUrl = await getDownloadURL(ref(storage, url));
-              mainUrl = downloadUrl;
               imagensUrls.push(downloadUrl);
             } catch (e) {
               console.warn('Erro ao buscar downloadURL da imagem principal:', e, url);
-              mainUrl = url;
               imagensUrls.push(url);
             }
           }
@@ -147,12 +142,16 @@
         }
       }
       const mainImage = document.getElementById('mainImage');
-      mainImage.src = imagensUrls[0] || mainUrl;
-      mainImage.onerror = () => { mainImage.src = 'images/banner1.png'; };
+      if (imagensUrls.length > 0) {
+        mainImage.src = imagensUrls[0];
+        mainImage.onerror = () => { mainImage.src = 'images/no-image.png'; };
+      } else {
+        mainImage.src = 'images/no-image.png';
+      }
       // Galeria
       const thumbGrid = document.getElementById('thumbnailGrid');
       thumbGrid.innerHTML = '';
-      if (imagensUrls.length > 0) {
+      if (imagensUrls.length > 1) {
         imagensUrls.forEach((url, idx) => {
           const img = document.createElement('img');
           img.src = url;
@@ -168,7 +167,7 @@
         });
         mainImage.onclick = () => showLightbox(mainImage.src);
       } else {
-        mainImage.src = mainUrl;
+        mainImage.onclick = null;
       }
       // Detalhes
       const details = [
@@ -231,9 +230,12 @@
           favBtn.classList.add('btn-danger');
         }
       }
-      atualizarFavoritoBtn();
       favBtn.onclick = async () => {
-        if (!user) { alert('Faça login para favoritar produtos.'); return; }
+        if (!user) {
+          alert('Faça login para favoritar produtos.');
+          window.location.href = 'log.html';
+          return;
+        }
         const favRef = query(collection(db, "favoritos"), where("userId", "==", user.uid), where("produtoId", "==", productId));
         const favSnap = await getDocs(favRef);
         if (favSnap.empty) {
@@ -245,13 +247,19 @@
         }
         atualizarFavoritoBtn();
       };
+      atualizarFavoritoBtn();
       // Comprar agora
       document.getElementById('btnComprar').onclick = () => {
         window.location.href = `checkout.html?id=${productId}`;
       };
       // Adicionar ao carrinho
-      document.getElementById('btnCarrinho').onclick = async () => {
-        if (!user) { alert('Faça login para adicionar ao carrinho.'); return; }
+      const btnCarrinho = document.getElementById('btnCarrinho');
+      btnCarrinho.onclick = async () => {
+        if (!user) {
+          alert('Faça login para adicionar ao carrinho.');
+          window.location.href = 'log.html';
+          return;
+        }
         const carrinhoRef = doc(db, 'carrinhos', user.uid);
         let carrinhoSnap = await getDoc(carrinhoRef);
         let produtos = carrinhoSnap.exists() ? (carrinhoSnap.data().produtos || []) : [];
@@ -259,6 +267,16 @@
         await setDoc(carrinhoRef, { produtos });
         alert('Adicionado ao carrinho!');
         setTimeout(() => window.location.href = 'carrinho.html', 1000);
+      };
+      // Conversar com o vendedor
+      const btnChat = document.getElementById('btnChatVendedor');
+      btnChat.onclick = () => {
+        if (!user) {
+          alert('Faça login para conversar com o vendedor.');
+          window.location.href = 'log.html';
+          return;
+        }
+        window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
       };
       // Compartilhar
       document.getElementById('btnCompartilhar').onclick = () => {
