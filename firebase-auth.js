@@ -2,7 +2,7 @@ import { auth, db } from "./firebase-config.js";
 
 auth.onAuthStateChanged(async (user) => {
   if (user) {
-    const userRef = doc(db, "usuarios", user.uid);
+    const userRef = doc(db, "users", user.uid);
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {

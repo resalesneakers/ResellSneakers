@@ -1,13 +1,3 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getFirestore, collection, addDoc, query,
-  orderBy, onSnapshot, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-import {
-  getAuth, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
 import { auth, db } from "./firebase-config.js";
 
 // Remover tudo entre 'const firebaseConfig = {' até 'const app = initializeApp(firebaseConfig);'

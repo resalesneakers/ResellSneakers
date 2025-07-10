@@ -9,7 +9,7 @@ const firebaseConfig = {
   authDomain: "resalesneakers-e17cb.firebaseapp.com",
   databaseURL: "https://resalesneakers-e17cb-default-rtdb.firebaseio.com",
   projectId: "resalesneakers-e17cb",
-  storageBucket: "resalesneakers-e17cb.appspot.com",
+  storageBucket: "resalesneakers-e17cb.firebasestorage.app",
   messagingSenderId: "698715655625",
   appId: "1:698715655625:web:fde7f7a7f2da0037792c18",
   measurementId: "G-WVNMT06HJS"
