@@ -47,11 +47,27 @@ function renderProductCard(produto) {
   card.className = "card mb-3";
   card.dataset.id = produto.id;
 
+  // Carregar imagem corretamente
+  let imgEl = document.createElement('img');
+  imgEl.className = 'img-fluid rounded-start';
+  imgEl.alt = produto.nome;
+  if (produto.imagemPrincipal) {
+    if (!produto.imagemPrincipal.startsWith('http')) {
+      storage.ref(produto.imagemPrincipal).getDownloadURL().then(url => {
+        imgEl.src = url;
+      }).catch(() => {
+        imgEl.src = 'https://via.placeholder.com/400x320?text=Sem+Imagem';
+      });
+    } else {
+      imgEl.src = produto.imagemPrincipal;
+    }
+  } else {
+    imgEl.src = 'https://via.placeholder.com/400x320?text=Sem+Imagem';
+  }
+
   card.innerHTML = `
     <div class="row g-0">
-      <div class="col-md-4">
-        <img src="${produto.imagemPrincipal}" class="img-fluid rounded-start" alt="${produto.nome}">
-      </div>
+      <div class="col-md-4" id="img-col-${produto.id}"></div>
       <div class="col-md-8">
         <div class="card-body">
           <h5 class="card-title">${produto.nome}</h5>
@@ -69,6 +85,11 @@ function renderProductCard(produto) {
       </div>
     </div>
   `;
+  // Inserir imagem carregada
+  setTimeout(() => {
+    const imgCol = card.querySelector(`#img-col-${produto.id}`);
+    if (imgCol) imgCol.appendChild(imgEl);
+  }, 0);
 
   container.appendChild(card);
 }

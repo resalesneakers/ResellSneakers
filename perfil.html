@@ -694,24 +694,34 @@
       }
       emptyState.style.display = 'none';
       container.innerHTML = '';
-      listings.forEach(listing => {
-        const productCard = document.createElement('div');
-        productCard.className = 'product-card';
-        productCard.innerHTML = `
-          <div class="product-image">
-            <img src="${listing.imagemPrincipal || listing.imageUrl || '/api/placeholder/280/200'}" alt="${listing.nome || listing.title}">
-            <div class="product-status status-active">Disponível</div>
-          </div>
-          <div class="product-info">
-            <div class="product-title">${listing.nome || listing.title}</div>
-            <div class="product-price">€${listing.preco ? Number(listing.preco).toFixed(2) : (listing.price ? Number(listing.price).toFixed(2) : '')}</div>
-            <div class="product-meta">
-              <span>${listing.marca || listing.brand || ''} • Tamanho ${listing.tamanho || listing.size || ''}</span>
+      (async () => {
+        const storageModule = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js');
+        const storage = storageModule.getStorage();
+        const { getDownloadURL, ref } = storageModule;
+        const cards = await Promise.all(listings.map(async listing => {
+          let imgSrc = listing.imagemPrincipal || listing.imageUrl || '/api/placeholder/280/200';
+          if (imgSrc && !imgSrc.startsWith('http') && imgSrc !== '/api/placeholder/280/200') {
+            try { imgSrc = await getDownloadURL(ref(storage, imgSrc)); } catch { imgSrc = '/api/placeholder/280/200'; }
+          }
+          const productCard = document.createElement('div');
+          productCard.className = 'product-card';
+          productCard.innerHTML = `
+            <div class="product-image">
+              <img src="${imgSrc}" alt="${listing.nome || listing.title}">
+              <div class="product-status status-active">Disponível</div>
             </div>
-          </div>
-        `;
-        container.appendChild(productCard);
-      });
+            <div class="product-info">
+              <div class="product-title">${listing.nome || listing.title}</div>
+              <div class="product-price">€${listing.preco ? Number(listing.preco).toFixed(2) : (listing.price ? Number(listing.price).toFixed(2) : '')}</div>
+              <div class="product-meta">
+                <span>${listing.marca || listing.brand || ''} • Tamanho ${listing.tamanho || listing.size || ''}</span>
+              </div>
+            </div>
+          `;
+          return productCard;
+        }));
+        cards.forEach(card => container.appendChild(card));
+      })();
     }
 
     function renderFollowersList(docs) {

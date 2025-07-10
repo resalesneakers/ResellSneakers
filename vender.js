@@ -67,7 +67,8 @@ function uploadImages(userId) {
         },
         reject,
         () => {
-          getDownloadURL(uploadTask.snapshot.ref).then(resolve);
+          // Em vez de getDownloadURL, resolve com o caminho do Storage
+          resolve(filePath);
         }
       );
     });

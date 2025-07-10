@@ -640,9 +640,14 @@
       // Buscar imagemPrincipal
       if (product.imagemPrincipal) {
         try {
-          const imgRef = ref(storage, product.imagemPrincipal);
-          mainUrl = await getDownloadURL(imgRef);
-          imagensUrls.push(mainUrl);
+          if (!product.imagemPrincipal.startsWith('http')) {
+            const imgRef = ref(storage, product.imagemPrincipal);
+            mainUrl = await getDownloadURL(imgRef);
+            imagensUrls.push(mainUrl);
+          } else {
+            mainUrl = product.imagemPrincipal;
+            imagensUrls.push(mainUrl);
+          }
         } catch {}
       }
       // Buscar todas as imagens do array
@@ -650,8 +655,11 @@
         for (let idx = 0; idx < product.imagens.length; idx++) {
           try {
             const path = product.imagens[idx];
-            const thumbRef = ref(storage, path);
-            const thumbUrl = await getDownloadURL(thumbRef);
+            let thumbUrl = path;
+            if (!path.startsWith('http')) {
+              const thumbRef = ref(storage, path);
+              thumbUrl = await getDownloadURL(thumbRef);
+            }
             // Evitar duplicar a imagem principal
             if (!imagensUrls.includes(thumbUrl)) imagensUrls.push(thumbUrl);
           } catch {}
@@ -814,11 +822,22 @@
       const q = query(collection(db, 'produtos'), where('marca', '==', product.marca), limit(4));
       const snap = await getDocs(q);
       let html = '<h5 class="mb-3">Você também pode gostar</h5><div class="row">';
+      const sugestoes = [];
       snap.forEach(docu => {
         if (docu.id !== productId) {
           const p = docu.data();
-          html += `<div class='col-6 col-md-3 mb-2'><div class='card h-100 shadow-sm' style='cursor:pointer' onclick="window.location.href='produto-detalhe.html?id=${docu.id}'"><img src='${(p.imagemPrincipal || 'https://via.placeholder.com/200x200?text=Sneaker')}' class='card-img-top' style='object-fit:cover; height:120px;'><div class='card-body p-2'><div class='fw-bold small'>${p.nome}</div><div class='text-muted small'>${p.marca}</div></div></div></div>`;
+          sugestoes.push({ id: docu.id, ...p });
         }
+      });
+      const imagensSugestoes = await Promise.all(sugestoes.map(async (p) => {
+        let sugImg = p.imagemPrincipal || 'https://via.placeholder.com/200x200?text=Sneaker';
+        if (sugImg && !sugImg.startsWith('http')) {
+          sugImg = await getDownloadURL(ref(storage, sugImg)).catch(() => 'https://via.placeholder.com/200x200?text=Sneaker');
+        }
+        return { ...p, sugImg };
+      }));
+      imagensSugestoes.forEach(p => {
+        html += `<div class='col-6 col-md-3 mb-2'><div class='card h-100 shadow-sm' style='cursor:pointer' onclick="window.location.href='produto-detalhe.html?id=${p.id}'"><img src='${p.sugImg}' class='card-img-top' style='object-fit:cover; height:120px;'><div class='card-body p-2'><div class='fw-bold small'>${p.nome}</div><div class='text-muted small'>${p.marca}</div></div></div></div>`;
       });
       html += '</div>';
       suggestedDiv.innerHTML = html;

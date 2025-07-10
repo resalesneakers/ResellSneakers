@@ -101,11 +101,17 @@
         const proms = produtosIds.map(id => getDoc(doc(db, "produtos", id)));
         const prodsSnap = await Promise.all(proms);
         const prodsExistentes = prodsSnap.filter(doc => doc.exists());
-        favList.innerHTML = prodsExistentes.map((doc, index) => {
+        const storage = (await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js')).getStorage();
+        const { getDownloadURL, ref } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js');
+        const cards = await Promise.all(prodsExistentes.map(async (doc, index) => {
           const p = doc.data();
+          let imgSrc = p.imagemPrincipal || 'images/no-image.png';
+          if (imgSrc && !imgSrc.startsWith('http') && imgSrc !== 'images/no-image.png') {
+            try { imgSrc = await getDownloadURL(ref(storage, imgSrc)); } catch { imgSrc = 'images/no-image.png'; }
+          }
           return `
             <div class="product-card">
-              <img src="${p.imagemPrincipal || 'images/no-image.png'}" class="product-img" alt="${p.nome}" />
+              <img src="${imgSrc}" class="product-img" alt="${p.nome}" />
               <div class="product-info">
                 <div class="product-title">${p.nome}</div>
                 <div class="product-price">€${p.preco}</div>
@@ -114,7 +120,8 @@
               <button class="remove-btn" data-index="${index}"><i class="fa fa-trash"></i> Remover</button>
             </div>
           `;
-        }).join("");
+        }));
+        favList.innerHTML = cards.join("");
         // Event listeners para remover favoritos
         document.querySelectorAll('.remove-btn').forEach(btn => {
           btn.addEventListener('click', async () => {

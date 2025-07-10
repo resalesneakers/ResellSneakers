@@ -527,9 +527,21 @@
     document.getElementById("disponibilidade").value = produtoAtual.disponibilidade || "";
 
     if (produtoAtual.imagemPrincipal) {
-      previewImagem.src = produtoAtual.imagemPrincipal;
-      previewImagem.style.display = "block";
-      imagemAnterior = produtoAtual.imagemPrincipal;
+      // Se for um caminho do Storage, buscar o downloadURL
+      if (!produtoAtual.imagemPrincipal.startsWith('http')) {
+        storage.ref(produtoAtual.imagemPrincipal).getDownloadURL().then(url => {
+          previewImagem.src = url;
+          previewImagem.style.display = "block";
+          imagemAnterior = produtoAtual.imagemPrincipal;
+        }).catch(() => {
+          previewImagem.style.display = "none";
+        });
+      } else {
+        // Suporte legado: se for URL completo
+        previewImagem.src = produtoAtual.imagemPrincipal;
+        previewImagem.style.display = "block";
+        imagemAnterior = produtoAtual.imagemPrincipal;
+      }
     }
     
     hideLoading();
@@ -554,23 +566,29 @@
     if (!condicao || !disponibilidade) return mostrarMensagem("Preencha todos os campos obrigatórios.", "danger", submitBtn);
 
     try {
-      let imagemURL = produtoAtual.imagemPrincipal;
+      let imagemPath = produtoAtual.imagemPrincipal;
       const novaImagem = imagemInput.files[0];
 
       if (novaImagem) {
         if (imagemAnterior) {
           try {
-            const antigaRef = storage.refFromURL(imagemAnterior);
-            await antigaRef.delete();
+            // Se for caminho do Storage, deletar corretamente
+            if (!imagemAnterior.startsWith('http')) {
+              await storage.ref(imagemAnterior).delete();
+            } else {
+              const antigaRef = storage.refFromURL(imagemAnterior);
+              await antigaRef.delete();
+            }
           } catch (err) {
             console.warn("Erro ao apagar imagem anterior:", err);
           }
         }
 
         const nomeImagem = `${Date.now()}_${novaImagem.name}`;
-        const storageRef = storage.ref().child(`produtos/${user.uid}/${nomeImagem}`);
-        const uploadResult = await storageRef.put(novaImagem);
-        imagemURL = await uploadResult.ref.getDownloadURL();
+        const storagePath = `produtos/${user.uid}/${nomeImagem}`;
+        const storageRef = storage.ref().child(storagePath);
+        await storageRef.put(novaImagem);
+        imagemPath = storagePath; // Salva apenas o caminho!
       }
 
       await db.collection("produtos").doc(produtoId).update({
@@ -578,7 +596,7 @@
         preco,
         condicao,
         disponibilidade,
-        imagemPrincipal: imagemURL,
+        imagemPrincipal: imagemPath, // Salva só o caminho
         ultimaAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
       });
 

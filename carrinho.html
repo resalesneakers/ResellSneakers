@@ -134,14 +134,21 @@
       // Buscar detalhes dos produtos
       const proms = produtosIds.map(id => getDoc(doc(db, 'produtos', id)));
       const produtosSnaps = await Promise.all(proms);
-      produtosSnaps.forEach((snap, idx) => {
-        if (!snap.exists()) return;
+      const storageModule = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js');
+      const storage = storageModule.getStorage();
+      const { getDownloadURL, ref } = storageModule;
+      const cards = await Promise.all(produtosSnaps.map(async (snap, idx) => {
+        if (!snap.exists()) return null;
         const item = snap.data();
         total += Number(item.preco) || 0;
+        let imgSrc = item.imagemPrincipal || 'images/no-image.png';
+        if (imgSrc && !imgSrc.startsWith('http') && imgSrc !== 'images/no-image.png') {
+          try { imgSrc = await getDownloadURL(ref(storage, imgSrc)); } catch { imgSrc = 'images/no-image.png'; }
+        }
         const card = document.createElement('div');
         card.className = 'product-card';
         card.innerHTML = `
-          <img src="${item.imagemPrincipal || 'images/no-image.png'}" class="product-img" alt="${item.nome}">
+          <img src="${imgSrc}" class="product-img" alt="${item.nome}">
           <div class="product-info">
             <div class="product-title">${item.nome}</div>
             <div class="product-price">€${item.preco}</div>
@@ -154,8 +161,9 @@
           await setDoc(carrinhoRef, { produtos: produtosIds });
           renderCarrinhoFirestore(user);
         };
-        cartList.appendChild(card);
-      });
+        return card;
+      }));
+      cards.filter(Boolean).forEach(card => cartList.appendChild(card));
       cartTotal.textContent = total.toFixed(2);
       cartSummary.style.display = 'block';
     }
