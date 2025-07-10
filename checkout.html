@@ -18,25 +18,11 @@
   </script>
   <div class="container mt-4">
     <h1>Finalizar Compra</h1>
-  <div id="detalhes-produto"></div>
-
-  <div class="container" style="max-width:500px;margin:auto;">
-    <h3 class="mb-3">Pagamento Seguro</h3>
-    <div class="mb-4">
-      <div id="stripe-form">
-        <label class="form-label">Pagar com Cartão (Stripe)</label>
-        <form id="stripe-payment-form">
-          <div id="stripe-card-element" style="padding:12px;border:1px solid #eee;border-radius:8px;"></div>
-          <button id="stripe-pay-btn" class="btn btn-primary w-100 mt-3" type="submit">Pagar com Cartão</button>
-        </form>
-      </div>
-      <hr class="my-4">
-      <div id="paypal-form">
-        <label class="form-label">Pagar com PayPal</label>
-        <div id="paypal-button-container"></div>
-      </div>
-    </div>
-    <div id="checkout-mensagem" class="mt-3"></div>
+    <div id="detalhes-produto"></div>
+    <form id="form-pagamento" class="mt-4">
+      <button id="finalizar-btn" class="btn btn-success w-100" type="submit">Finalizar Compra</button>
+    </form>
+    <div id="mensagem-pagamento" class="mt-3"></div>
     <div class="small text-muted">Pagamentos reais requerem backend seguro. Veja instruções no código.</div>
   </div>
   </div>

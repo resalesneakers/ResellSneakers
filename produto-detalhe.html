@@ -636,45 +636,52 @@
       // Galeria de imagens
       const mainImage = document.getElementById('mainImage');
       let mainUrl = 'https://via.placeholder.com/400x400?text=Sem+Imagem';
+      let imagensUrls = [];
+      // Buscar imagemPrincipal
       if (product.imagemPrincipal) {
         try {
           const imgRef = ref(storage, product.imagemPrincipal);
           mainUrl = await getDownloadURL(imgRef);
-          mainImage.src = mainUrl;
+          imagensUrls.push(mainUrl);
         } catch {}
-      } else if (product.imagens && Array.isArray(product.imagens) && product.imagens.length > 0) {
-        try {
-          const imgRef = ref(storage, product.imagens[0]);
-          mainUrl = await getDownloadURL(imgRef);
-          mainImage.src = mainUrl;
-        } catch {}
-      } else {
-        mainImage.src = mainUrl;
       }
-      // Miniaturas
-      const thumbGrid = document.querySelector('.thumbnail-grid');
-      thumbGrid.innerHTML = '';
+      // Buscar todas as imagens do array
       if (product.imagens && Array.isArray(product.imagens) && product.imagens.length > 0) {
         for (let idx = 0; idx < product.imagens.length; idx++) {
           try {
             const path = product.imagens[idx];
             const thumbRef = ref(storage, path);
             const thumbUrl = await getDownloadURL(thumbRef);
-            const img = document.createElement('img');
-            img.src = thumbUrl;
-            img.className = 'thumbnail rounded shadow-sm';
-            img.style.width = '60px';
-            img.style.height = '60px';
-            img.style.objectFit = 'cover';
-            img.onclick = () => {
-              mainImage.src = thumbUrl;
-            };
-            img.ondblclick = () => showLightbox(thumbUrl);
-            if (idx === 0 && !product.imagemPrincipal) img.classList.add('active');
-            thumbGrid.appendChild(img);
+            // Evitar duplicar a imagem principal
+            if (!imagensUrls.includes(thumbUrl)) imagensUrls.push(thumbUrl);
           } catch {}
         }
+      }
+      // Mostrar imagem principal
+      mainImage.src = imagensUrls[0] || mainUrl;
+      // Miniaturas
+      const thumbGrid = document.querySelector('.thumbnail-grid');
+      thumbGrid.innerHTML = '';
+      if (imagensUrls.length > 0) {
+        imagensUrls.forEach((url, idx) => {
+          const img = document.createElement('img');
+          img.src = url;
+          img.className = 'thumbnail rounded shadow-sm';
+          img.style.width = '60px';
+          img.style.height = '60px';
+          img.style.objectFit = 'cover';
+          if (idx === 0) img.classList.add('active');
+          img.onclick = () => {
+            mainImage.src = url;
+            thumbGrid.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+            img.classList.add('active');
+          };
+          img.ondblclick = () => showLightbox(url);
+          thumbGrid.appendChild(img);
+        });
         mainImage.onclick = () => showLightbox(mainImage.src);
+      } else {
+        mainImage.src = mainUrl;
       }
       // Detalhes do produto
       const details = [
