@@ -55,9 +55,11 @@
     </form>
   </div>
   <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { getDoc, doc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { auth, db, storage } from './firebase-config.js';
+    import { getDoc, doc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+    import { getDatabase, ref as dbRef, onValue, set, serverTimestamp as rtdbTimestamp, onDisconnect } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
     // Carregar menu universal
     fetch('menu.html').then(res => res.text()).then(html => {
       document.getElementById('menu-container').innerHTML = html;
@@ -72,6 +74,11 @@
     onAuthStateChanged(auth, async user => {
       if (!user) return window.location.href = 'log.html';
       currentUser = user;
+      // Presence: marcar como online no RTDB
+      const rtdb = getDatabase();
+      const userStatusRef = dbRef(rtdb, `status/${currentUser.uid}`);
+      set(userStatusRef, { state: 'online', lastChanged: Date.now() });
+      onDisconnect(userStatusRef).set({ state: 'offline', lastChanged: Date.now() });
       // Buscar produto
       const productRef = doc(db, 'produtos', productId);
       const productSnap = await getDoc(productRef);
@@ -93,19 +100,35 @@
       const vendedorSnap = await getDoc(vendedorRef);
       let vendedorNome = 'Vendedor';
       let vendedorFoto = 'images/default-profile.png';
+      let vendedorOnline = 'Offline';
       if (vendedorSnap.exists()) {
         const v = vendedorSnap.data();
         vendedorNome = v.nome || 'Vendedor';
         vendedorFoto = v.foto || 'images/default-profile.png';
+        // Buscar estado online/offline (Realtime Database)
+        const rtdb = getDatabase();
+        const statusRef = dbRef(rtdb, `status/${vendedor}`);
+        onValue(statusRef, (snap) => {
+          const val = snap.val();
+          vendedorOnline = (val && val.state === 'online') ? 'Online' : 'Offline';
+          document.getElementById('userSubtitle').textContent = vendedorOnline;
+        });
         document.getElementById('userProfileLink').href = `perfil.html?id=${vendedor}`;
+      }
+      // Se a foto for caminho do Storage, buscar downloadURL
+      if (vendedorFoto && !vendedorFoto.startsWith('http') && vendedorFoto !== 'images/default-profile.png') {
+        try { vendedorFoto = await getDownloadURL(ref(storage, vendedorFoto)); } catch {}
       }
       document.getElementById('userName').textContent = vendedorNome;
       document.getElementById('userPhoto').src = vendedorFoto;
-      document.getElementById('userSubtitle').textContent = 'Online';
       // Mini-card do produto
       const miniCard = document.getElementById('productMiniCard');
       miniCard.style.display = 'flex';
-      miniCard.innerHTML = `<img src='${(product.imagemPrincipal || (product.imagens && product.imagens[0]) || 'https://via.placeholder.com/80x80?text=Sneaker')}' alt='Produto'><div class='prod-info'><div class='prod-name'>${product.nome}</div><div class='prod-price'>€${product.preco || '--'}</div></div><a href='produto-detalhe.html?id=${productId}' class='btn btn-link p-0'>Ver Produto</a>`;
+      let prodImg = product.imagemPrincipal || (product.imagens && product.imagens[0]) || 'images/banner1.png';
+      if (prodImg && !prodImg.startsWith('http') && prodImg !== 'images/banner1.png') {
+        try { prodImg = await getDownloadURL(ref(storage, prodImg)); } catch {}
+      }
+      miniCard.innerHTML = `<img src='${prodImg}' alt='Produto'><div class='prod-info'><div class='prod-name'>${product.nome}</div><div class='prod-price'>€${product.preco || '--'}</div></div><a href='produto-detalhe.html?id=${productId}' class='btn btn-link p-0'>Ver Produto</a>`;
       // Ouvir mensagens em tempo real
       const mensagensRef = collection(db, 'conversas', chatId, 'mensagens');
       const mensagensQuery = query(mensagensRef, orderBy('timestamp'));

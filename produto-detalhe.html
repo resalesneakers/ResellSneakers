@@ -72,9 +72,9 @@
     <div id="suggestedProducts" class="mt-5"></div>
   </div>
   <script type="module">
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { doc, getDoc, collection, query, where, getDocs, addDoc, setDoc, updateDoc, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { doc, getDoc, collection, query, where, getDocs, addDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
     import { auth, db, storage } from './firebase-config.js';
     const params = new URLSearchParams(window.location.search);
     const productId = params.get('id');
@@ -116,12 +116,15 @@
               const downloadUrl = await getDownloadURL(ref(storage, url));
               mainUrl = downloadUrl;
               imagensUrls.push(downloadUrl);
-            } catch {
+            } catch (e) {
+              console.warn('Erro ao buscar downloadURL da imagem principal:', e, url);
               mainUrl = url;
               imagensUrls.push(url);
             }
           }
-        } catch {}
+        } catch (e) {
+          console.warn('Erro inesperado ao processar imagem principal:', e);
+        }
       }
       if (product.imagens && Array.isArray(product.imagens) && product.imagens.length > 0) {
         for (let idx = 0; idx < product.imagens.length; idx++) {
@@ -133,11 +136,14 @@
               try {
                 const downloadUrl = await getDownloadURL(ref(storage, path));
                 if (!imagensUrls.includes(downloadUrl)) imagensUrls.push(downloadUrl);
-              } catch {
+              } catch (e) {
+                console.warn('Erro ao buscar downloadURL de imagem extra:', e, path);
                 if (!imagensUrls.includes(path)) imagensUrls.push(path);
               }
             }
-          } catch {}
+          } catch (e) {
+            console.warn('Erro inesperado ao processar imagem extra:', e);
+          }
         }
       }
       const mainImage = document.getElementById('mainImage');
