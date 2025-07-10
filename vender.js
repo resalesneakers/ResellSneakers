@@ -66,9 +66,14 @@ function uploadImages(userId) {
           progressText.textContent = `A carregar imagens... ${Math.floor(progress)}%`;
         },
         reject,
-        () => {
-          // Salva apenas o caminho do Storage, não o downloadURL
-          resolve(filePath);
+        async () => {
+          // Após upload, buscar o downloadURL (lógica antiga)
+          try {
+            const url = await getDownloadURL(fileRef);
+            resolve(url);
+          } catch (e) {
+            resolve(filePath); // fallback para o caminho
+          }
         }
       );
     });
@@ -115,6 +120,13 @@ onAuthStateChanged(auth, (u) => {
       const urls = await uploadImages(user.uid);
       const formData = new FormData(form);
 
+      // Se não houver imagens, adicionar banners antigos
+      let imagensFinal = urls.length > 0 ? urls : [
+        'images/banner1.png',
+        'images/banner2.png',
+        'images/banner3.png'
+      ];
+
       const produto = {
         nome: formData.get("title"),
         marca: formData.get("brand") || "Desconhecida",
@@ -126,8 +138,8 @@ onAuthStateChanged(auth, (u) => {
         disponibilidade: formData.get("saleType") || "venda",
         descricao: formData.get("description") || "",
         localizacao: formData.get("location") || "",
-        imagemPrincipal: urls[0],
-        imagens: urls,
+        imagemPrincipal: imagensFinal[0],
+        imagens: imagensFinal,
         visualizacoes: 0,
         favorito: false,
         verificado: false,
