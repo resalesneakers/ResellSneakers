@@ -4,6 +4,8 @@ import {
   collection,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getDownloadURL, ref as storageRef } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+import { storage } from "./firebase-config.js";
 
 const listaDiv = document.getElementById("lista-produtos");
 
@@ -40,12 +42,10 @@ function criarCardProduto(produto, id) {
     if (imgEl) {
       if (imagem) {
         if (!imagem.startsWith('http')) {
-          import('./firebase-config.js').then(({ storage }) => {
-            storage.ref(imagem).getDownloadURL().then(url => {
-              imgEl.src = url;
-            }).catch(() => {
-              imgEl.src = 'https://via.placeholder.com/400x320?text=Sem+Imagem';
-            });
+          getDownloadURL(storageRef(storage, imagem)).then(url => {
+            imgEl.src = url;
+          }).catch(() => {
+            imgEl.src = 'https://via.placeholder.com/400x320?text=Sem+Imagem';
           });
         } else {
           imgEl.src = imagem;

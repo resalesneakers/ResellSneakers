@@ -1,5 +1,6 @@
 import { app, auth, db, storage } from './firebase-config.js';
 import { collection, query, where, orderBy, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getDownloadURL, ref as storageRef } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
 const container = document.getElementById("produtosContainer");
 
@@ -53,7 +54,7 @@ function renderProductCard(produto) {
   imgEl.alt = produto.nome;
   if (produto.imagemPrincipal) {
     if (!produto.imagemPrincipal.startsWith('http')) {
-      storage.ref(produto.imagemPrincipal).getDownloadURL().then(url => {
+      getDownloadURL(storageRef(storage, produto.imagemPrincipal)).then(url => {
         imgEl.src = url;
       }).catch(() => {
         imgEl.src = 'https://via.placeholder.com/400x320?text=Sem+Imagem';
