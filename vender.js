@@ -127,14 +127,16 @@ onAuthStateChanged(auth, (u) => {
         'images/banner3.png'
       ];
 
+      // Garantir que todos os campos obrigatórios estão preenchidos corretamente
+      const preco = parseFloat(formData.get("price"));
       const produto = {
-        nome: formData.get("title"),
+        nome: formData.get("title") || "Produto sem nome",
         marca: formData.get("brand") || "Desconhecida",
         modelo: formData.get("model") || "",
         tamanho: formData.get("size") || "",
         condicao: formData.get("condition") || "",
-        preco: parseFloat(formData.get("price")) || 0,
-        negociavel: formData.get("negotiable") === "yes",
+        preco: isNaN(preco) ? 0 : preco,
+        negociavel: formData.get("negotiable") === "yes" || formData.get("negotiable") === "Sim",
         disponibilidade: formData.get("saleType") || "venda",
         descricao: formData.get("description") || "",
         localizacao: formData.get("location") || "",
@@ -146,7 +148,7 @@ onAuthStateChanged(auth, (u) => {
         dataCriacao: serverTimestamp(),
         userId: user.uid,
       };
-
+      console.log("Produto a ser publicado:", produto);
       await addDoc(collection(db, "produtos"), produto);
 
       // Notificar seguidores
