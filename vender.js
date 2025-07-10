@@ -144,7 +144,7 @@ onAuthStateChanged(auth, (u) => {
         favorito: false,
         verificado: false,
         dataCriacao: serverTimestamp(),
-        vendedorId: user.uid,
+        userId: user.uid,
       };
 
       await addDoc(collection(db, "produtos"), produto);
