@@ -332,6 +332,11 @@
 </head>
 <body>
     <div id="menu-container"></div>
+    <script>
+        fetch('menu.html').then(res => res.text()).then(html => {
+            document.getElementById('menu-container').innerHTML = html;
+        });
+    </script>
     <div class="container-fluid">
         <div class="main-container">
             <!-- Header Section -->
@@ -429,9 +434,9 @@
     import { collection, query, where, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     // Carregar menu universal
-    fetch('menu.html').then(res => res.text()).then(html => {
-      document.getElementById('menu-container').innerHTML = html;
-    });
+    // fetch('menu.html').then(res => res.text()).then(html => {
+    //   document.getElementById('menu-container').innerHTML = html;
+    // });
 
     const loadingState = document.getElementById('loadingState');
     const productsGrid = document.getElementById('productsGrid');

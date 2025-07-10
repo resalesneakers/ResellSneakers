@@ -1,1636 +1,308 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ResellSneakers - O Meu Perfil</title>
-
-    <style>
-        :root {
-            --primary-color: #ff5a5f;
-            --secondary-color: #484848;
-            --accent-color: #767676;
-            --background-color: #f7f7f7;
-            --card-background: #ffffff;
-            --success-color: #4CAF50;
-            --warning-color: #FFC107;
-            --danger-color: #f44336;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--background-color);
-            color: var(--secondary-color);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Removido: estilos de header customizado - agora usa menu.html unificado */
-
-        .profile-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background-color: var(--card-background);
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            overflow: hidden;
-            margin-right: 30px;
-            border: 3px solid white;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-info {
-            flex: 1;
-        }
-
-        .profile-info h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-
-        .profile-stats {
-            display: flex;
-            margin-top: 15px;
-        }
-
-        .stat {
-            margin-right: 25px;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--accent-color);
-        }
-
-        .wallet-info {
-            margin-left: auto;
-            text-align: right;
-        }
-
-        .wallet-amount {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--success-color);
-        }
-
-        .wallet-label {
-            font-size: 14px;
-            color: var(--accent-color);
-        }
-
-        .add-funds-btn {
-            display: inline-block;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            text-decoration: none;
-            font-size: 14px;
-            margin-top: 10px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .tab {
-            padding: 12px 20px;
-            cursor: pointer;
-            font-weight: bold;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .tab:hover {
-            color: var(--primary-color);
-        }
-
-        .tab.active {
-            color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .product-card {
-            background-color: var(--card-background);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .product-image {
-            height: 200px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .product-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .product-status {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
-        }
-
-        .status-active {
-            background-color: var(--success-color);
-        }
-
-        .status-sold {
-            background-color: var(--warning-color);
-            color: #333;
-        }
-
-        .status-pending {
-            background-color: var(--accent-color);
-        }
-
-        .product-info {
-            padding: 15px;
-        }
-
-        .product-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-
-        .product-price {
-            color: var(--primary-color);
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .product-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-
-        .product-action-btn {
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .edit-btn {
-            background-color: #e1e1e1;
-            color: var(--secondary-color);
-        }
-
-        .delete-btn {
-            background-color: #ffebee;
-            color: var(--danger-color);
-        }
-
-        .edit-btn:hover {
-            background-color: #d1d1d1;
-        }
-
-        .delete-btn:hover {
-            background-color: #ffdde1;
-        }
-
-        .transaction-list {
-            margin-top: 20px;
-        }
-
-        .transaction-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background-color: var(--card-background);
-            border-radius: 8px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
-
-        .transaction-image {
-            width: 60px;
-            height: 60px;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-right: 15px;
-        }
-
-        .transaction-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .transaction-details {
-            flex: 1;
-        }
-
-        .transaction-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .transaction-date {
-            font-size: 12px;
-            color: var(--accent-color);
-        }
-
-        .transaction-amount {
-            margin-left: auto;
-            font-weight: bold;
-        }
-
-        .amount-positive {
-            color: var(--success-color);
-        }
-
-        .amount-negative {
-            color: var(--danger-color);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: var(--accent-color);
-        }
-
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        .action-btn {
-            display: inline-block;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            margin-top: 20px;
-            transition: background-color 0.2s;
-        }
-
-        .action-btn:hover {
-            background-color: #e54a4f;
-        }
-
-        .settings-section {
-            background-color: var(--card-background);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .settings-section h3 {
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        .save-btn {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.2s;
-        }
-
-        .save-btn:hover {
-            background-color: #e54a4f;
-        }
-
-        .danger-zone {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #fff8f8;
-            border-radius: 8px;
-            border: 1px solid #ffebee;
-        }
-
-        .danger-zone h3 {
-            color: var(--danger-color);
-        }
-
-        .danger-btn {
-            background-color: var(--danger-color);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.2s;
-        }
-
-        .danger-btn:hover {
-            background-color: #d32f2f;
-        }
-
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #333;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            display: none;
-            z-index: 1000;
-            animation: fadeInOut 3s ease-in-out;
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        /* Modal para adicionar fundos */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1001;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-
-        .modal-content {
-            background-color: var(--card-background);
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 8px;
-            width: 400px;
-            max-width: 90%;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .close-modal {
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-
-        .modal-btn {
-            padding: 8px 16px;
-            border-radius: 4px;
-            margin-left: 10px;
-            cursor: pointer;
-            border: none;
-        }
-
-        .modal-cancel {
-            background-color: #e1e1e1;
-            color: var(--secondary-color);
-        }
-
-        .modal-confirm {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            .profile-header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .profile-avatar {
-                margin: 0 auto 20px;
-            }
-
-            .profile-stats {
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-
-            .wallet-info {
-                margin: 20px auto 0;
-                text-align: center;
-            }
-
-            .grid-container {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu Perfil - ResellSneakers</title>
+  <!-- Bootstrap e FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="navbar-styles.css">
+  <style>
+    .profile-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #eee;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .profile-stats .stat {
+      min-width: 90px;
+      text-align: center;
+    }
+    .profile-stats .stat .number {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #dc2626;
+    }
+    .tab-pane {
+      padding-top: 2rem;
+    }
+    .product-card {
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      margin-bottom: 1.5rem;
+      background: #fff;
+      transition: transform 0.2s;
+    }
+    .product-card:hover {
+      transform: translateY(-4px) scale(1.01);
+    }
+    .product-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 12px 12px 0 0;
+    }
+    .empty-state {
+      text-align: center;
+      color: #aaa;
+      padding: 3rem 0;
+    }
+    @media (max-width: 768px) {
+      .profile-card { padding: 1rem; }
+      .profile-avatar { width: 90px; height: 90px; }
+    }
+  </style>
 </head>
 <body>
-    <div id="menu-container"></div>
-    <div class="container">
-        <div class="container mt-4">
-          <div class="row justify-content-center">
-            <div class="col-12 col-md-10 col-lg-8">
-              <div class="card shadow-sm p-4 mb-4 text-center">
-                <div class="d-flex flex-column flex-md-row align-items-center justify-content-center gap-4">
-                  <img id="profile-avatar" src="images/default-profile.png" alt="Avatar" class="rounded-circle border border-3" style="width:120px;height:120px;object-fit:cover;">
-                  <div class="flex-grow-1 text-md-start">
-                    <h2 id="profile-name" class="fw-bold mb-1">Nome do Usuário</h2>
-                    <div id="profile-email" class="text-muted mb-2">email@exemplo.com</div>
-                    <div class="mb-2"><span class="badge bg-light text-dark">Membro desde <span id="join-date"></span></span></div>
-                    <div class="d-flex flex-wrap gap-3 mt-2">
-                      <div><span class="fw-bold" id="listings-count">0</span> Produtos</div>
-                      <div><span class="fw-bold" id="sales-count">0</span> Vendas</div>
-                      <div><span class="fw-bold" id="purchases-count">0</span> Compras</div>
-                      <div><span class="fw-bold" id="rating">0.0</span> Classificação</div>
-                    </div>
-                  </div>
-                  <div class="text-center text-md-end">
-                    <div class="fs-4 fw-bold text-success" id="wallet-balance">€0.00</div>
-                    <div class="text-muted">Saldo na Carteira</div>
-                    <button class="btn btn-primary mt-2" id="add-funds-btn">Adicionar Fundos</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+  <div id="menu-container"></div>
+  <script>
+    fetch('menu.html').then(res => res.text()).then(html => {
+      document.getElementById('menu-container').innerHTML = html;
+    });
+  </script>
+  <div class="container mt-4">
+    <div class="profile-card text-center">
+      <div class="row align-items-center">
+        <div class="col-12 col-md-3 mb-3 mb-md-0">
+          <img id="profile-avatar" src="images/default-profile.png" class="profile-avatar" alt="Avatar">
+        </div>
+        <div class="col-12 col-md-6 text-md-start">
+          <h2 id="profile-name" class="fw-bold mb-1">Nome do Usuário</h2>
+          <div id="profile-email" class="text-muted mb-2">email@exemplo.com</div>
+          <span class="badge bg-light text-dark mb-2">Membro desde <span id="join-date"></span></span>
+          <div class="profile-stats d-flex flex-wrap gap-3 mt-2 justify-content-center justify-content-md-start">
+            <div class="stat"><div class="number" id="listings-count">0</div><div>Produtos</div></div>
+            <div class="stat"><div class="number" id="sales-count">0</div><div>Vendas</div></div>
+            <div class="stat"><div class="number" id="purchases-count">0</div><div>Compras</div></div>
+            <div class="stat"><div class="number" id="rating">0.0</div><div>Classificação</div></div>
           </div>
         </div>
-
-        <div class="tabs">
-            <div class="tab active" data-tab="meus-produtos">Os Meus Produtos</div>
-            <div class="tab" data-tab="transacoes">Transações</div>
-            <div class="tab" data-tab="notificacoes">Notificações <span id="notificacoes-badge" style="display:none;background:var(--danger-color);color:#fff;border-radius:10px;padding:2px 8px;font-size:12px;margin-left:4px;">0</span></div>
-            <div class="tab" data-tab="definicoes">Definições</div>
+        <div class="col-12 col-md-3 text-center text-md-end mt-3 mt-md-0">
+          <div class="fs-4 fw-bold text-success" id="wallet-balance">€0.00</div>
+          <div class="text-muted">Saldo na Carteira</div>
+          <button class="btn btn-outline-primary mt-2" id="add-funds-btn"><i class="fa fa-plus"></i> Adicionar Fundos</button>
         </div>
-
-        <!-- Meus Produtos -->
-        <div class="tab-content active" id="meus-produtos">
-            <h2>Os Meus Produtos</h2>
-            <div class="grid-container" id="listings-container">
-                <!-- Produtos serão carregados aqui -->
-                <div class="empty-state" id="empty-listings">
-                    <i>👟</i>
-                    <h3>Sem Produtos Publicados</h3>
-                    <p>Comece a vender os seus sapatilhas favoritos.</p>
-                    <button class="action-btn" id="add-product-btn">Adicionar Produto</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Transações -->
-        <div class="tab-content" id="transacoes">
-            <h2>Histórico de Transações</h2>
-            <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-                <select id="filtro-tipo" class="form-select w-auto">
-                    <option value="todos">Todos os Tipos</option>
-                    <option value="compra">Compra</option>
-                    <option value="venda">Venda</option>
-                    <option value="deposito">Depósito</option>
-                    <option value="saque">Saque</option>
-                </select>
-                <select id="filtro-status" class="form-select w-auto">
-                    <option value="todos">Todos os Status</option>
-                    <option value="concluida">Concluída</option>
-                    <option value="pendente">Pendente</option>
-                    <option value="falha">Falha</option>
-                </select>
-                <input id="filtro-busca" class="form-control w-auto" placeholder="Buscar produto ou ID...">
-                <button id="btn-exportar-csv" class="btn btn-outline-primary ms-auto">Exportar CSV</button>
-            </div>
-            <div class="transaction-list" id="transaction-list"></div>
-            <div class="empty-state" id="empty-transactions" style="display:none;">
-                <i>💸</i>
-                <h3>Sem Transações</h3>
-                <p>Ainda não realizou nenhuma transação.</p>
-            </div>
-        </div>
-
-        <!-- Notificações -->
-        <div class="tab-content" id="notificacoes">
-            <h2>Notificações</h2>
-            <div id="notificacoes-list" class="transaction-list"></div>
-            <div class="empty-state" id="empty-notificacoes" style="display:none;">
-                <i>🔔</i>
-                <h3>Sem notificações</h3>
-                <p>Você ainda não recebeu nenhuma notificação.</p>
-            </div>
-        </div>
-
-        <!-- Definições -->
-        <div class="tab-content" id="definicoes">
-            <h2>Definições</h2>
-            <p>Funcionalidades de configurações em breve.</p>
-        </div>
+      </div>
     </div>
 
-    <!-- Modal para adicionar fundos -->
-    <div id="add-funds-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);z-index:1000;align-items:center;justify-content:center;">
-        <div style="background:#fff;padding:32px 24px;border-radius:12px;max-width:350px;margin:auto;position:relative;">
-            <h4>Adicionar Fundos</h4>
-            <label>Valor (€):<input type="number" id="funds-amount" class="form-control mb-2" min="1" step="0.01"></label>
-            <div class="mb-3">
-                <button id="stripe-checkout-btn" class="btn btn-primary w-100 mb-2">Pagar com Cartão (Stripe)</button>
-                <div id="paypal-button-container" class="mb-2"></div>
-                <button id="mbway-btn" class="btn btn-warning w-100 mb-2">Pagar com MB Way</button>
-                <button id="confirm-add-funds" class="btn btn-success w-100 mb-2">Confirmar (Simulação)</button>
-                <button id="cancel-add-funds" class="btn btn-outline-secondary w-100">Cancelar</button>
-            </div>
-            <div class="small text-muted">Pagamentos reais requerem backend seguro. Veja instruções no código.</div>
+    <!-- Tabs Bootstrap -->
+    <ul class="nav nav-tabs" id="perfilTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="produtos-tab" data-bs-toggle="tab" data-bs-target="#produtos" type="button" role="tab">Meus Produtos</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="transacoes-tab" data-bs-toggle="tab" data-bs-target="#transacoes" type="button" role="tab">Transações</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="notificacoes-tab" data-bs-toggle="tab" data-bs-target="#notificacoes" type="button" role="tab">Notificações</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="definicoes-tab" data-bs-toggle="tab" data-bs-target="#definicoes" type="button" role="tab">Definições</button>
+      </li>
+    </ul>
+    <div class="tab-content" id="perfilTabsContent">
+      <!-- Produtos -->
+      <div class="tab-pane fade show active" id="produtos" role="tabpanel">
+        <div class="row" id="listings-container">
+          <div class="empty-state" id="empty-listings">
+            <i class="fa fa-box-open fa-2x mb-2"></i>
+            <h5>Sem Produtos Publicados</h5>
+            <p>Comece a vender os seus sneakers favoritos.</p>
+            <a href="vender.html" class="btn btn-primary mt-2">Adicionar Produto</a>
+          </div>
         </div>
-    </div>
-
-    <!-- Modal para confirmar eliminação da conta -->
-    <div id="delete-account-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Eliminar Conta</h2>
-                <span class="close-modal">&times;</span>
-            </div>
-            <p>Tem certeza que deseja eliminar permanentemente a sua conta? Esta ação não pode ser desfeita.</p>
-            <div class="form-group">
-                <label for="delete-confirm-password">Introduza a sua password para confirmar</label>
-                <input type="password" id="delete-confirm-password" placeholder="A sua password">
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn modal-cancel" id="cancel-delete-account">Cancelar</button>
-                <button class="modal-btn modal-confirm" id="confirm-delete-account" style="background-color: var(--danger-color);">Eliminar Permanentemente</button>
-            </div>
+      </div>
+      <!-- Transações -->
+      <div class="tab-pane fade" id="transacoes" role="tabpanel">
+        <div id="transaction-list"></div>
+        <div class="empty-state" id="empty-transactions" style="display:none;">
+          <i class="fa fa-money-bill-wave fa-2x mb-2"></i>
+          <h5>Sem Transações</h5>
+          <p>Ainda não realizou nenhuma transação.</p>
         </div>
+      </div>
+      <!-- Notificações -->
+      <div class="tab-pane fade" id="notificacoes" role="tabpanel">
+        <div id="notificacoes-list"></div>
+        <div class="empty-state" id="empty-notificacoes" style="display:none;">
+          <i class="fa fa-bell fa-2x mb-2"></i>
+          <h5>Sem notificações</h5>
+          <p>Você ainda não recebeu nenhuma notificação.</p>
+        </div>
+      </div>
+      <!-- Definições -->
+      <div class="tab-pane fade" id="definicoes" role="tabpanel">
+        <p>Funcionalidades de configurações em breve.</p>
+      </div>
     </div>
+  </div>
 
-    <div class="toast" id="toast-message"></div>
+  <!-- Firebase SDK e Config -->
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, sendPasswordResetEmail, deleteUser } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    <script>
-        // Inicializar Firebase a partir do arquivo firebase-config.js
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const storage = firebase.storage();
+    // Carregar menu
+    // fetch('menu.html').then(res => res.text()).then(html => {
+    //   document.getElementById('menu-container').innerHTML = html;
+    // });
 
-        // Verificar autenticação
-        document.addEventListener('DOMContentLoaded', function() {
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    // Utilizador autenticado, carregar dados
-                    loadUserProfile(user);
-                    loadUserListings(user.uid);
-                    loadUserPurchases(user.uid);
-                    loadUserTrades(user.uid);
-                    loadUserTransactions(user.uid);
-                    loadUserNotifications(user.uid);
-                } else {
-                    // Utilizador não autenticado, redirecionar para login
-                    window.location.href = 'login.html';
-                }
-            });
+    // Carregar dados do usuário
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'log.html';
+        return;
+      }
+      // Dados básicos
+      document.getElementById('profile-name').textContent = user.displayName || 'Usuário';
+      document.getElementById('profile-email').textContent = user.email;
+      document.getElementById('profile-avatar').src = user.photoURL || 'images/default-profile.png';
 
-            // Setup dos tabs
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Atualizar classes ativas
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(tc => tc.classList.remove('active'));
-                    tab.classList.add('active');
-                    document.getElementById(tab.dataset.tab).classList.add('active');
-                });
-            });
+      // Buscar dados extras do Firestore
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      let userData = {};
+      if (userSnap.exists()) {
+        userData = userSnap.data();
+        // Data de registro
+        if (userData.createdAt && userData.createdAt.toDate) {
+          document.getElementById('join-date').textContent = userData.createdAt.toDate().toLocaleDateString('pt-PT');
+        } else {
+          document.getElementById('join-date').textContent = '---';
+        }
+        // Saldo
+        document.getElementById('wallet-balance').textContent = '€' + (userData.walletBalance ? userData.walletBalance.toFixed(2) : '0.00');
+        // Estatísticas
+        document.getElementById('listings-count').textContent = userData.listingsCount || 0;
+        document.getElementById('sales-count').textContent = userData.salesCount || 0;
+        document.getElementById('purchases-count').textContent = userData.purchasesCount || 0;
+        document.getElementById('rating').textContent = userData.rating ? userData.rating.toFixed(1) : '0.0';
+      } else {
+        document.getElementById('join-date').textContent = '---';
+      }
 
-            // Setup dos botões de guardar e outras ações
-            document.getElementById('save-info-btn').addEventListener('click', saveUserInfo);
-            document.getElementById('save-avatar-btn').addEventListener('click', updateUserAvatar);
-            document.getElementById('save-preferences-btn').addEventListener('click', saveUserPreferences);
-            document.getElementById('change-password-btn').addEventListener('click', changeUserPassword);
-            document.getElementById('delete-account-btn').addEventListener('click', showDeleteConfirmation);
-            document.getElementById('add-funds-btn').addEventListener('click', showAddFundsDialog);
-            
-            // Setup dos modais
-            setupModals();
+      // Carregar produtos do usuário
+      const listingsContainer = document.getElementById('listings-container');
+      const emptyListings = document.getElementById('empty-listings');
+      listingsContainer.innerHTML = '';
+      const produtosRef = collection(db, "produtos");
+      const q = query(produtosRef, where("userId", "==", user.uid), orderBy("dataCriacao", "desc"));
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        emptyListings.style.display = 'block';
+      } else {
+        emptyListings.style.display = 'none';
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const card = document.createElement('div');
+          card.className = 'col-12 col-md-6 col-lg-4';
+          card.innerHTML = `
+            <div class="product-card h-100">
+              <img src="${data.imagemPrincipal || 'images/no-image.png'}" class="product-img" alt="${data.nome}">
+              <div class="p-3">
+                <h5 class="mb-1">${data.nome}</h5>
+                <div class="mb-2 text-muted">${data.marca || ''}</div>
+                <div class="fw-bold text-danger mb-2">€${data.preco}</div>
+                <div class="mb-2"><span class="badge bg-light text-dark">${data.condicao || ''}</span></div>
+                <a href="produto-detalhe.html?id=${docSnap.id}" class="btn btn-outline-dark btn-sm w-100 mb-1">Ver Detalhes</a>
+                <a href="editar-produto.html?id=${docSnap.id}" class="btn btn-outline-primary btn-sm w-100">Editar</a>
+              </div>
+            </div>
+          `;
+          listingsContainer.appendChild(card);
         });
+      }
 
-        // Carregar perfil do utilizador
-        function loadUserProfile(user) {
-            db.collection('users').doc(user.uid).get().then(doc => {
-                if (doc.exists) {
-                    const userData = doc.data();
-                    
-                    // Preencher informações de perfil
-                    document.getElementById('profile-name').textContent = userData.displayName || 'Utilizador';
-                    document.getElementById('profile-email').textContent = user.email;
-                    
-                    // Formatar data de registo
-                    const joinDate = userData.createdAt ? 
-                        new Date(userData.createdAt.toDate()).toLocaleDateString('pt-PT', {
-                            day: 'numeric', 
-                            month: 'long', 
-                            year: 'numeric'
-                        }) : 'N/A';
-                    document.getElementById('join-date').textContent = joinDate;
-                    
-                    // Avatar
-                    if (userData.avatarUrl) {
-                        document.getElementById('profile-avatar').src = userData.avatarUrl;
-                    }
-                    
-                    // Estatísticas
-                    document.getElementById('listings-count').textContent = userData.listingsCount || 0;
-                    document.getElementById('sales-count').textContent = userData.salesCount || 0;
-                    document.getElementById('purchase-count').textContent = userData.purchaseCount || 0;
-                    document.getElementById('rating').textContent = userData.rating ? userData.rating.toFixed(1) : '0.0';
-                    
-                    // Saldo da carteira
-                    document.getElementById('wallet-balance').textContent = 
-                        '€' + (userData.walletBalance ? userData.walletBalance.toFixed(2) : '0.00');
-                    
-                    // Preencher campos de definições
-                    document.getElementById('display-name').value = userData.displayName || '';
-                    document.getElementById('email').value = user.email;
-                    document.getElementById('phone').value = userData.phone || '';
-                    document.getElementById('location').value = userData.location || '';
-                    
-                    // Preencher preferências
-                    if (userData.preferences) {
-                        document.getElementById('notification-preference').value = userData.preferences.notifications || 'all';
-                        document.getElementById('language-preference').value = userData.preferences.language || 'pt';
-                    }
-                } else {
-                    // Criar documento de usuário se não existir
-                    db.collection('users').doc(user.uid).set({
-                        displayName: user.displayName || 'Utilizador',
-                        email: user.email,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        walletBalance: 0,
-                        listingsCount: 0,
-                        salesCount: 0,
-                        purchaseCount: 0,
-                        rating: 0,
-                        preferences: {
-                            notifications: 'all',
-                            language: 'pt'
-                        }
-                    });
-                }
-            }).catch(error => {
-                showToast('Erro ao carregar dados: ' + error.message);
-            });
-        }
-
-        // Carregar produtos do utilizador
-        function loadUserListings(userId) {
-            db.collection('listings')
-                .where('sellerId', '==', userId)
-                .orderBy('createdAt', 'desc')
-                .get()
-                .then(snapshot => {
-                    const container = document.getElementById('listings-container');
-                    const emptyState = document.getElementById('empty-listings');
-                    
-                    if (snapshot.empty) {
-                        emptyState.style.display = 'block';
-                        return;
-                    }
-                    
-                    emptyState.style.display = 'none';
-                    container.innerHTML = '';
-                    
-                    snapshot.forEach(doc => {
-                        const listing = doc.data();
-                        const listingId = doc.id;
-                        
-                        const statusClass = listing.status === 'active' ? 'status-active' : 
-                                           (listing.status === 'sold' ? 'status-sold' : 'status-pending');
-                        const statusText = listing.status === 'active' ? 'Ativo' : 
-                                          (listing.status === 'sold' ? 'Vendido' : 'Pendente');
-                        
-                        const productCard = document.createElement('div');
-                        productCard.className = 'product-card';
-                        productCard.innerHTML = `
-                            <div class="product-image">
-                                <img src="${listing.imageUrl || '/api/placeholder/280/200'}" alt="${listing.title}">
-                                <div class="product-status ${statusClass}">${statusText}</div>
-                            </div>
-                            <div class="product-info">
-                                <div class="product-title">${listing.title}</div>
-                                <div class="product-price">€${listing.price.toFixed(2)}</div>
-                                <div style="font-size: 12px; color: var(--accent-color);">
-                                    ${listing.brand} • Tamanho ${listing.size}
-                                </div>
-                                <div class="product-actions">
-                                    <button class="product-action-btn edit-btn" data-id="${listingId}">Editar</button>
-                                    <button class="product-action-btn delete-btn" data-id="${listingId}">Eliminar</button>
-                                </div>
-                            </div>
-                        `;
-                        
-                        container.appendChild(productCard);
-                        
-                        // Adicionar event listeners para os botões
-                        productCard.querySelector('.edit-btn').addEventListener('click', function() {
-                            window.location.href = `edit-listing.html?id=${listingId}`;
-                        });
-                        
-                        productCard.querySelector('.delete-btn').addEventListener('click', function() {
-                            deleteListing(listingId);
-                        });
-                    });
-                })
-                .catch(error => {
-                    showToast('Erro ao carregar produtos: ' + error.message);
-                });
-        }
-
-        // Carregar compras do utilizador
-        function loadUserPurchases(userId) {
-            db.collection('purchases')
-                .where('buyerId', '==', userId)
-                .orderBy('purchaseDate', 'desc')
-                .get()
-                .then(snapshot => {
-                    const container = document.getElementById('purchases-container');
-                    const emptyState = document.getElementById('empty-purchases');
-                    
-                    if (snapshot.empty) {
-                        emptyState.style.display = 'block';
-                        return;
-                    }
-                    
-                    emptyState.style.display = 'none';
-                    container.innerHTML = '';
-                    
-                    snapshot.forEach(doc => {
-                        const purchase = doc.data();
-                        
-                        // Carregar informações do produto
-                        db.collection('listings').doc(purchase.listingId).get().then(listingDoc => {
-                            if (listingDoc.exists) {
-                                const listing = listingDoc.data();
-                                
-                                const productCard = document.createElement('div');
-                                productCard.className = 'product-card';
-                                productCard.innerHTML = `
-                                    <div class="product-image">
-                                        <img src="${listing.imageUrl || '/api/placeholder/280/200'}" alt="${listing.title}">
-                                        <div class="product-status status-sold">Comprado</div>
-                                    </div>
-                                    <div class="product-info">
-                                        <div class="product-title">${listing.title}</div>
-                                        <div class="product-price">€${listing.price.toFixed(2)}</div>
-                                        <div style="font-size: 12px; color: var(--accent-color);">
-                                            Comprado em ${new Date(purchase.purchaseDate.toDate()).toLocaleDateString('pt-PT')}
-                                        </div>
-                                    </div>
-                                `;
-                                
-                                container.appendChild(productCard);
-                            }
-                        });
-                    });
-                })
-                .catch(error => {
-                    showToast('Erro ao carregar compras: ' + error.message);
-                });
-        }
-
-        // Carregar trocas do utilizador
-        function loadUserTrades(userId) {
-            db.collection('trades')
-                .where('participants', 'array-contains', userId)
-                .orderBy('createdAt', 'desc')
-                .get()
-                .then(snapshot => {
-                    const container = document.getElementById('trades-container');
-                    const emptyState = document.getElementById('empty-trades');
-                    
-                    if (snapshot.empty) {
-                        emptyState.style.display = 'block';
-                        return;
-                    }
-                    
-                    emptyState.style.display = 'none';
-                    container.innerHTML = '';
-                    
-                    snapshot.forEach(doc => {
-                        const trade = doc.data();
-                        const tradeId = doc.id;
-                        
-                        const statusClass = trade.status === 'pending' ? 'status-pending' : 
-                                          (trade.status === 'completed' ? 'status-active' : 'status-sold');
-                        const statusText = trade.status === 'pending' ? 'Pendente' : 
-                                          (trade.status === 'completed' ? 'Concluída' : 'Cancelada');
-                        
-                        // Determinar se o utilizador é o iniciador ou o receptor
-                        const isInitiator = trade.initiatorId === userId;
-                        const otherUserId = isInitiator ? trade.receiverId : trade.initiatorId;
-                        
-                        // Carregar informações do outro utilizador
-                        db.collection('users').doc(otherUserId).get().then(userDoc => {
-                            if (userDoc.exists) {
-                                const otherUser = userDoc.data();
-                                
-                                const tradeCard = document.createElement('div');
-                                tradeCard.className = 'product-card';
-                                tradeCard.innerHTML = `
-                                    <div class="product-image">
-                                        <img src="${trade.imageUrl || '/api/placeholder/280/200'}" alt="Troca">
-                                        <div class="product-status ${statusClass}">${statusText}</div>
-                                    </div>
-                                    <div class="product-info">
-                                        <div class="product-title">Troca com ${otherUser.displayName || 'Utilizador'}</div>
-                                        <div style="font-size: 14px;">${isInitiator ? 'Você ofereceu' : 'Recebeu oferta de'}: ${trade.offerDescription}</div>
-                                        <div style="font-size: 12px; color: var(--accent-color);">
-                                            Criado em ${new Date(trade.createdAt.toDate()).toLocaleDateString('pt-PT')}
-                                        </div>
-                                        ${trade.status === 'pending' ? `
-                                        <div class="product-actions">
-                                            <button class="product-action-btn edit-btn" data-id="${tradeId}">Ver Detalhes</button>
-                                            ${!isInitiator ? `
-                                            <button class="product-action-btn accept-btn" data-id="${tradeId}">Aceitar</button>
-                                            ` : ''}
-                                            <button class="product-action-btn delete-btn" data-id="${tradeId}">Recusar</button>
-                                        </div>
-                                        ` : ''}
-                                    </div>
-                                `;
-                                
-                                container.appendChild(tradeCard);
-                                
-                                // Adicionar event listeners para os botões
-                                if (trade.status === 'pending') {
-                                    tradeCard.querySelector('.edit-btn').addEventListener('click', function() {
-                                        window.location.href = `trade-details.html?id=${tradeId}`;
-                                    });
-                                    
-                                    if (!isInitiator) {
-                                        tradeCard.querySelector('.accept-btn').addEventListener('click', function() {
-                                            acceptTrade(tradeId);
-                                        });
-                                    }
-                                    
-                                    tradeCard.querySelector('.delete-btn').addEventListener('click', function() {
-                                        rejectTrade(tradeId);
-                                    });
-                                }
-                            }
-                        });
-                    });
-                })
-                .catch(error => {
-                    showToast('Erro ao carregar trocas: ' + error.message);
-                });
-        }
-
-        // Carregar transações reais do Firestore com filtros e exportação CSV
-        function loadUserTransactions(userId) {
-            let transacoes = [];
-            db.collection('transacoes')
-                .where('userId', '==', userId)
-                .orderBy('data', 'desc')
-                .onSnapshot(snapshot => {
-                    transacoes = [];
-                    snapshot.forEach(doc => {
-                        const t = doc.data();
-                        t.id = doc.id;
-                        transacoes.push(t);
-                    });
-                    renderTransacoes(transacoes);
-                });
-            // Filtros
-            document.getElementById('filtro-tipo').onchange = () => renderTransacoes(transacoes);
-            document.getElementById('filtro-status').onchange = () => renderTransacoes(transacoes);
-            document.getElementById('filtro-busca').oninput = () => renderTransacoes(transacoes);
-            document.getElementById('btn-exportar-csv').onclick = () => exportarTransacoesCSV(transacoes);
-        }
-        function renderTransacoes(transacoes) {
-            const tipo = document.getElementById('filtro-tipo').value;
-            const status = document.getElementById('filtro-status').value;
-            const busca = document.getElementById('filtro-busca').value.toLowerCase();
-            const container = document.getElementById('transaction-list');
-            const emptyState = document.getElementById('empty-transactions');
-            let filtradas = transacoes.filter(t => {
-                let ok = true;
-                if (tipo !== 'todos') ok = ok && t.tipo === tipo;
-                if (status !== 'todos') ok = ok && t.status === status;
-                if (busca) ok = ok && ((t.produtoNome && t.produtoNome.toLowerCase().includes(busca)) || (t.id && t.id.toLowerCase().includes(busca)));
-                return ok;
-            });
-            if (filtradas.length === 0) {
-                emptyState.style.display = 'block';
-                container.innerHTML = '';
-                return;
-            }
-            emptyState.style.display = 'none';
-            container.innerHTML = '';
-            filtradas.forEach(t => {
-                const isPositive = t.tipo === 'deposito' || t.tipo === 'venda';
-                const amountClass = isPositive ? 'amount-positive' : 'amount-negative';
-                const amountPrefix = isPositive ? '+' : '-';
-                let descricao = t.tipo.charAt(0).toUpperCase() + t.tipo.slice(1);
-                if (t.produtoNome) descricao += ': ' + t.produtoNome;
-                container.innerHTML += `
-                    <div class="transaction-item">
-                        <div class="transaction-details">
-                            <div class="transaction-title">${descricao}</div>
-                            <div class="transaction-date">${t.data && t.data.toDate ? new Date(t.data.toDate()).toLocaleString('pt-PT') : ''}</div>
-                            <div class="transaction-title small text-muted">Status: ${t.status || 'concluida'}</div>
-                        </div>
-                        <div class="transaction-amount ${amountClass}">${amountPrefix}€${Math.abs(t.valor || 0).toFixed(2)}</div>
-                    </div>
-                `;
-            });
-        }
-        function exportarTransacoesCSV(transacoes) {
-            const tipo = document.getElementById('filtro-tipo').value;
-            const status = document.getElementById('filtro-status').value;
-            const busca = document.getElementById('filtro-busca').value.toLowerCase();
-            let filtradas = transacoes.filter(t => {
-                let ok = true;
-                if (tipo !== 'todos') ok = ok && t.tipo === tipo;
-                if (status !== 'todos') ok = ok && t.status === status;
-                if (busca) ok = ok && ((t.produtoNome && t.produtoNome.toLowerCase().includes(busca)) || (t.id && t.id.toLowerCase().includes(busca)));
-                return ok;
-            });
-            let csv = 'ID,Tipo,Status,Produto,Valor,Data\n';
-            filtradas.forEach(t => {
-                csv += `${t.id},${t.tipo},${t.status || 'concluida'},${t.produtoNome || ''},${t.valor || 0},${t.data && t.data.toDate ? new Date(t.data.toDate()).toLocaleString('pt-PT') : ''}\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'transacoes.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Carregar notificações do utilizador
-        function loadUserNotifications(userId) {
-            db.collection('notificacoes')
-                .where('userId', '==', userId)
-                .orderBy('timestamp', 'desc')
-                .onSnapshot(snapshot => {
-                    const container = document.getElementById('notificacoes-list');
-                    const emptyState = document.getElementById('empty-notificacoes');
-                    const badge = document.getElementById('notificacoes-badge');
-                    if (snapshot.empty) {
-                        emptyState.style.display = 'block';
-                        container.innerHTML = '';
-                        badge.style.display = 'none';
-                        return;
-                    }
-                    emptyState.style.display = 'none';
-                    container.innerHTML = '';
-                    let unread = 0;
-                    snapshot.forEach(doc => {
-                        const notif = doc.data();
-                        const notifDiv = document.createElement('div');
-                        notifDiv.className = 'transaction-item' + (notif.lida ? '' : ' amount-negative');
-                        notifDiv.innerHTML = `
-                            <div class="transaction-details">
-                                <div class="transaction-title">${notif.mensagem}</div>
-                                <div class="transaction-date">${notif.timestamp && notif.timestamp.toDate ? new Date(notif.timestamp.toDate()).toLocaleString('pt-PT') : ''}</div>
-                                ${notif.produtoNome ? `<div class='transaction-title'><b>Produto:</b> ${notif.produtoNome}</div>` : ''}
-                            </div>
-                            <button class="product-action-btn edit-btn" style="margin-left:auto;" ${notif.lida ? 'disabled' : ''}>${notif.lida ? 'Lida' : 'Marcar como lida'}</button>
-                        `;
-                        if (!notif.lida) unread++;
-                        notifDiv.querySelector('button').onclick = async () => {
-                            await db.collection('notificacoes').doc(doc.id).update({ lida: true });
-                        };
-                        container.appendChild(notifDiv);
-                    });
-                    badge.textContent = unread;
-                    badge.style.display = unread > 0 ? 'inline-block' : 'none';
-                });
-        }
-
-        // Salvar informações pessoais
-        function saveUserInfo() {
-            const user = auth.currentUser;
-            if (!user) return;
-            
-            const displayName = document.getElementById('display-name').value;
-            const phone = document.getElementById('phone').value;
-            const location = document.getElementById('location').value;
-            
-            db.collection('users').doc(user.uid).update({
-                displayName: displayName,
-                phone: phone,
-                location: location,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                // Atualizar exibição do nome no perfil
-                document.getElementById('profile-name').textContent = displayName;
-                showToast('Informações atualizadas com sucesso!');
-            }).catch(error => {
-                showToast('Erro ao salvar informações: ' + error.message);
-            });
-        }
-
-        // Atualizar avatar do utilizador
-        function updateUserAvatar() {
-            const user = auth.currentUser;
-            if (!user) return;
-            
-            const fileInput = document.getElementById('avatar-upload');
-            if (fileInput.files.length === 0) {
-                showToast('Selecione uma imagem para atualizar.');
-                return;
-            }
-            
-            const file = fileInput.files[0];
-            
-            // Validar tipo de arquivo
-            if (!file.type.match('image.*')) {
-                showToast('Por favor, selecione uma imagem válida.');
-                return;
-            }
-            
-            // Criar referência no storage e fazer upload
-            const storageRef = storage.ref();
-            const avatarRef = storageRef.child(`user-avatars/${user.uid}`);
-            
-            avatarRef.put(file).then(snapshot => {
-                // Obter URL do arquivo enviado
-                return snapshot.ref.getDownloadURL();
-            }).then(downloadURL => {
-                // Atualizar URL do avatar no documento do utilizador
-                return db.collection('users').doc(user.uid).update({
-                    avatarUrl: downloadURL,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            }).then(() => {
-                // Atualizar avatar na interface
-                document.getElementById('profile-avatar').src = URL.createObjectURL(file);
-                showToast('Fotografia atualizada com sucesso!');
-                fileInput.value = '';
-            }).catch(error => {
-                showToast('Erro ao atualizar fotografia: ' + error.message);
-            });
-        }
-
-        // Salvar preferências do utilizador
-        function saveUserPreferences() {
-            const user = auth.currentUser;
-            if (!user) return;
-            
-            const notificationPref = document.getElementById('notification-preference').value;
-            const languagePref = document.getElementById('language-preference').value;
-            
-            db.collection('users').doc(user.uid).update({
-                'preferences.notifications': notificationPref,
-                'preferences.language': languagePref,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                showToast('Preferências atualizadas com sucesso!');
-            }).catch(error => {
-                showToast('Erro ao salvar preferências: ' + error.message);
-            });
-        }
-
-        // Alterar password do utilizador
-        function changeUserPassword() {
-            const user = auth.currentUser;
-            if (!user) return;
-            
-            const currentPassword = document.getElementById('current-password').value;
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-            
-            // Validar inputs
-            if (!currentPassword || !newPassword || !confirmPassword) {
-                showToast('Preencha todos os campos de password.');
-                return;
-            }
-            
-            if (newPassword !== confirmPassword) {
-                showToast('As passwords não coincidem.');
-                return;
-            }
-            
-            if (newPassword.length < 6) {
-                showToast('A nova password deve ter pelo menos 6 caracteres.');
-                return;
-            }
-            
-            // Reautenticar utilizador
-            const credential = firebase.auth.EmailAuthProvider.credential(
-                user.email, 
-                currentPassword
-            );
-            
-            user.reauthenticateWithCredential(credential).then(() => {
-                // Atualizar password
-                return user.updatePassword(newPassword);
-            }).then(() => {
-                showToast('Password atualizada com sucesso!');
-                
-                // Limpar campos
-                document.getElementById('current-password').value = '';
-                document.getElementById('new-password').value = '';
-                document.getElementById('confirm-password').value = '';
-            }).catch(error => {
-                showToast('Erro: ' + error.message);
-            });
-        }
-
-        // Eliminar produto
-        function deleteListing(listingId) {
-            if (confirm('Tem certeza que deseja eliminar este produto?')) {
-                db.collection('listings').doc(listingId).delete().then(() => {
-                    showToast('Produto eliminado com sucesso!');
-                    
-                    // Atualizar contagem de produtos
-                    const user = auth.currentUser;
-                    db.collection('users').doc(user.uid).get().then(doc => {
-                        if (doc.exists) {
-                            const userData = doc.data();
-                            const newCount = Math.max(0, (userData.listingsCount || 1) - 1);
-                            
-                            db.collection('users').doc(user.uid).update({
-                                listingsCount: newCount
-                            });
-                            
-                            document.getElementById('listings-count').textContent = newCount;
-                        }
-                    });
-                    
-                    // Recarregar produtos
-                    loadUserListings(auth.currentUser.uid);
-                }).catch(error => {
-                    showToast('Erro ao eliminar produto: ' + error.message);
-                });
-            }
-        }
-
-        // Aceitar troca
-        function acceptTrade(tradeId) {
-            db.collection('trades').doc(tradeId).update({
-                status: 'completed',
-                completedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                showToast('Troca aceite com sucesso!');
-                loadUserTrades(auth.currentUser.uid);
-            }).catch(error => {
-                showToast('Erro ao aceitar troca: ' + error.message);
-            });
-        }
-
-        // Recusar troca
-        function rejectTrade(tradeId) {
-            db.collection('trades').doc(tradeId).update({
-                status: 'rejected',
-                rejectedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                showToast('Troca recusada.');
-                loadUserTrades(auth.currentUser.uid);
-            }).catch(error => {
-                showToast('Erro ao recusar troca: ' + error.message);
-            });
-        }
-
-        // Configurar modais
-        function setupModals() {
-            // Modal de adicionar fundos
-            const addFundsModal = document.getElementById('add-funds-modal');
-            const closeAddFunds = addFundsModal.querySelector('.close-modal');
-            const cancelAddFunds = document.getElementById('cancel-add-funds');
-            const confirmAddFunds = document.getElementById('confirm-add-funds');
-            
-            closeAddFunds.addEventListener('click', () => {
-                addFundsModal.style.display = 'none';
-            });
-            
-            cancelAddFunds.addEventListener('click', () => {
-                addFundsModal.style.display = 'none';
-            });
-            
-            confirmAddFunds.addEventListener('click', addFunds);
-            
-            // Modal de eliminar conta
-            const deleteAccountModal = document.getElementById('delete-account-modal');
-            const closeDeleteAccount = deleteAccountModal.querySelector('.close-modal');
-            const cancelDeleteAccount = document.getElementById('cancel-delete-account');
-            const confirmDeleteAccount = document.getElementById('confirm-delete-account');
-            
-            closeDeleteAccount.addEventListener('click', () => {
-                deleteAccountModal.style.display = 'none';
-            });
-            
-            cancelDeleteAccount.addEventListener('click', () => {
-                deleteAccountModal.style.display = 'none';
-            });
-            
-            confirmDeleteAccount.addEventListener('click', deleteAccount);
-            
-            // Fechar modais ao clicar fora
-            window.addEventListener('click', (event) => {
-                if (event.target === addFundsModal) {
-                    addFundsModal.style.display = 'none';
-                }
-                if (event.target === deleteAccountModal) {
-                    deleteAccountModal.style.display = 'none';
-                }
-            });
-        }
-
-        // Mostrar modal de adicionar fundos
-        function showAddFundsDialog() {
-            const modal = document.getElementById('add-funds-modal');
-            modal.style.display = 'flex';
-        }
-
-        // Adicionar fundos à carteira
-        function addFunds() {
-            const user = auth.currentUser;
-            if (!user) return;
-            
-            const amount = parseFloat(document.getElementById('funds-amount').value);
-            const paymentMethod = document.getElementById('payment-method').value;
-            
-            if (isNaN(amount) || amount <= 0) {
-                showToast('Por favor, introduza um valor válido.');
-                return;
-            }
-            
-            // Em produção, aqui seria feita a integração com um gateway de pagamento
-            // Para este exemplo, adicionamos fundos diretamente
-            
-            // Obter saldo atual
-            db.collection('users').doc(user.uid).get().then(doc => {
-                if (doc.exists) {
-                    const userData = doc.data();
-                    const currentBalance = userData.walletBalance || 0;
-                    const newBalance = currentBalance + amount;
-                    
-                    // Atualizar saldo
-                    return db.collection('users').doc(user.uid).update({
-                        walletBalance: newBalance,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-            }).then(() => {
-                // Criar registo de transação
-                return db.collection('transactions').add({
-                    userId: user.uid,
-                    type: 'deposit',
-                    amount: amount,
-                    paymentMethod: paymentMethod,
-                    date: firebase.firestore.FieldValue.serverTimestamp(),
-                    description: 'Depósito de fundos'
-                });
-            }).then(() => {
-                // Fechar modal e mostrar mensagem
-                document.getElementById('add-funds-modal').style.display = 'none';
-                showToast('Fundos adicionados com sucesso!');
-                
-                // Atualizar saldo exibido
-                db.collection('users').doc(user.uid).get().then(doc => {
-                    if (doc.exists) {
-                        const userData = doc.data();
-                        document.getElementById('wallet-balance').textContent = 
-                            '€' + (userData.walletBalance ? userData.walletBalance.toFixed(2) : '0.00');
-                    }
-                });
-                
-                // Recarregar transações
-                loadUserTransactions(user.uid);
-            }).catch(error => {
-                showToast('Erro ao adicionar fundos: ' + error.message);
-            });
-        }
-
-        // Mostrar confirmação de eliminação de conta
-        function showDeleteConfirmation() {
-            const modal = document.getElementById('delete-account-modal');
-            modal.style.display = 'block';
-        }
-
-        // Eliminar conta de utilizador
-        function deleteAccount() {
-            const user = auth.currentUser;
-            if (!user) return;
-            
-            const password = document.getElementById('delete-confirm-password').value;
-            
-            if (!password) {
-                showToast('Introduza a sua password para confirmar.');
-                return;
-            }
-            
-            // Reautenticar utilizador
-            const credential = firebase.auth.EmailAuthProvider.credential(
-                user.email, 
-                password
-            );
-            
-            user.reauthenticateWithCredential(credential).then(() => {
-                // Eliminar dados do utilizador
-                const batch = db.batch();
-                
-                // Referências para documentos a eliminar
-                const userRef = db.collection('users').doc(user.uid);
-                
-                // Adicionar operação de eliminação ao batch
-                batch.delete(userRef);
-                
-                // Commit do batch
-                return batch.commit();
-            }).then(() => {
-                // Eliminar conta do Firebase Auth
-                return user.delete();
-            }).then(() => {
-                alert('A sua conta foi eliminada com sucesso. Vai ser redirecionado para a página inicial.');
-                window.location.href = 'index.html';
-            }).catch(error => {
-                showToast('Erro ao eliminar conta: ' + error.message);
-            });
-        }
-
-        // Mostrar mensagens toast
-        function showToast(message) {
-            const toast = document.getElementById('toast-message');
-            toast.textContent = message;
-            toast.style.display = 'block';
-            
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 3000);
-        }
-    </script>
-    <script type="module">
-        import { auth, db, storage } from './firebase-config.js';
-        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        import { doc, getDoc, collection, query, where, getDocs, updateDoc, addDoc, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-        import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
-
-        onAuthStateChanged(auth, async user => {
-            if (!user) return window.location.href = 'log.html';
-            // Dados do utilizador
-            const userRef = doc(db, 'usuarios', user.uid);
-            const userSnap = await getDoc(userRef);
-            let userData = userSnap.exists() ? userSnap.data() : {};
-            document.getElementById('profile-name').textContent = userData.nome || user.displayName || 'Sem Nome';
-            document.getElementById('profile-email').textContent = user.email;
-            document.getElementById('join-date').textContent = user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString('pt-PT') : '';
-            document.getElementById('profile-avatar').src = userData.foto || user.photoURL || 'images/default-profile.png';
-            // Upload de foto de perfil
-            document.getElementById('avatar-upload').addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const storageRef = ref(storage, `usuarios/${user.uid}/avatar.jpg`);
-                await uploadBytes(storageRef, file);
-                const url = await getDownloadURL(storageRef);
-                await updateDoc(userRef, { foto: url });
-                document.getElementById('profile-avatar').src = url;
-                alert('Foto de perfil atualizada!');
-            });
-            // Listar produtos publicados (vendedorId ou userId)
-            const listingsContainer = document.getElementById('listings-container');
-            const emptyListings = document.getElementById('empty-listings');
-            const q1 = query(collection(db, 'produtos'), where('vendedorId', '==', user.uid));
-            const q2 = query(collection(db, 'produtos'), where('userId', '==', user.uid));
-            const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
-            listingsContainer.innerHTML = '';
-            let count = 0;
-            const allDocs = [...snap1.docs, ...snap2.docs].filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
-            allDocs.forEach(docSnap => {
-                const produto = docSnap.data();
-                const div = document.createElement('div');
-                div.className = 'product-card';
-                div.innerHTML = `
-                    <div class='product-image'><img src='${produto.imagemPrincipal || 'images/no-image.png'}' alt='${produto.nome}'></div>
-                    <div class='product-info'>
-                        <div class='product-title'>${produto.nome}</div>
-                        <div class='product-price'>€${produto.preco}</div>
-                        <div class='product-status status-active'>${produto.disponibilidade || ''}</div>
-                        <div class='product-actions'>
-                            <a href='produto-detalhe.html?id=${docSnap.id}' class='product-action-btn edit-btn'>Ver</a>
-                        </div>
-                    </div>
-                `;
-                listingsContainer.appendChild(div);
-                count++;
-            });
-            document.getElementById('listings-count').textContent = count;
-            if (count === 0) emptyListings.style.display = 'block';
-            else emptyListings.style.display = 'none';
-            // Botões funcionais
-            document.getElementById('add-funds-btn')?.addEventListener('click', () => {
-                document.getElementById('add-funds-modal').style.display = 'flex';
-            });
-            document.getElementById('cancel-add-funds')?.addEventListener('click', () => {
-                document.getElementById('add-funds-modal').style.display = 'none';
-            });
-            document.getElementById('confirm-add-funds')?.addEventListener('click', async () => {
-                const amount = parseFloat(document.getElementById('funds-amount').value);
-                if (isNaN(amount) || amount <= 0) return alert('Valor inválido.');
-                // Atualizar saldo na coleção 'usuarios'
-                const saldoAtual = userData.saldo || 0;
-                await updateDoc(userRef, { saldo: saldoAtual + amount });
-                // Registrar transação
-                await addDoc(collection(db, 'transacoes'), {
-                    userId: user.uid,
-                    tipo: 'deposito',
-                    valor: amount,
-                    data: new Date(),
-                    metodo: document.getElementById('payment-method').value
-                });
-                alert('Fundos adicionados com sucesso!');
-                document.getElementById('add-funds-modal').style.display = 'none';
-                // Atualizar saldo na tela
-                userData.saldo = saldoAtual + amount;
-                document.getElementById('wallet-balance').textContent = '€' + userData.saldo.toFixed(2);
-                loadTransactions();
-            });
-            // Stripe Checkout (exemplo real)
-            document.getElementById('stripe-checkout-btn')?.addEventListener('click', async () => {
-                const amount = parseFloat(document.getElementById('funds-amount').value);
-                if (isNaN(amount) || amount <= 0) return alert('Valor inválido.');
-                // Chame seu backend para criar uma sessão Stripe Checkout
-                // Exemplo:
-                // const res = await fetch('/create-checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, userId: auth.currentUser.uid }) });
-                // const { sessionId } = await res.json();
-                // const stripe = Stripe('YOUR_STRIPE_PUBLISHABLE_KEY');
-                // await stripe.redirectToCheckout({ sessionId });
-                alert('Integração real com Stripe requer backend. Veja documentação Stripe Checkout para produção.');
-            });
-            // PayPal Button (exemplo real)
-            if (window.paypal) {
-                paypal.Buttons({
-                    createOrder: function(data, actions) {
-                        const amount = parseFloat(document.getElementById('funds-amount').value);
-                        if (isNaN(amount) || amount <= 0) return alert('Valor inválido.');
-                        // Chame seu backend para criar uma ordem PayPal e retornar orderID
-                        // return fetch('/create-paypal-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, userId: auth.currentUser.uid }) })
-                        //   .then(res => res.json())
-                        //   .then(data => data.orderID);
-                        alert('Integração real com PayPal requer backend. Veja documentação PayPal Checkout para produção.');
-                        return '';
-                    },
-                    onApprove: function(data, actions) {
-                        // Chame seu backend para capturar o pagamento e creditar saldo
-                        // fetch('/capture-paypal-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderID: data.orderID }) })
-                        alert('Pagamento PayPal aprovado (simulação).');
-                    }
-                }).render('#paypal-button-container');
-            }
-            // MB Way (estrutura para integração)
-            document.getElementById('mbway-btn')?.addEventListener('click', async () => {
-                const amount = parseFloat(document.getElementById('funds-amount').value);
-                if (isNaN(amount) || amount <= 0) return alert('Valor inválido.');
-                // Chame seu backend para gerar referência MB Way e mostrar instruções ao usuário
-                // Exemplo:
-                // const res = await fetch('/create-mbway-payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, userId: auth.currentUser.uid }) });
-                // const { reference, instructions } = await res.json();
-                // alert('Referência MB Way: ' + reference + '\n' + instructions);
-                alert('Integração real com MB Way requer backend/gateway português. Veja documentação do seu gateway.');
-            });
-            document.getElementById('edit-profile-btn')?.addEventListener('click', () => window.location.href = 'editar-perfil.html');
-            document.getElementById('add-product-btn')?.addEventListener('click', () => window.location.href = 'vender.html');
-            document.getElementById('settings-btn')?.addEventListener('click', () => alert('Funcionalidade de definições em breve!'));
-            // Exibir saldo
-            document.getElementById('wallet-balance').textContent = '€' + (userData.saldo ? userData.saldo.toFixed(2) : '0.00');
-            // Carregar histórico de transações
-            loadTransactions();
+      // --- Transações (Compras e Vendas) ---
+      const transactionList = document.getElementById('transaction-list');
+      const emptyTransactions = document.getElementById('empty-transactions');
+      transactionList.innerHTML = '';
+      // Compras
+      const comprasRef = collection(db, 'compras');
+      const comprasQ = query(comprasRef, where('userId', '==', user.uid), orderBy('data', 'desc'));
+      const comprasSnap = await getDocs(comprasQ);
+      let transacoesHtml = '';
+      if (!comprasSnap.empty) {
+        comprasSnap.forEach(docu => {
+          const compra = docu.data();
+          transacoesHtml += `<div class='mb-3 p-3 border rounded bg-light'><b>Compra</b> - ${new Date(compra.data.seconds*1000).toLocaleDateString('pt-PT')}<ul>`;
+          compra.produtos.forEach(p => {
+            transacoesHtml += `<li>${p.nome} - €${p.preco}</li>`;
+          });
+          transacoesHtml += `</ul><span class='fw-bold'>Total: €${compra.total}</span></div>`;
         });
-
-        async function loadTransactions() {
-            const user = auth.currentUser;
-            if (!user) return;
-            const q = query(collection(db, 'transacoes'), where('userId', '==', user.uid), orderBy('data', 'desc'));
-            const snap = await getDocs(q);
-            const list = document.getElementById('transaction-list');
-            const empty = document.getElementById('empty-transactions');
-            list.innerHTML = '';
-            if (snap.empty) {
-                empty.style.display = 'block';
-                return;
-            }
-            empty.style.display = 'none';
-            snap.forEach(doc => {
-                const t = doc.data();
-                const div = document.createElement('div');
-                div.className = 'transaction-item';
-                div.innerHTML = `
-                    <div class='transaction-details'>
-                        <div class='transaction-title'>${t.tipo === 'deposito' ? 'Depósito' : t.tipo}</div>
-                        <div class='transaction-date'>${t.data ? new Date(t.data).toLocaleString('pt-PT') : ''}</div>
-                        <div class='transaction-amount amount-positive'>+€${t.valor.toFixed(2)}</div>
-                        <div class='transaction-method'>${t.metodo || ''}</div>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
-        }
-
-        // Carregar menu universal
-        fetch('menu.html').then(res => res.text()).then(html => {
-            document.getElementById('menu-container').innerHTML = html;
+      }
+      // Vendas
+      const vendasQ = query(produtosRef, where('userId', '==', user.uid), where('disponibilidade', '==', 'vendido'), orderBy('dataCriacao', 'desc'));
+      const vendasSnap = await getDocs(vendasQ);
+      if (!vendasSnap.empty) {
+        vendasSnap.forEach(docu => {
+          const venda = docu.data();
+          transacoesHtml += `<div class='mb-3 p-3 border rounded bg-light'><b>Venda</b> - ${venda.nome} - €${venda.preco} (${new Date(venda.dataCriacao.seconds*1000).toLocaleDateString('pt-PT')})</div>`;
         });
-    </script>
-    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=EUR"></script>
-    <script src="https://js.stripe.com/v3/"></script>
+      }
+      if (transacoesHtml) {
+        transactionList.innerHTML = transacoesHtml;
+        emptyTransactions.style.display = 'none';
+      } else {
+        emptyTransactions.style.display = 'block';
+      }
+
+      // --- Notificações ---
+      const notificacoesList = document.getElementById('notificacoes-list');
+      const emptyNotificacoes = document.getElementById('empty-notificacoes');
+      notificacoesList.innerHTML = '';
+      const notificacoesRef = collection(db, 'notificacoes');
+      const notificacoesQ = query(notificacoesRef, where('userId', '==', user.uid), orderBy('data', 'desc'));
+      const notificacoesSnap = await getDocs(notificacoesQ);
+      if (!notificacoesSnap.empty) {
+        notificacoesSnap.forEach(docu => {
+          const n = docu.data();
+          notificacoesList.innerHTML += `<div class='mb-2 p-2 border rounded bg-light'><b>${n.tipo || 'Notificação'}</b>: ${n.mensagem} <span class='text-muted small'>(${new Date(n.data.seconds*1000).toLocaleString('pt-PT')})</span></div>`;
+        });
+        emptyNotificacoes.style.display = 'none';
+      } else {
+        emptyNotificacoes.style.display = 'block';
+      }
+
+      // --- Definições ---
+      const definicoesTab = document.getElementById('definicoes');
+      definicoesTab.innerHTML = `
+        <div class='mt-3'>
+          <a href='editar-perfil.html' class='btn btn-outline-primary mb-2'><i class='fa fa-user-edit'></i> Editar Perfil</a><br>
+          <button class='btn btn-outline-warning mb-2' id='btn-reset-password'><i class='fa fa-key'></i> Alterar Password</button><br>
+          <button class='btn btn-outline-danger' id='btn-delete-account'><i class='fa fa-trash'></i> Apagar Conta</button>
+        </div>
+        <div id='definicoes-msg' class='mt-3'></div>
+      `;
+      document.getElementById('btn-reset-password').onclick = async () => {
+        await sendPasswordResetEmail(auth, user.email);
+        document.getElementById('definicoes-msg').innerHTML = '<div class="alert alert-info">Email de redefinição de password enviado!</div>';
+      };
+      document.getElementById('btn-delete-account').onclick = async () => {
+        if (confirm('Tem a certeza que deseja apagar a sua conta? Esta ação é irreversível.')) {
+          try {
+            await deleteUser(user);
+            window.location.href = 'index.html';
+          } catch (e) {
+            document.getElementById('definicoes-msg').innerHTML = '<div class="alert alert-danger">Erro ao apagar conta. Faça login novamente e tente de novo.</div>';
+          }
+        }
+      };
+    });
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="navbar-script.js"></script>
 </body>
 </html>

@@ -229,6 +229,11 @@
 
 <body>
   <div id="menu-container"></div>
+  <script>
+    fetch('menu.html').then(res => res.text()).then(html => {
+      document.getElementById('menu-container').innerHTML = html;
+    });
+  </script>
   <div class="container">
     <header>
       <div class="logo">ResellSneakers</div>
@@ -288,9 +293,9 @@
     import { firebaseConfig } from './firebase-config.js';
 
     // Carregar menu universal
-    fetch('menu.html').then(res => res.text()).then(html => {
-      document.getElementById('menu-container').innerHTML = html;
-    });
+    // fetch('menu.html').then(res => res.text()).then(html => {
+    //   document.getElementById('menu-container').innerHTML = html;
+    // });
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);

@@ -4,469 +4,172 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Carrinho - ResellSneakers</title>
-  <link rel="stylesheet" href="styles/carrinho.css" />
-  <script type="module" src="carrinho.js"></script>
-    <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="navbar-styles.css">
+  <style>
+    .cart-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
-      padding-top: 20px; /* Garantir que não conflite com navbar */
-      color: #333;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border-radius: 24px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      animation: slideUp 0.6s ease-out;
-    }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .header {
-      background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
-      color: white;
-      padding: 30px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-      pointer-events: none;
-    }
-
-    .header h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 10px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .header .subtitle {
-      font-size: 1.1rem;
-      opacity: 0.9;
-      position: relative;
-      z-index: 1;
-    }
-
-    .content {
-      padding: 40px;
-    }
-
-    .carrinho-vazio {
-      text-align: center;
-      padding: 60px 20px;
-      color: #718096;
-    }
-
-    .carrinho-vazio .icon {
-      font-size: 4rem;
-      margin-bottom: 20px;
-      opacity: 0.5;
-    }
-
-    .carrinho-vazio h3 {
-      font-size: 1.5rem;
-      margin-bottom: 10px;
-      color: #4a5568;
-    }
-
-    .produto-item {
-      background: white;
+      color: #fff;
       border-radius: 16px;
-      padding: 25px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      border: 1px solid #e2e8f0;
-      transition: all 0.3s ease;
-      animation: fadeIn 0.5s ease-out;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      padding: 2rem 1rem 1rem 1rem;
+      margin-bottom: 2rem;
+      text-align: center;
     }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateX(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    .produto-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .produto-content {
-      display: grid;
-      grid-template-columns: 120px 1fr auto;
-      gap: 20px;
-      align-items: center;
-    }
-
-    .produto-imagem {
-      width: 120px;
-      height: 120px;
+    .cart-header h1 { font-size: 2.2rem; font-weight: 700; }
+    .cart-header p { opacity: 0.9; }
+    .cart-list .product-card {
       border-radius: 12px;
-      object-fit: cover;
-      background: #f7fafc;
-      border: 2px solid #e2e8f0;
-      transition: transform 0.3s ease;
-    }
-
-    .produto-imagem:hover {
-      transform: scale(1.05);
-    }
-
-    .produto-info h3 {
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: #2d3748;
-      margin-bottom: 8px;
-      line-height: 1.3;
-    }
-
-    .produto-preco {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #667eea;
-      margin-bottom: 15px;
-    }
-
-    .produto-acoes {
-      text-align: right;
-    }
-
-    .btn-remover {
-      background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.9rem;
-      box-shadow: 0 4px 12px rgba(252, 129, 129, 0.3);
-    }
-
-    .btn-remover:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(252, 129, 129, 0.4);
-    }
-
-    .btn-remover:active {
-      transform: translateY(0);
-    }
-
-    .resumo {
-      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-      border-radius: 16px;
-      padding: 30px;
-      margin-top: 30px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .total {
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      margin-bottom: 1.5rem;
+      background: #fff;
+      transition: transform 0.2s;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #2d3748;
-      margin-bottom: 25px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #e2e8f0;
+      gap: 1.5rem;
+      padding: 1rem;
     }
-
-    .btn-finalizar {
-      width: 100%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+    .cart-list .product-card:hover { transform: translateY(-4px) scale(1.01); }
+    .cart-list .product-img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #f7f7f7;
+    }
+    .cart-list .product-info { flex: 1; }
+    .cart-list .product-title { font-weight: 600; font-size: 1.1rem; }
+    .cart-list .product-price { color: #dc2626; font-weight: bold; font-size: 1.1rem; }
+    .cart-list .remove-btn {
+      background: #ff5a5f;
+      color: #fff;
       border: none;
-      padding: 18px 30px;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.95rem;
+      transition: background 0.2s;
+    }
+    .cart-list .remove-btn:hover { background: #d32f2f; }
+    .empty-state {
+      text-align: center;
+      color: #aaa;
+      padding: 3rem 0;
+    }
+    .cart-summary {
+      background: #fff;
       border-radius: 12px;
-      font-size: 1.2rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      padding: 2rem 1rem;
+      margin-top: 2rem;
+      text-align: center;
+    }
+    .cart-summary .total {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 1rem;
+    }
+    .cart-summary .checkout-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem 2rem;
+      font-size: 1.1rem;
       font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
-      position: relative;
-      overflow: hidden;
+      transition: background 0.2s;
     }
-
-    .btn-finalizar::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    .btn-finalizar:hover::before {
-      left: 100%;
-    }
-
-    .btn-finalizar:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-finalizar:active {
-      transform: translateY(-1px);
-    }
-
-    /* Responsividade */
+    .cart-summary .checkout-btn:hover { background: #5a67d8; }
     @media (max-width: 768px) {
-      body {
-        padding: 10px;
-      }
-
-      .header {
-        padding: 20px;
-      }
-
-      .header h1 {
-        font-size: 2rem;
-      }
-
-      .content {
-        padding: 20px;
-      }
-
-      .produto-content {
-        grid-template-columns: 80px 1fr;
-        gap: 15px;
-      }
-
-      .produto-imagem {
-        width: 80px;
-        height: 80px;
-      }
-
-      .produto-acoes {
-        grid-column: 1 / -1;
-        margin-top: 15px;
-        text-align: left;
-      }
-
-      .produto-info h3 {
-        font-size: 1.1rem;
-      }
-
-      .produto-preco {
-        font-size: 1.2rem;
-      }
-
-      .total {
-        font-size: 1.5rem;
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-      }
-
-      .resumo {
-        padding: 20px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .header h1 {
-        font-size: 1.8rem;
-      }
-
-      .produto-item {
-        padding: 20px;
-      }
-
-      .produto-content {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-
-      .produto-imagem {
-        width: 100px;
-        height: 100px;
-        margin: 0 auto;
-      }
-    }
-
-    /* Animações suaves */
-    .fade-out {
-      animation: fadeOut 0.3s ease-out forwards;
-    }
-
-    @keyframes fadeOut {
-      to {
-        opacity: 0;
-        transform: translateX(20px);
-      }
+      .cart-header { padding: 1.2rem 0.5rem; }
+      .cart-list .product-card { flex-direction: column; align-items: flex-start; }
+      .cart-list .product-img { width: 80px; height: 80px; }
     }
   </style>
 </head>
 <body>
   <div id="menu-container"></div>
-  <div class="container">
-    <div class="header">
-      <h1>🛒 O teu Carrinho</h1>
-      <p class="subtitle">Revê os teus produtos selecionados</p>
+  <div class="container mt-4">
+    <div class="cart-header">
+      <h1><i class="fa fa-shopping-cart"></i> O teu Carrinho</h1>
+      <p>Revê os teus produtos selecionados</p>
     </div>
-
-    <div class="content">
-      <div id="carrinho-lista"></div>
-
-      <div class="resumo" id="resumo" style="display: none;">
-        <div class="total">
-          <span>Total:</span>
-          <span>€<span id="total">0.00</span></span>
-        </div>
-        <button id="finalizar-compra" class="btn-finalizar">
-          ✨ Finalizar Compra
-        </button>
-      </div>
+    <div class="cart-list" id="cart-list"></div>
+    <div class="cart-summary" id="cart-summary" style="display:none;">
+      <div class="total">Total: €<span id="cart-total">0.00</span></div>
+      <a href="checkout.html" class="checkout-btn">Finalizar Compra</a>
     </div>
   </div>
-
-  <!-- Importar navbar dinamicamente -->
-  <script src="js/navbar.js"></script>
-
-  <!-- Script do carrinho -->
   <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { doc, getDoc, updateDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { firebaseConfig } from './firebase-config.js';
 
     // Carregar menu universal
     fetch('menu.html').then(res => res.text()).then(html => {
       document.getElementById('menu-container').innerHTML = html;
     });
 
-    const carrinhoDiv = document.getElementById("carrinho-lista");
-    const totalSpan = document.getElementById("total");
-    const finalizarBtn = document.getElementById("finalizar-compra");
-    const resumoDiv = document.getElementById("resumo");
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    let user = null;
-    let carrinhoIds = [];
-    let produtosCarrinho = [];
-
-    onAuthStateChanged(auth, async u => {
-      if (!u) return window.location.href = 'log.html';
-      user = u;
-      await carregarCarrinho();
-    });
-
-    async function carregarCarrinho() {
-      carrinhoDiv.innerHTML = '<div class="carrinho-vazio"><div class="icon">🛍️</div><h3>A carregar...</h3></div>';
+    async function renderCarrinhoFirestore(user) {
+      const cartList = document.getElementById('cart-list');
+      const cartSummary = document.getElementById('cart-summary');
+      const cartTotal = document.getElementById('cart-total');
+      cartList.innerHTML = '';
+      let total = 0;
+      // Buscar carrinho do Firestore
       const carrinhoRef = doc(db, 'carrinhos', user.uid);
       const carrinhoSnap = await getDoc(carrinhoRef);
-      carrinhoIds = carrinhoSnap.exists() ? (carrinhoSnap.data().produtos || []) : [];
-      if (carrinhoIds.length === 0) {
-        carrinhoDiv.innerHTML = `<div class='carrinho-vazio'><div class='icon'>🛍️</div><h3>O teu carrinho está vazio</h3><p>Adiciona alguns produtos incríveis para começar!</p></div>`;
-        resumoDiv.style.display = 'none';
+      const produtosIds = carrinhoSnap.exists() ? (carrinhoSnap.data().produtos || []) : [];
+      if (produtosIds.length === 0) {
+        cartList.innerHTML = `<div class="empty-state"><i class="fa fa-shopping-basket fa-2x mb-2"></i><h5>O teu carrinho está vazio</h5><p>Adiciona alguns produtos incríveis para começar!</p></div>`;
+        cartSummary.style.display = 'none';
         return;
       }
-      // Buscar produtos reais
-      const proms = carrinhoIds.map(id => getDoc(doc(db, 'produtos', id)));
-      const prodsSnap = await Promise.all(proms);
-      produtosCarrinho = prodsSnap.filter(doc => doc.exists()).map(doc => ({ id: doc.id, ...doc.data() }));
-      renderizarCarrinho();
-    }
-
-    function renderizarCarrinho() {
-      carrinhoDiv.innerHTML = '';
-      let total = 0;
-      if (produtosCarrinho.length === 0) {
-        carrinhoDiv.innerHTML = `<div class='carrinho-vazio'><div class='icon'>🛍️</div><h3>O teu carrinho está vazio</h3><p>Adiciona alguns produtos incríveis para começar!</p></div>`;
-        resumoDiv.style.display = 'none';
-        return;
-      }
-      produtosCarrinho.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = 'produto-item';
-        div.innerHTML = `
-          <div class='produto-content'>
-            <img src='${item.imagemPrincipal || 'images/no-image.png'}' alt='${item.nome}' class='produto-imagem' />
-            <div class='produto-info'>
-              <h3>${item.nome}</h3>
-              <div class='produto-preco'>€${item.preco}</div>
-            </div>
-            <div class='produto-acoes'>
-              <button class='btn-remover' data-index='${index}'>🗑️ Remover</button>
-            </div>
+      // Buscar detalhes dos produtos
+      const proms = produtosIds.map(id => getDoc(doc(db, 'produtos', id)));
+      const produtosSnaps = await Promise.all(proms);
+      produtosSnaps.forEach((snap, idx) => {
+        if (!snap.exists()) return;
+        const item = snap.data();
+        total += Number(item.preco) || 0;
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <img src="${item.imagemPrincipal || 'images/no-image.png'}" class="product-img" alt="${item.nome}">
+          <div class="product-info">
+            <div class="product-title">${item.nome}</div>
+            <div class="product-price">€${item.preco}</div>
           </div>
+          <button class="remove-btn"><i class="fa fa-trash"></i> Remover</button>
         `;
-        carrinhoDiv.appendChild(div);
-        total += parseFloat(item.preco);
-      });
-      totalSpan.textContent = total.toFixed(2);
-      resumoDiv.style.display = 'block';
-      document.querySelectorAll('.btn-remover').forEach(btn => {
-        btn.onclick = async () => {
-          const idx = parseInt(btn.getAttribute('data-index'));
-          carrinhoIds.splice(idx, 1);
-          await setDoc(doc(db, 'carrinhos', user.uid), { produtos: carrinhoIds });
-          await carregarCarrinho();
+        card.querySelector('.remove-btn').onclick = async () => {
+          // Remover produto do carrinho no Firestore
+          produtosIds.splice(idx, 1);
+          await setDoc(carrinhoRef, { produtos: produtosIds });
+          renderCarrinhoFirestore(user);
         };
+        cartList.appendChild(card);
       });
+      cartTotal.textContent = total.toFixed(2);
+      cartSummary.style.display = 'block';
     }
 
-    finalizarBtn.onclick = async () => {
-      if (produtosCarrinho.length === 0) return;
-      finalizarBtn.disabled = true;
-      finalizarBtn.textContent = 'Processando...';
-      // Simular processamento
-      setTimeout(async () => {
-        // Limpar carrinho no Firestore
-        await setDoc(doc(db, 'carrinhos', user.uid), { produtos: [] });
-        produtosCarrinho = [];
-        carrinhoIds = [];
-        renderizarCarrinho();
-        finalizarBtn.disabled = false;
-        finalizarBtn.textContent = '✨ Finalizar Compra';
-        // Mensagem de sucesso
-        resumoDiv.innerHTML += `<div class='alert alert-success mt-3' id='msgSucesso'>Compra finalizada com sucesso! Obrigado por comprar conosco.</div>`;
-        setTimeout(() => {
-          const msg = document.getElementById('msgSucesso');
-          if (msg) msg.remove();
-        }, 4000);
-      }, 1200);
-    };
+    // Autenticação
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        window.location.href = 'log.html';
+        return;
+      }
+      renderCarrinhoFirestore(user);
+    });
   </script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="navbar-script.js"></script>
 </body>
 </html>
