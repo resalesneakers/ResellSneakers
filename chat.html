@@ -65,7 +65,7 @@
     });
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('produto') || urlParams.get('id');
-    const vendedorId = urlParams.get('vendedor');
+    let vendedorId = urlParams.get('vendedor');
     let currentUser = null;
     let otherUserId = null;
     let chatId = null;
@@ -78,19 +78,22 @@
       const productSnap = await getDoc(productRef);
       if (!productSnap.exists()) return alert('Produto não encontrado.');
       product = productSnap.data();
-      // Definir vendedorId se não veio na URL
-      const vendedor = vendedorId || product.vendedorId;
-      if (!vendedor || vendedor === currentUser.uid) {
+      // Corrigir vendedorId: sempre buscar do produto se não vier na URL ou se vier como undefined
+      if (!vendedorId || vendedorId === 'undefined') {
+        vendedorId = product.vendedorId;
+      }
+      if (!vendedorId || vendedorId === currentUser.uid) {
         document.getElementById('userName').textContent = 'Este é o seu produto.';
         document.getElementById('sendBtn').disabled = true;
         document.getElementById('messageInput').disabled = true;
+        document.getElementById('userProfileLink').href = `perfil.html?id=${currentUser.uid}`;
         return;
       }
-      otherUserId = vendedor;
+      otherUserId = vendedorId;
       // Gerar chatId único para o par de utilizadores e produto
       chatId = [productId, ...[currentUser.uid, otherUserId].sort()].join('_');
       // Exibir nome, foto e link do vendedor
-      const vendedorRef = doc(db, 'users', vendedor); // corrigido para 'users'
+      const vendedorRef = doc(db, 'users', vendedorId); // corrigido para 'users'
       const vendedorSnap = await getDoc(vendedorRef);
       let vendedorNome = 'Vendedor';
       let vendedorFoto = 'images/default-profile.png';
@@ -100,7 +103,7 @@
         vendedorNome = v.nome || v.displayName || v.email || 'Vendedor';
         vendedorFoto = v.foto || 'images/default-profile.png';
         vendedorEmail = v.email || '';
-        document.getElementById('userProfileLink').href = `perfil.html?id=${vendedor}`;
+        document.getElementById('userProfileLink').href = `perfil.html?id=${vendedorId}`;
       }
       // Se a foto for caminho do Storage, buscar downloadURL
       if (vendedorFoto && !vendedorFoto.startsWith('http') && vendedorFoto !== 'images/default-profile.png') {
