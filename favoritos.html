@@ -2,147 +2,15 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Meus Favoritos - ResellSneakers</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="navbar-styles.css">
-  <style>
-    .fav-header {
-      background: linear-gradient(135deg, #ff5a5f 0%, #ffb347 100%);
-      color: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-      padding: 2rem 1rem 1rem 1rem;
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-    .fav-header h1 { font-size: 2.2rem; font-weight: 700; }
-    .fav-header p { opacity: 0.9; }
-    .fav-list .product-card {
-      border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      margin-bottom: 1.5rem;
-      background: #fff;
-      transition: transform 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      padding: 1rem;
-    }
-    .fav-list .product-card:hover { transform: translateY(-4px) scale(1.01); }
-    .fav-list .product-img {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 10px;
-      background: #f7f7f7;
-    }
-    .fav-list .product-info { flex: 1; }
-    .fav-list .product-title { font-weight: 600; font-size: 1.1rem; }
-    .fav-list .product-price { color: #dc2626; font-weight: bold; font-size: 1.1rem; }
-    .fav-list .remove-btn {
-      background: #ff5a5f;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 0.5rem 1rem;
-      font-size: 0.95rem;
-      transition: background 0.2s;
-    }
-    .fav-list .remove-btn:hover { background: #d32f2f; }
-    .empty-state {
-      text-align: center;
-      color: #aaa;
-      padding: 3rem 0;
-    }
-    @media (max-width: 768px) {
-      .fav-header { padding: 1.2rem 0.5rem; }
-      .fav-list .product-card { flex-direction: column; align-items: flex-start; }
-      .fav-list .product-img { width: 80px; height: 80px; }
-    }
-  </style>
+  <title>Favoritos - ResellSneakers</title>
+  <link rel="stylesheet" href="navbar-styles.css" />
 </head>
 <body>
   <div id="menu-container"></div>
+  <script>fetch('menu.html').then(res => res.text()).then(html => {document.getElementById('menu-container').innerHTML = html;});</script>
   <div class="container mt-4">
-    <div class="fav-header">
-      <h1><i class="fa fa-heart"></i> Favoritos</h1>
-      <p>Veja todos os produtos que você marcou como favorito</p>
-    </div>
-    <div class="fav-list" id="fav-list"></div>
+    <h1>Os favoritos estarão disponíveis em breve!</h1>
+    <a href="home.html">Voltar ao início</a>
   </div>
-  <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { collection, query, where, onSnapshot, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    // Carregar menu universal
-    fetch('menu.html').then(res => res.text()).then(html => {
-      document.getElementById('menu-container').innerHTML = html;
-    });
-
-    const favList = document.getElementById("fav-list");
-    let favoritosDocs = [];
-
-    onAuthStateChanged(auth, user => {
-      if (!user) return (window.location.href = "log.html");
-      favList.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin fa-2x mb-2"></i><h5>A carregar...</h5></div>`;
-      // Buscar favoritos do utilizador em tempo real
-      onSnapshot(query(collection(db, "favoritos"), where("userId", "==", user.uid)), async (favsSnap) => {
-        favoritosDocs = favsSnap.docs;
-        if (favoritosDocs.length === 0) {
-          favList.innerHTML = "<div class='empty-state'><i class='fa fa-heart-broken fa-2x mb-2'></i><h5>Nenhum produto favorito encontrado.</h5></div>";
-          return;
-        }
-        // IDs dos produtos
-        const produtosIds = favoritosDocs.map(doc => doc.data().produtoId);
-        // Buscar produtos reais
-        const proms = produtosIds.map(id => getDoc(doc(db, "produtos", id)));
-        const prodsSnap = await Promise.all(proms);
-        const prodsExistentes = prodsSnap.filter(doc => doc.exists());
-        const storage = (await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js')).getStorage();
-        const { getDownloadURL, ref } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js');
-        const cards = await Promise.all(prodsExistentes.map(async (doc, index) => {
-          const p = doc.data();
-          let imgSrc = p.imagemPrincipal || 'images/no-image.png';
-          if (imgSrc && !imgSrc.startsWith('http') && imgSrc !== 'images/no-image.png') {
-            try { imgSrc = await getDownloadURL(ref(storage, imgSrc)); } catch { imgSrc = 'images/no-image.png'; }
-          }
-          return `
-            <div class="product-card">
-              <img src="${imgSrc}" class="product-img" alt="${p.nome}" />
-              <div class="product-info">
-                <div class="product-title">${p.nome}</div>
-                <div class="product-price">€${p.preco}</div>
-                <a href="produto-detalhe.html?id=${doc.id}" class="btn btn-outline-dark btn-sm mt-2">Ver Detalhes</a>
-              </div>
-              <button class="remove-btn" data-index="${index}"><i class="fa fa-trash"></i> Remover</button>
-            </div>
-          `;
-        }));
-        favList.innerHTML = cards.join("");
-        // Event listeners para remover favoritos
-        document.querySelectorAll('.remove-btn').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const idx = btn.getAttribute('data-index');
-            const favDoc = favoritosDocs[idx];
-            if (!favDoc) return;
-            if (!confirm("Tem a certeza que deseja remover este produto dos seus favoritos?")) return;
-            try {
-              await deleteDoc(doc(db, "favoritos", favDoc.id));
-              btn.closest(".product-card").remove();
-              favoritosDocs.splice(idx, 1);
-              if (favoritosDocs.length === 0) favList.innerHTML = "<div class='empty-state'><i class='fa fa-heart-broken fa-2x mb-2'></i><h5>Nenhum produto favorito encontrado.</h5></div>";
-            } catch (error) {
-              alert("Erro ao remover favorito. Tente novamente.");
-            }
-          });
-        });
-      });
-    });
-  </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-  <script src="navbar-script.js"></script>
 </body>
 </html>

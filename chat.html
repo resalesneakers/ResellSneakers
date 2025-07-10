@@ -103,7 +103,7 @@
       let vendedorOnline = 'Offline';
       if (vendedorSnap.exists()) {
         const v = vendedorSnap.data();
-        vendedorNome = v.nome || 'Vendedor';
+        vendedorNome = v.nome || v.displayName || v.email || 'Vendedor';
         vendedorFoto = v.foto || 'images/default-profile.png';
         // Buscar estado online/offline (Realtime Database)
         const rtdb = getDatabase();
@@ -121,6 +121,10 @@
       }
       document.getElementById('userName').textContent = vendedorNome;
       document.getElementById('userPhoto').src = vendedorFoto;
+      // Mostrar nome/email do utilizador autenticado no topo do chat
+      const myName = currentUser.displayName || currentUser.email || 'Eu';
+      document.title = `Chat com ${vendedorNome} - ${myName}`;
+      // Opcional: mostrar também o nome do utilizador autenticado em algum local do chat
       // Mini-card do produto
       const miniCard = document.getElementById('productMiniCard');
       miniCard.style.display = 'flex';
