@@ -266,15 +266,8 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <!-- Navbar exclusiva da index -->
-  <nav class="navbar navbar-expand-lg bg-white shadow-sm">
-    <div class="container-fluid">
-      <span class="navbar-brand fw-bold" style="font-size:1.8rem;">ResellSneakers</span>
-      <div class="d-flex">
-        <a href="log.html" class="btn btn-primary btn-lg">Entrar ou Criar Conta</a>
-      </div>
-    </div>
-  </nav>
+  <div id="menu-container"></div>
+  <script>fetch('menu.html').then(res => res.text()).then(html => { document.getElementById('menu-container').innerHTML = html; });</script>
 
   <!-- Hero Section -->
   <section class="hero position-relative" style="background: url('images/banner1.png') center/cover no-repeat; min-height: 420px;">
