@@ -76,8 +76,8 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, doc, getDoc, collection, query, where, getDocs, addDoc, setDoc, updateDoc, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-    import { firebaseConfig } from './firebase-config.js';
-    const app = initializeApp(firebaseConfig);
+    import { auth, db, storage } from './firebase-config.js';
+    const app = initializeApp(auth.app);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
@@ -107,7 +107,7 @@
       document.getElementById('productCondition').textContent = product.condicao || 'Usado';
       document.getElementById('breadcrumbProduto').textContent = `${product.marca || ''} > ${product.nome || ''}`;
       // Imagens
-      let mainUrl = 'images/no-image.png';
+      let mainUrl = 'images/banner1.png';
       let imagensUrls = [];
       if (product.imagemPrincipal) {
         try {
@@ -147,6 +147,7 @@
       }
       const mainImage = document.getElementById('mainImage');
       mainImage.src = imagensUrls[0] || mainUrl;
+      mainImage.onerror = () => { mainImage.src = 'images/banner1.png'; };
       // Galeria
       const thumbGrid = document.getElementById('thumbnailGrid');
       thumbGrid.innerHTML = '';
