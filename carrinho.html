@@ -4,13 +4,75 @@
   <meta charset="UTF-8" />
   <title>Carrinho - ResellSneakers</title>
   <link rel="stylesheet" href="navbar-styles.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    body { background: #f8f9fa; }
+    .container { max-width: 900px; margin: 0 auto; padding: 32px 16px; }
+    .cart-header { text-align: center; margin-bottom: 32px; }
+    .cart-list { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; }
+    .product-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); width: 260px; padding: 18px; display: flex; flex-direction: column; align-items: center; }
+    .product-img { width: 120px; height: 120px; object-fit: cover; border-radius: 10px; background: #f7f7f7; margin-bottom: 12px; }
+    .product-title { font-weight: 600; font-size: 1.1rem; margin-bottom: 6px; text-align: center; }
+    .product-price { color: #dc2626; font-weight: bold; font-size: 1.1rem; margin-bottom: 8px; }
+    .remove-btn { background: #ff5a5f; color: #fff; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.95rem; transition: background 0.2s; cursor: pointer; }
+    .remove-btn:hover { background: #d32f2f; }
+    .empty-state { text-align: center; color: #aaa; padding: 3rem 0; }
+  </style>
 </head>
 <body>
   <div id="menu-container"></div>
   <script>fetch('menu.html').then(res => res.text()).then(html => {document.getElementById('menu-container').innerHTML = html;});</script>
-  <div class="container mt-4">
-    <h1>O carrinho estará disponível em breve!</h1>
-    <a href="home.html">Voltar ao início</a>
+  <div class="container">
+    <div class="cart-header">
+      <h1><i class="fa fa-shopping-cart"></i> O teu Carrinho</h1>
+      <p>Revê os teus produtos selecionados</p>
+    </div>
+    <div class="cart-list" id="cart-list"></div>
   </div>
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getDownloadURL, ref as storageRef } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+    const cartList = document.getElementById('cart-list');
+    onAuthStateChanged(auth, async user => {
+      if (!user) return (window.location.href = "log.html");
+      cartList.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin fa-2x mb-2"></i><h5>A carregar...</h5></div>`;
+      const carrinhoRef = doc(db, 'carrinhos', user.uid);
+      const carrinhoSnap = await getDoc(carrinhoRef);
+      const produtosIds = carrinhoSnap.exists() ? (carrinhoSnap.data().produtos || []) : [];
+      if (produtosIds.length === 0) {
+        cartList.innerHTML = `<div class="empty-state"><i class="fa fa-shopping-basket fa-2x mb-2"></i><h5>O teu carrinho está vazio</h5><p>Adiciona alguns produtos incríveis para começar!</p></div>`;
+        return;
+      }
+      const proms = produtosIds.map(id => getDoc(doc(db, 'produtos', id)));
+      const produtosSnaps = await Promise.all(proms);
+      const cards = await Promise.all(produtosSnaps.map(async (snap, idx) => {
+        if (!snap.exists()) return null;
+        const item = snap.data();
+        let imgSrc = item.imagemPrincipal || 'images/no-image.png';
+        if (imgSrc && !imgSrc.startsWith('http') && imgSrc !== 'images/no-image.png') {
+          try { imgSrc = await getDownloadURL(storageRef(storage, imgSrc)); } catch { imgSrc = 'images/no-image.png'; }
+        }
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <img src="${imgSrc}" class="product-img" alt="${item.nome}">
+          <div class="product-title">${item.nome}</div>
+          <div class="product-price">€${item.preco}</div>
+          <a href="produto-detalhe.html?id=${produtosIds[idx]}" class="btn btn-outline-dark btn-sm mt-2">Ver Detalhes</a>
+          <button class="remove-btn"><i class="fa fa-trash"></i> Remover</button>
+        `;
+        card.querySelector('.remove-btn').onclick = async () => {
+          produtosIds.splice(idx, 1);
+          await setDoc(carrinhoRef, { produtos: produtosIds });
+          card.remove();
+          if (produtosIds.length === 0) cartList.innerHTML = `<div class='empty-state'><i class='fa fa-shopping-basket fa-2x mb-2'></i><h5>O teu carrinho está vazio</h5><p>Adiciona alguns produtos incríveis para começar!</p></div>`;
+        };
+        return card;
+      }));
+      cards.filter(Boolean).forEach(card => cartList.appendChild(card));
+    });
+  </script>
 </body>
 </html>
