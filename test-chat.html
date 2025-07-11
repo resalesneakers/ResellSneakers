@@ -162,6 +162,7 @@
         authStatus.innerHTML = '<span class="status-indicator status-error"></span> Usuário não autenticado';
         userInfo.innerHTML = '<a href="log.html" class="btn btn-primary btn-sm">Fazer Login</a>';
         addLog('❌ Usuário não autenticado');
+        addLog('💡 Clique em "Fazer Login" para testar o sistema');
       }
     });
     
@@ -173,15 +174,18 @@
       
       try {
         // Testar leitura de usuários
-        const usersSnapshot = await getDocs(collection(db, 'users'));
+        const usersRef = collection(db, 'users');
+        const usersSnapshot = await getDocs(usersRef);
         const userCount = usersSnapshot.size;
         
         // Testar leitura de produtos
-        const produtosSnapshot = await getDocs(collection(db, 'produtos'));
+        const produtosRef = collection(db, 'produtos');
+        const produtosSnapshot = await getDocs(produtosRef);
         const produtoCount = produtosSnapshot.size;
         
         // Testar leitura de conversas
-        const conversasSnapshot = await getDocs(collection(db, 'conversas'));
+        const conversasRef = collection(db, 'conversas');
+        const conversasSnapshot = await getDocs(conversasRef);
         const conversaCount = conversasSnapshot.size;
         
         firestoreStatus.innerHTML = '<span class="status-indicator status-success"></span> Conexão OK';
@@ -191,16 +195,30 @@
         if (userCount > 0) {
           const firstUser = usersSnapshot.docs[0];
           document.getElementById('testVendedorId').value = firstUser.id;
+          addLog(`📝 ID do vendedor preenchido: ${firstUser.id}`);
         }
         
         if (produtoCount > 0) {
           const firstProduto = produtosSnapshot.docs[0];
           document.getElementById('testProdutoId').value = firstProduto.id;
+          addLog(`📝 ID do produto preenchido: ${firstProduto.id}`);
+        }
+        
+        if (userCount === 0) {
+          addLog('⚠️ Nenhum usuário encontrado no banco de dados');
+          addLog('💡 Crie um usuário primeiro em log.html');
+        }
+        
+        if (produtoCount === 0) {
+          addLog('⚠️ Nenhum produto encontrado no banco de dados');
+          addLog('💡 Crie um produto primeiro em vender.html');
         }
         
       } catch (error) {
         firestoreStatus.innerHTML = '<span class="status-indicator status-error"></span> Erro na conexão';
         addLog(`❌ Erro no Firestore: ${error.message}`);
+        addLog(`🔧 Dica: Verifique se o Firebase está configurado corretamente`);
+        addLog(`🔧 Verifique se as regras do Firestore permitem leitura`);
       }
     };
     
@@ -209,11 +227,13 @@
       const vendedorId = document.getElementById('testVendedorId').value;
       if (!vendedorId) {
         addLog('⚠️ Digite um ID de vendedor primeiro');
+        addLog('💡 Clique em "Testar Conexão" para preencher automaticamente');
         return;
       }
       
       if (!currentUser) {
         addLog('⚠️ Faça login primeiro');
+        addLog('💡 Clique em "Fazer Login" no topo da página');
         return;
       }
       
@@ -229,11 +249,13 @@
       
       if (!vendedorId || !produtoId) {
         addLog('⚠️ Digite IDs de vendedor e produto primeiro');
+        addLog('💡 Clique em "Testar Conexão" para preencher automaticamente');
         return;
       }
       
       if (!currentUser) {
         addLog('⚠️ Faça login primeiro');
+        addLog('💡 Clique em "Fazer Login" no topo da página');
         return;
       }
       
@@ -246,6 +268,7 @@
     window.testListaConversas = function() {
       if (!currentUser) {
         addLog('⚠️ Faça login primeiro');
+        addLog('💡 Clique em "Fazer Login" no topo da página');
         return;
       }
       
