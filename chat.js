@@ -134,11 +134,12 @@ async function createOrGetConversation() {
   try {
     const conversationRef = doc(db, 'conversas', chatId);
     const conversationSnap = await getDoc(conversationRef);
+    const participantesArr = [currentUser.uid, otherUserId];
     
     if (!conversationSnap.exists()) {
-      // Criar nova conversa
+      // Criar nova conversa com campo participantes correto
       await setDoc(conversationRef, {
-        participantes: [currentUser.uid, otherUserId],
+        participantes: participantesArr,
         ultimaMensagem: '',
         timestamp: serverTimestamp(),
         produtoId: productId || null,
@@ -148,16 +149,23 @@ async function createOrGetConversation() {
         }
       });
     } else {
-      // Verificar se a conversa tem a estrutura correta
+      // Atualizar conversa antiga para garantir campo participantes correto
       const data = conversationSnap.data();
-      if (!data.participantes || !Array.isArray(data.participantes)) {
-        await updateDoc(conversationRef, {
-          participantes: [currentUser.uid, otherUserId],
-          naoLidas: {
-            [currentUser.uid]: 0,
-            [otherUserId]: 0
-          }
-        });
+      let updateObj = {};
+      let precisaAtualizar = false;
+      if (!data.participantes || !Array.isArray(data.participantes) || data.participantes.length !== 2 || !data.participantes.includes(currentUser.uid) || !data.participantes.includes(otherUserId)) {
+        updateObj.participantes = participantesArr;
+        precisaAtualizar = true;
+      }
+      if (!data.naoLidas || typeof data.naoLidas !== 'object') {
+        updateObj.naoLidas = {
+          [currentUser.uid]: 0,
+          [otherUserId]: 0
+        };
+        precisaAtualizar = true;
+      }
+      if (precisaAtualizar) {
+        await updateDoc(conversationRef, updateObj);
       }
     }
   } catch (error) {
