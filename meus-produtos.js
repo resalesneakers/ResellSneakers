@@ -16,29 +16,50 @@ onAuthStateChanged(auth, (user) => {
   loadProductsRealtime(user.uid);
 });
 
+// Adicionar filtros de status
+const filtros = document.querySelectorAll('.filter-btn');
+let statusFiltro = 'todos';
+filtros.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filtros.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    statusFiltro = btn.dataset.status;
+    renderAllProducts();
+  });
+});
+
+function renderAllProducts() {
+  container.innerHTML = '';
+  let produtosFiltrados = allProducts;
+  if (statusFiltro !== 'todos') {
+    produtosFiltrados = allProducts.filter(p => (p.status || p.disponibilidade) === statusFiltro);
+  }
+  if (produtosFiltrados.length === 0) {
+    container.innerHTML = "<p class='text-center'>Nenhum produto encontrado para este filtro.</p>";
+    return;
+  }
+  produtosFiltrados.forEach(renderProductCard);
+}
+
 function loadProductsRealtime(userId) {
   const q = query(
     collection(db, "produtos"),
     where("userId", "==", userId),
     orderBy("dataCriacao", "desc")
   );
-
   onSnapshot(q, (snapshot) => {
-    container.innerHTML = "";
     allProducts = [];
-
     if (snapshot.empty) {
       container.innerHTML = "<p class='text-center'>Você ainda não publicou nenhum produto.</p>";
+      updateStats();
       return;
     }
-
     snapshot.forEach(doc => {
       const data = doc.data();
       data.id = doc.id;
       allProducts.push(data);
-      renderProductCard(data);
     });
-
+    renderAllProducts();
     updateStats();
   });
 }
@@ -48,7 +69,10 @@ function renderProductCard(produto) {
   card.className = "card mb-3";
   card.dataset.id = produto.id;
 
-  // Carregar imagem corretamente
+  let status = produto.status || produto.disponibilidade || 'ativo';
+  let statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+  let statusClass = 'status-' + status;
+
   let imgEl = document.createElement('img');
   imgEl.className = 'img-fluid rounded-start';
   imgEl.alt = produto.nome;
@@ -66,32 +90,34 @@ function renderProductCard(produto) {
     imgEl.src = 'https://via.placeholder.com/400x320?text=Sem+Imagem';
   }
 
+  // Contadores
+  let visualizacoes = produto.visualizacoes || 0;
+  let favoritos = produto.favoritos || 0;
+
   card.innerHTML = `
     <div class="row g-0">
       <div class="col-md-4" id="img-col-${produto.id}"></div>
       <div class="col-md-8">
         <div class="card-body">
           <h5 class="card-title">${produto.nome}</h5>
+          <span class="status-badge ${statusClass}">${statusLabel}</span>
           <p class="card-text"><strong>Marca:</strong> ${produto.marca} | <strong>Tamanho:</strong> ${produto.tamanho}</p>
           <p class="card-text"><strong>Preço:</strong> €${Number(produto.preco).toFixed(2)} - <strong>Estado:</strong> ${produto.condicao}</p>
-          <p class="card-text"><strong>Disponibilidade:</strong> ${produto.disponibilidade}</p>
-
+          <p class="card-text"><strong>Visualizações:</strong> ${visualizacoes} | <strong>Favoritos:</strong> ${favoritos}</p>
           <div class="mt-3 d-flex gap-2">
-            <button class="btn btn-danger btn-sm" onclick="deleteProduct('${produto.id}')">Eliminar</button>
-            <button class="btn btn-secondary btn-sm" onclick="toggleVisibility('${produto.id}')">
-              ${produto.disponibilidade === "inativo" ? "Ativar" : "Inativar"}
-            </button>
+            <a class="btn btn-primary btn-sm" href="produto-detalhe.html?id=${produto.id}">Ver</a>
+            <a class="btn btn-warning btn-sm" href="editar-produto.html?id=${produto.id}">Editar</a>
+            <button class="btn btn-danger btn-sm" onclick="removerProduto('${produto.id}')">Excluir</button>
+            <button class="btn btn-success btn-sm" onclick="marcarComoVendido('${produto.id}')">Marcar como Vendido</button>
           </div>
         </div>
       </div>
     </div>
   `;
-  // Inserir imagem carregada
   setTimeout(() => {
     const imgCol = card.querySelector(`#img-col-${produto.id}`);
     if (imgCol) imgCol.appendChild(imgEl);
   }, 0);
-
   container.appendChild(card);
 }
 
@@ -121,6 +147,30 @@ window.toggleVisibility = async function (productId) {
     updateStats();
   } catch (error) {
     console.error("Erro ao alterar visibilidade:", error);
+  }
+};
+
+window.removerProduto = async function (produtoId) {
+  if (!confirm('Tem certeza que deseja remover este produto?')) return;
+  try {
+    await updateDoc(doc(db, "produtos", produtoId), { status: "removido" });
+    allProducts = allProducts.map(p => p.id === produtoId ? { ...p, status: "removido" } : p);
+    renderAllProducts();
+    updateStats();
+  } catch (error) {
+    alert("Erro ao remover produto: " + error.message);
+  }
+};
+
+window.marcarComoVendido = async function (produtoId) {
+  if (!confirm('Marcar este produto como vendido?')) return;
+  try {
+    await updateDoc(doc(db, "produtos", produtoId), { status: "vendido" });
+    allProducts = allProducts.map(p => p.id === produtoId ? { ...p, status: "vendido" } : p);
+    renderAllProducts();
+    updateStats();
+  } catch (error) {
+    alert("Erro ao marcar como vendido: " + error.message);
   }
 };
 

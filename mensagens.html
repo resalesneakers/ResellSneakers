@@ -285,19 +285,17 @@
     
     function carregarConversas(uid) {
       conversasList.innerHTML = `<div class="col-12 text-center text-muted"><i class="fa fa-spinner fa-spin"></i><h5>A carregar conversas...</h5></div>`;
-      
       const convsQuery = query(collection(db, "conversas"), where("participantes", "array-contains", uid), orderBy("timestamp", "desc"));
       unsubscribeConvs = onSnapshot(convsQuery, async (convsSnap) => {
         if (convsSnap.empty) {
           conversasList.innerHTML = '<div class="col-12 text-center text-muted">Nenhuma conversa encontrada.</div>';
+          messagesList.innerHTML = `<div class='empty-state'><i class='fa fa-comments'></i><h5>Selecione uma conversa para ver as mensagens.</h5></div>`;
           chatArea.innerHTML = "<div class='empty-state'><i class='fa fa-comments'></i><h5>Selecione uma conversa para ver as mensagens.</h5></div>";
           sendMsgForm.classList.add('d-none');
           return;
         }
-        
         convs = convsSnap.docs.map(docSnap => ({id: docSnap.id, ...docSnap.data()}));
         convs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-        
         let html = '';
         for (const conv of convs) {
           const otherId = conv.participantes.find(id => id !== user.uid);
@@ -305,48 +303,60 @@
           let foto = 'images/default-profile.png';
           let online = false;
           let numNaoLidas = conv.naoLidas && conv.naoLidas[user.uid] ? conv.naoLidas[user.uid] : 0;
-          
+          // Buscar dados do outro participante
           if (otherId) {
             try {
               const userRef = doc(db, 'users', otherId);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists()) {
-              const u = userSnap.data();
-              nome = u.nome || 'Outro utilizador';
-              foto = u.foto || 'images/default-profile.png';
+              const userSnap = await getDoc(userRef);
+              if (userSnap.exists()) {
+                const u = userSnap.data();
+                nome = u.nome || 'Outro utilizador';
+                foto = u.foto || 'images/default-profile.png';
                 if (u.lastOnline && u.lastOnline.toDate) {
                   const diff = Date.now() - u.lastOnline.toDate().getTime();
                   online = diff < 2 * 60 * 1000;
                 }
               }
-            } catch (error) {
-              console.error('Erro ao carregar dados do usuário:', error);
-            }
+            } catch (error) { console.error('Erro ao carregar dados do usuário:', error); }
           }
-          
+          // Buscar imagem e nome do produto
+          let imgProduto = 'images/no-image.png';
+          let nomeProduto = '';
+          if (conv.produtoId) {
+            try {
+              const prodSnap = await getDoc(doc(db, 'produtos', conv.produtoId));
+              if (prodSnap.exists()) {
+                const p = prodSnap.data();
+                imgProduto = p.imagemPrincipal || (p.imagens && p.imagens[0]) || 'images/no-image.png';
+                nomeProduto = p.nome || '';
+              }
+            } catch {}
+          }
           let hora = '';
           if (conv.timestamp?.toDate) {
             hora = new Date(conv.timestamp.toDate()).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
           }
-          
           const onlineClass = online ? 'online' : 'offline';
           const unreadBadge = numNaoLidas > 0 ? `<span class="unread-badge">${numNaoLidas}</span>` : '';
-          
-          html += `<div class='conv-item' data-id='${conv.id}'>
+          html += `<div class='conv-item' data-id='${conv.id}' title='${nome} | ${nomeProduto}'>
+            <img src='${imgProduto}' alt='Produto' style='width:48px;height:48px;border-radius:8px;object-fit:cover;border:2px solid #e9ecef;'>
             <span class='online-indicator ${onlineClass}'></span>
-            <img src='${foto}' alt='Foto'>
+            <img src='${foto}' alt='Foto' style='margin-left:-12px;'>
             <div class='conv-info'>
               <div class='conv-nome'>${nome} ${unreadBadge}</div>
-              <div class='conv-msg'>${conv.ultimaMensagem || 'Sem mensagens ainda.'}</div>
+              <div class='conv-msg'><span class='text-muted small'>${nomeProduto ? nomeProduto + ': ' : ''}</span>${conv.ultimaMensagem || 'Sem mensagens ainda.'}</div>
               <div class='conv-hora'>${hora}</div>
             </div>
+            <a href='chat.html?vendedor=${otherId}&produto=${conv.produtoId || ''}' class='btn btn-outline-primary btn-sm ms-2'><i class='fa fa-comments'></i> Abrir Chat</a>
           </div>`;
         }
-        
         messagesList.innerHTML = html;
-        
         document.querySelectorAll('.conv-item').forEach(item => {
-          item.onclick = () => abrirConversa(item.getAttribute('data-id'));
+          item.onclick = (e) => {
+            // Só abrir conversa se não clicar no botão de chat
+            if (e.target.closest('a')) return;
+            abrirConversa(item.getAttribute('data-id'));
+          };
         });
       });
     }

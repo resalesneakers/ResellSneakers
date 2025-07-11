@@ -36,7 +36,7 @@
   </div>
   <script type="module">
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { doc, getDoc, setDoc, collection, getDocs, deleteDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
     import { getDownloadURL, ref as storageRef } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
     import { auth, db, storage } from './firebase-config.js';
     const cartList = document.getElementById('cart-list');
@@ -44,107 +44,74 @@
     const cartTotal = document.getElementById('cart-total');
     const finalizarCompraBtn = document.getElementById('finalizarCompraBtn');
     const limparCarrinhoBtn = document.getElementById('limparCarrinhoBtn');
-    let produtosIds = [];
-    let produtosSnaps = [];
+    let itens = [];
     let total = 0;
+    let userId = null;
     onAuthStateChanged(auth, async user => {
       if (!user) return (window.location.href = "log.html");
+      userId = user.uid;
+      await carregarCarrinho();
+    });
+    async function carregarCarrinho() {
       cartList.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin fa-2x mb-2"></i><h5>A carregar...</h5></div>`;
-      const carrinhoRef = doc(db, 'carrinhos', user.uid);
-      const carrinhoSnap = await getDoc(carrinhoRef);
-      produtosIds = carrinhoSnap.exists() ? (carrinhoSnap.data().produtos || []) : [];
-      if (produtosIds.length === 0) {
+      const itensRef = collection(db, 'carrinhos', userId, 'itens');
+      const snap = await getDocs(itensRef);
+      itens = snap.docs.map(doc => ({...doc.data(), id: doc.id}));
+      if (itens.length === 0) {
         cartList.innerHTML = `<div class="empty-state"><i class="fa fa-shopping-basket fa-2x mb-2"></i><h5>O teu carrinho está vazio</h5><p>Adiciona alguns produtos incríveis para começar!</p></div>`;
         cartActions.style.display = 'none';
         return;
       }
-      const proms = produtosIds.map(id => getDoc(doc(db, 'produtos', id)));
-      produtosSnaps = await Promise.all(proms);
-      let cards = await Promise.all(produtosSnaps.map(async (snap, idx) => {
-        if (!snap.exists()) return null;
-        const item = snap.data();
-        let imgSrc = item.imagemPrincipal || 'images/no-image.png';
+      let cards = await Promise.all(itens.map(async (item, idx) => {
+        let imgSrc = (item.imagens && item.imagens[0]) || 'images/no-image.png';
         if (imgSrc && !imgSrc.startsWith('http') && imgSrc !== 'images/no-image.png') {
           try { imgSrc = await getDownloadURL(storageRef(storage, imgSrc)); } catch { imgSrc = 'images/no-image.png'; }
         }
         const card = document.createElement('div');
         card.className = 'product-card';
         card.innerHTML = `
-          <img src="${imgSrc}" class="product-img" alt="${item.nome}">
-          <div class="product-title">${item.nome}</div>
+          <img src="${imgSrc}" class="product-img" alt="${item.titulo}">
+          <div class="product-title">${item.titulo}</div>
           <div class="product-price">€${item.preco}</div>
-          <a href="produto-detalhe.html?id=${produtosIds[idx]}" class="btn btn-outline-dark btn-sm mt-2">Ver Detalhes</a>
+          <a href="chat.html?vendedor=${item.vendedor}&produto=${item.produtoId}" class="btn btn-outline-success btn-sm mt-2"><i class="fa fa-comments"></i> Chat</a>
           <button class="remove-btn"><i class="fa fa-trash"></i> Remover</button>
         `;
         card.querySelector('.remove-btn').onclick = async () => {
-          produtosIds.splice(idx, 1);
-          await setDoc(carrinhoRef, { produtos: produtosIds });
-          card.remove();
-          if (produtosIds.length === 0) {
-            cartList.innerHTML = `<div class='empty-state'><i class='fa fa-shopping-basket fa-2x mb-2'></i><h5>O teu carrinho está vazio</h5><p>Adiciona alguns produtos incríveis para começar!</p></div>`;
-            cartActions.style.display = 'none';
-          }
-          calcularTotal();
+          await deleteDoc(doc(db, 'carrinhos', userId, 'itens', item.id));
+          await carregarCarrinho();
         };
         return card;
       }));
-      cards = cards.filter(Boolean);
       cartList.innerHTML = '';
       cards.forEach(card => cartList.appendChild(card));
       cartActions.style.display = cards.length ? 'block' : 'none';
       calcularTotal();
-    });
+    }
     function calcularTotal() {
       total = 0;
-      produtosSnaps.forEach(snap => {
-        if (snap && snap.exists()) {
-          const item = snap.data();
-          total += Number(item.preco) || 0;
-        }
+      itens.forEach(item => {
+        total += Number(item.preco) || 0;
       });
       cartTotal.textContent = `€${total.toFixed(2)}`;
     }
     limparCarrinhoBtn.onclick = async () => {
       if (!confirm('Tem certeza que deseja limpar o carrinho?')) return;
-      const user = auth.currentUser;
-      if (!user) return;
-      await setDoc(doc(db, 'carrinhos', user.uid), { produtos: [] });
-      cartList.innerHTML = `<div class='empty-state'><i class='fa fa-shopping-basket fa-2x mb-2'></i><h5>O teu carrinho está vazio</h5><p>Adiciona alguns produtos incríveis para começar!</p></div>`;
-      cartActions.style.display = 'none';
-      produtosIds = [];
-      produtosSnaps = [];
-      calcularTotal();
+      const itensRef = collection(db, 'carrinhos', userId, 'itens');
+      const snap = await getDocs(itensRef);
+      await Promise.all(snap.docs.map(docSnap => deleteDoc(docSnap.ref)));
+      await carregarCarrinho();
     };
     finalizarCompraBtn.onclick = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-      if (produtosIds.length === 0) return alert('Carrinho vazio!');
-      // Criar um pedido para cada produto
-      for (let i = 0; i < produtosIds.length; i++) {
-        const produtoId = produtosIds[i];
-        const snap = produtosSnaps[i];
-        if (!snap || !snap.exists()) continue;
-        const produto = snap.data();
-        await addDoc(collection(db, 'pedidos'), {
-          compradorId: user.uid,
-          produtoId,
-          vendedorId: produto.vendedorId,
-          preco: produto.preco,
-          data: serverTimestamp(),
-          status: 'pendente'
-        });
-      }
-      // Limpar carrinho após finalizar compra
-      await setDoc(doc(db, 'carrinhos', user.uid), { produtos: [] });
+      if (itens.length === 0) return alert('Carrinho vazio!');
+      // Simular compra: apagar todos os itens
+      const itensRef = collection(db, 'carrinhos', userId, 'itens');
+      const snap = await getDocs(itensRef);
+      await Promise.all(snap.docs.map(docSnap => deleteDoc(docSnap.ref)));
       cartList.innerHTML = `<div class='empty-state'><i class='fa fa-check-circle fa-2x mb-2' style='color:#22c55e;'></i><h5>Compra finalizada com sucesso!</h5><p>Os vendedores serão notificados e você pode acompanhar o status em <a href='meus-produtos.html' style='color:#0d6efd;text-decoration:underline;'>Meus Produtos</a>.<br>Em breve, integraremos métodos de pagamento online!</p><div style='margin-top:18px;'><span id='redirectMsg' style='color:#888;'>Redirecionando para seus pedidos em 5 segundos...</span></div></div>`;
       cartActions.style.display = 'none';
-      produtosIds = [];
-      produtosSnaps = [];
+      itens = [];
       calcularTotal();
-      // Redirecionar após 5 segundos
-      setTimeout(() => {
-        window.location.href = 'meus-produtos.html';
-      }, 5000);
+      setTimeout(() => { window.location.href = 'meus-produtos.html'; }, 5000);
     };
   </script>
   <!-- Adicionar botão de dark mode -->

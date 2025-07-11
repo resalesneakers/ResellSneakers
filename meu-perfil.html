@@ -9,10 +9,12 @@
   <link rel="stylesheet" href="navbar-styles.css">
   <style>
     body { background: #f8f9fa; }
-    .profile-header { display: flex; align-items: center; gap: 32px; background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 32px 24px; margin-bottom: 32px; }
-    .profile-header img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 3px solid #e9ecef; }
+    .profile-header { display: flex; align-items: center; gap: 32px; background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 32px 24px; margin-bottom: 32px; position:relative; }
+    .profile-header img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 3px solid #e9ecef; cursor:pointer; transition: box-shadow 0.2s; }
+    .profile-header img:hover { box-shadow: 0 0 0 4px #dc2626; }
     .profile-info { flex: 1; }
-    .profile-info h2 { font-weight: 700; margin-bottom: 8px; }
+    .profile-info h2 { font-weight: 700; margin-bottom: 8px; display:inline-block; }
+    .profile-info .verified-badge { color: #22c55e; font-size:1.3rem; margin-left:8px; vertical-align:middle; }
     .profile-info .email { color: #666; font-size: 1.1rem; margin-bottom: 8px; }
     .profile-info .joined { color: #888; font-size: 0.98rem; margin-bottom: 12px; }
     .profile-stats { display: flex; gap: 32px; margin-bottom: 8px; }
@@ -20,6 +22,8 @@
     .profile-stats .stat .value { color: #dc2626; font-size: 1.3rem; font-weight: 700; }
     .profile-stats .stat .label { color: #444; font-size: 1rem; }
     .profile-actions { display: flex; gap: 12px; margin-top: 12px; }
+    .profile-header .upload-label { position:absolute; left:90px; top:90px; background:#fff; border-radius:50%; box-shadow:0 2px 8px rgba(0,0,0,0.08); padding:6px; cursor:pointer; border:2px solid #dc2626; }
+    .profile-header .upload-label i { color:#dc2626; font-size:1.2rem; }
     .products-section { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 24px; }
     .products-section h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 18px; }
     .products-list { display: flex; flex-wrap: wrap; gap: 18px; }
@@ -29,13 +33,14 @@
     .product-card .prod-price { color: #dc2626; font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
     .product-card .prod-status { font-size: 0.9rem; color: #666; margin-bottom: 4px; }
     .product-card .btn { font-size: 0.95rem; }
-    @media (max-width: 700px) {
-      .profile-header, .products-section { padding: 12px 4px; }
-      .profile-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-      .products-list { flex-direction: column; gap: 12px; }
-      .product-card { width: 100%; }
-      .profile-stats { flex-direction: column; gap: 8px; }
-    }
+    .tabs-modern { display:flex; gap:2px; border-bottom:2px solid #eee; margin-bottom:24px; }
+    .tabs-modern button { background:none; border:none; font-weight:600; font-size:1.1rem; padding:10px 22px; border-radius:8px 8px 0 0; color:#888; transition:all 0.2s; cursor:pointer; }
+    .tabs-modern button.active { background:#fff; color:#dc2626; border-bottom:2px solid #dc2626; }
+    .tab-content-modern { display:none; }
+    .tab-content-modern.active { display:block; }
+    .loader { border: 4px solid #eee; border-top: 4px solid #dc2626; border-radius: 50%; width: 36px; height: 36px; animation: spin 1s linear infinite; margin: 2rem auto; display: block; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @media (max-width: 700px) { .profile-header, .products-section { padding: 12px 4px; } .profile-header { flex-direction: column; align-items: flex-start; gap: 12px; } .products-list { flex-direction: column; gap: 12px; } .product-card { width: 100%; } .profile-stats { flex-direction: column; gap: 8px; } }
   </style>
 </head>
 <body>
@@ -43,18 +48,59 @@
   <script>fetch('menu.html').then(res => res.text()).then(html => {document.getElementById('menu-container').innerHTML = html;});</script>
   <div class="container mt-4">
     <div id="profileHeader" class="profile-header"></div>
-    <div class="products-section">
-      <h3>Meus Produtos</h3>
-      <div id="productsList" class="products-list"></div>
+    <div class="tabs-modern mb-3">
+      <button class="active" data-tab="produtos">Meus Produtos</button>
+      <button data-tab="transacoes">Transações</button>
+      <button data-tab="notificacoes">Notificações</button>
+      <button data-tab="definicoes">Definições</button>
     </div>
+    <div id="tab-produtos" class="tab-content-modern active">
+      <div class="products-section">
+        <h3>Meus Produtos</h3>
+        <div id="productsList" class="products-list"></div>
+      </div>
+    </div>
+    <div id="tab-transacoes" class="tab-content-modern">
+      <div class="products-section">
+        <h3>Transações</h3>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <canvas id="graficoCompras" height="120"></canvas>
+            <div class="text-center small mt-2">Compras por mês</div>
+          </div>
+          <div class="col-md-4">
+            <canvas id="graficoVendas" height="120"></canvas>
+            <div class="text-center small mt-2">Vendas por mês</div>
+          </div>
+          <div class="col-md-4">
+            <canvas id="graficoProdutos" height="120"></canvas>
+            <div class="text-center small mt-2">Produtos publicados por mês</div>
+          </div>
+        </div>
+        <div id="historicoTransacoes" class="mt-4"></div>
+      </div>
+    </div>
+    <div id="tab-notificacoes" class="tab-content-modern"><div class="products-section"><h3>Notificações</h3><div class="loader"></div></div></div>
+    <div id="tab-definicoes" class="tab-content-modern"><div class="products-section"><h3>Definições</h3><div class="loader"></div></div></div>
   </div>
   <script type="module">
-    import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-    import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+    import { doc, getDoc, collection, query, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { ref, getDownloadURL, uploadBytes, getStorage } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     import { auth, db, storage } from './firebase-config.js';
     const profileHeader = document.getElementById('profileHeader');
     const productsList = document.getElementById('productsList');
+    // Tabs
+    document.querySelectorAll('.tabs-modern button').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.tabs-modern button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-content-modern').forEach(tab => tab.classList.remove('active'));
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      };
+    });
+    // Loader inicial
+    productsList.innerHTML = '<div class="loader"></div>';
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = 'log.html';
@@ -89,10 +135,16 @@
       // Classificação (rating médio)
       if (u.rating) rating = Number(u.rating).toFixed(1);
       else rating = '0.0';
+      // Badge de verificação
+      const verifiedBadge = u.verificado ? '<span class="verified-badge" title="Verificado"><i class="fa fa-check-circle"></i></span>' : '';
       profileHeader.innerHTML = `
-        <img src="${foto}" alt="Foto do usuário">
+        <label class="upload-label" title="Alterar foto">
+          <input type="file" id="uploadFoto" accept="image/*" style="display:none;">
+          <i class="fa fa-camera"></i>
+        </label>
+        <img src="${foto}" alt="Foto do usuário" id="fotoPerfil">
         <div class="profile-info">
-          <h2>${nome}</h2>
+          <h2>${nome} ${verifiedBadge}</h2>
           <div class="email"><i class="fa fa-envelope"></i> ${email}</div>
           <div class="joined"><span class="badge bg-light text-dark">Membro desde</span> ${joined}</div>
           <div class="profile-stats">
@@ -106,8 +158,22 @@
           </div>
         </div>
       `;
+      // Upload de foto de perfil
+      document.querySelector('.upload-label').onclick = (e) => {
+        e.stopPropagation();
+        document.getElementById('uploadFoto').click();
+      };
+      document.getElementById('uploadFoto').onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const storagePath = `users/${user.uid}/profile_${Date.now()}`;
+        const storageReference = ref(storage, storagePath);
+        await uploadBytes(storageReference, file);
+        await updateDoc(userRef, { foto: storagePath });
+        window.location.reload();
+      };
       // Carregar produtos do usuário
-      productsList.innerHTML = '<div class="text-muted">Carregando produtos...</div>';
+      productsList.innerHTML = '<div class="loader"></div>';
       if (snapProdutos.empty) {
         productsList.innerHTML = '<div class="text-muted">Nenhum produto publicado.</div>';
         return;
@@ -126,10 +192,90 @@
           <div class="prod-status">${p.condicao || ''}</div>
           <a href="produto-detalhe.html?id=${docSnap.id}" class="btn btn-outline-primary btn-sm mt-2">Ver Detalhes</a>
         </div>`;
-          }
+      }
       productsList.innerHTML = html;
     });
+
+    // --- GRÁFICOS E HISTÓRICO DE TRANSAÇÕES ---
+    async function carregarTransacoes() {
+      const user = auth.currentUser;
+      if (!user) return;
+      // Compras
+      const qCompras = query(collection(db, 'pedidos'), where('compradorId', '==', user.uid));
+      const snapCompras = await getDocs(qCompras);
+      const compras = snapCompras.docs.map(doc => ({...doc.data(), id: doc.id}));
+      // Vendas
+      const qVendas = query(collection(db, 'pedidos'), where('vendedorId', '==', user.uid));
+      const snapVendas = await getDocs(qVendas);
+      const vendas = snapVendas.docs.map(doc => ({...doc.data(), id: doc.id}));
+      // Produtos publicados
+      const qProdutos = query(collection(db, 'produtos'), where('vendedorId', '==', user.uid));
+      const snapProdutos = await getDocs(qProdutos);
+      const produtos = snapProdutos.docs.map(doc => ({...doc.data(), id: doc.id}));
+      // Agrupar por mês
+      function agruparPorMes(arr, campoData) {
+        const meses = {};
+        arr.forEach(c => {
+          const d = c[campoData] && c[campoData].toDate ? c[campoData].toDate() : (c[campoData] && c.data && c.data.seconds ? new Date(c.data.seconds*1000) : null);
+          if (!d) return;
+          const mes = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+          if (!meses[mes]) meses[mes] = 0;
+          meses[mes]++;
+        });
+        return meses;
+      }
+      const mesesCompras = agruparPorMes(compras, 'data');
+      const mesesVendas = agruparPorMes(vendas, 'data');
+      const mesesProdutos = agruparPorMes(produtos, 'dataCriacao');
+      // Labels unificados
+      const allMeses = Array.from(new Set([
+        ...Object.keys(mesesCompras),
+        ...Object.keys(mesesVendas),
+        ...Object.keys(mesesProdutos)
+      ])).sort();
+      // Gráficos
+      const ctxC = document.getElementById('graficoCompras').getContext('2d');
+      const ctxV = document.getElementById('graficoVendas').getContext('2d');
+      const ctxP = document.getElementById('graficoProdutos').getContext('2d');
+      new Chart(ctxC, {
+        type: 'bar',
+        data: { labels: allMeses, datasets: [{ label: 'Compras', data: allMeses.map(m => mesesCompras[m]||0), backgroundColor: '#dc2626' }] },
+        options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+      });
+      new Chart(ctxV, {
+        type: 'bar',
+        data: { labels: allMeses, datasets: [{ label: 'Vendas', data: allMeses.map(m => mesesVendas[m]||0), backgroundColor: '#16a34a' }] },
+        options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+      });
+      new Chart(ctxP, {
+        type: 'bar',
+        data: { labels: allMeses, datasets: [{ label: 'Produtos', data: allMeses.map(m => mesesProdutos[m]||0), backgroundColor: '#0d6efd' }] },
+        options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+      });
+      // Histórico detalhado
+      let html = '<h5 class="mb-3">Histórico de Compras Recentes</h5>';
+      if (compras.length === 0) html += '<div class="text-muted">Nenhuma compra encontrada.</div>';
+      else html += '<ul class="list-group">' + (await Promise.all(compras.slice(0,10).map(async c => {
+        const d = c.data && c.data.toDate ? c.data.toDate() : (c.data && c.data.seconds ? new Date(c.data.seconds*1000) : null);
+        // Buscar nome do produto
+        let nomeProduto = c.produtoId;
+        let status = c.status || 'pendente';
+        try {
+          const prodSnap = await getDoc(doc(db, 'produtos', c.produtoId));
+          if (prodSnap.exists()) nomeProduto = prodSnap.data().nome;
+        } catch {}
+        return `<li class="list-group-item d-flex justify-content-between align-items-center">
+          <span><i class="fa fa-shopping-bag text-primary me-2"></i> <b>${nomeProduto}</b> <span class="badge bg-light text-dark ms-2">${status}</span></span>
+          <span>${d ? d.toLocaleDateString('pt-PT') : ''} - <span class="text-success">€${c.preco}</span></span>
+        </li>`;
+      }))).join('') + '</ul>';
+      document.getElementById('historicoTransacoes').innerHTML = html;
+    }
+    // Carregar ao abrir a tab
+    document.querySelector('button[data-tab="transacoes"]').addEventListener('click', carregarTransacoes);
   </script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script src="navbar-script.js"></script>
   <!-- Adicionar botão de dark mode -->

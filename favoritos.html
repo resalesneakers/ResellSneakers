@@ -31,7 +31,7 @@
   </div>
   <script type="module">
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import { collection, query, where, onSnapshot, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { collection, query, onSnapshot, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
     import { getDownloadURL, ref as storageRef } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
     import { auth, db, storage } from './firebase-config.js';
     const favList = document.getElementById("fav-list");
@@ -39,7 +39,8 @@
     onAuthStateChanged(auth, user => {
       if (!user) return (window.location.href = "log.html");
       favList.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin fa-2x mb-2"></i><h5>A carregar...</h5></div>`;
-      onSnapshot(query(collection(db, "favoritos"), where("userId", "==", user.uid)), async (favsSnap) => {
+      const favsRef = collection(db, "favoritos", user.uid, "produtos");
+      onSnapshot(favsRef, async (favsSnap) => {
         favoritosDocs = favsSnap.docs;
         if (favoritosDocs.length === 0) {
           favList.innerHTML = "<div class='empty-state'><i class='fa fa-heart-broken fa-2x mb-2'></i><h5>Nenhum produto favorito encontrado.</h5></div>";
@@ -48,8 +49,8 @@
         const produtosIds = favoritosDocs.map(doc => doc.data().produtoId);
         const proms = produtosIds.map(id => getDoc(doc(db, "produtos", id)));
         const prodsSnap = await Promise.all(proms);
-        const prodsExistentes = prodsSnap.filter(doc => doc.exists());
-        const cards = await Promise.all(prodsExistentes.map(async (doc, index) => {
+        const cards = await Promise.all(prodsSnap.map(async (doc, index) => {
+          if (!doc.exists()) return '';
           const p = doc.data();
           let imgSrc = p.imagemPrincipal || 'images/no-image.png';
           if (imgSrc && !imgSrc.startsWith('http') && imgSrc !== 'images/no-image.png') {
@@ -60,24 +61,22 @@
               <img src="${imgSrc}" class="product-img" alt="${p.nome}" />
               <div class="product-title">${p.nome}</div>
               <div class="product-price">€${p.preco}</div>
-              <a href="produto-detalhe.html?id=${doc.id}" class="btn btn-outline-dark btn-sm mt-2">Ver Detalhes</a>
-              <a href="chat.html?produto=${doc.id}&vendedor=${p.userId}" class="btn btn-sm btn-primary chat-link">Conversar com o vendedor</a>
-              <button class="remove-btn" data-index="${index}"><i class="fa fa-trash"></i> Remover</button>
+              <a href="produto-detalhe.html?id=${doc.id}" class="btn btn-outline-dark btn-sm mt-2">Ver Produto</a>
+              <a href="chat.html?produto=${doc.id}&vendedor=${p.vendedorId || ''}" class="btn btn-sm btn-primary chat-link">Chat com Vendedor</a>
+              <button class="remove-btn" data-id="${favoritosDocs[index].id}"><i class="fa fa-trash"></i> Remover</button>
             </div>
           `;
         }));
-        favList.innerHTML = cards.join("");
+        favList.innerHTML = cards.filter(Boolean).join("");
         document.querySelectorAll('.remove-btn').forEach(btn => {
           btn.addEventListener('click', async () => {
-            const idx = btn.getAttribute('data-index');
-            const favDoc = favoritosDocs[idx];
-            if (!favDoc) return;
+            const favId = btn.getAttribute('data-id');
+            if (!favId) return;
             if (!confirm("Tem a certeza que deseja remover este produto dos seus favoritos?")) return;
             try {
-              await deleteDoc(doc(db, "favoritos", favDoc.id));
+              await deleteDoc(doc(db, "favoritos", user.uid, "produtos", favId));
               btn.closest(".product-card").remove();
-              favoritosDocs.splice(idx, 1);
-              if (favoritosDocs.length === 0) favList.innerHTML = "<div class='empty-state'><i class='fa fa-heart-broken fa-2x mb-2'></i><h5>Nenhum produto favorito encontrado.</h5></div>";
+              if (document.querySelectorAll('.product-card').length === 0) favList.innerHTML = "<div class='empty-state'><i class='fa fa-heart-broken fa-2x mb-2'></i><h5>Nenhum produto favorito encontrado.</h5></div>";
             } catch (error) {
               alert("Erro ao remover favorito. Tente novamente.");
             }

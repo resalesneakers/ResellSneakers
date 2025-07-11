@@ -37,8 +37,8 @@ service cloud.firestore {
         request.auth.uid == request.resource.data.userId;
     }
 
-    // Carrinho: acesso só do dono (ID do doc = UID)
-    match /carrinho/{userId} {
+    // Carrinhos: acesso só do dono (ID do doc = UID)
+    match /carrinhos/{userId} {
       allow read, write: if request.auth != null &&
         request.auth.uid == userId;
     }
@@ -46,9 +46,9 @@ service cloud.firestore {
     // Pedidos: acesso só do dono
     match /pedidos/{pedidoId} {
       allow read, write: if request.auth != null &&
-        request.auth.uid == resource.data.userId;
+        request.auth.uid == resource.data.compradorId;
       allow create: if request.auth != null &&
-        request.auth.uid == request.resource.data.userId;
+        request.auth.uid == request.resource.data.compradorId;
     }
 
     // Notificações: acesso só do dono
