@@ -56,7 +56,7 @@
   </div>
   <script type="module">
     import { auth, db, storage } from './firebase-config.js';
-    import { getDoc, doc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getDoc, doc, collection, addDoc, setDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
     import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
     // Carregar menu universal
@@ -108,6 +108,24 @@
         otherUserId = vendedorId;
         chatId = `direct_${[currentUser.uid, otherUserId].sort().join('_')}`;
       }
+      // Garantir que o documento da conversa existe e tem o campo participantes
+      const conversaRef = doc(db, 'conversas', chatId);
+      const conversaSnap = await getDoc(conversaRef);
+      if (!conversaSnap.exists()) {
+        await setDoc(conversaRef, {
+          participantes: [currentUser.uid, otherUserId],
+          criadoEm: serverTimestamp()
+        });
+      } else {
+        // Se já existe, mas não tem participantes, atualiza
+        const data = conversaSnap.data();
+        if (!data.participantes || !Array.isArray(data.participantes) || data.participantes.length < 2) {
+          await setDoc(conversaRef, {
+            ...data,
+            participantes: [currentUser.uid, otherUserId]
+          }, { merge: true });
+        }
+      }
       // Exibir nome, foto e link do outro usuário
       const userRef = doc(db, 'users', otherUserId);
       const userSnap = await getDoc(userRef);
@@ -120,6 +138,10 @@
         foto = u.foto || 'images/default-profile.png';
         email = u.email || '';
         document.getElementById('userProfileLink').href = `perfil-vendedor.html?id=${otherUserId}`;
+        document.getElementById('userProfileLink').onclick = null;
+      } else {
+        document.getElementById('userProfileLink').href = '#';
+        document.getElementById('userProfileLink').onclick = (e) => { e.preventDefault(); };
       }
       if (foto && !foto.startsWith('http') && foto !== 'images/default-profile.png') {
         try { foto = await getDownloadURL(ref(storage, foto)); } catch {}
