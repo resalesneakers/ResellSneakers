@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Produtos: leitura pública, escrita só autenticado
+    match /produtos/{produtoId} {
+      allow read: if true; // público
+      allow create, update, delete: if request.auth != null;
+    }
+
+    // Perfil do usuário: acesso apenas ao próprio
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Conversas: acesso restrito a participantes
+    match /conversas/{chatId} {
+      allow create: if request.auth != null &&
+        (request.resource.data.participantes is list &&
+         request.auth.uid in request.resource.data.participantes);
+      allow read, update, delete: if request.auth != null &&
+        (resource.data.participantes is list &&
+         request.auth.uid in resource.data.participantes);
+      match /mensagens/{mensagemId} {
+        allow create, read: if request.auth != null &&
+          (get(/databases/$(database)/documents/conversas/$(chatId)).data.participantes is list &&
+           request.auth.uid in get(/databases/$(database)/documents/conversas/$(chatId)).data.participantes);
+        allow update, delete: if false;
+      }
+    }
+
+    // Favoritos: acesso só do dono
+    match /favoritos/{favId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.userId;
+    }
+
+    // Carrinho: acesso só do dono (ID do doc = UID)
+    match /carrinho/{userId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == userId;
+    }
+
+    // Pedidos: acesso só do dono
+    match /pedidos/{pedidoId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.userId;
+    }
+
+    // Notificações: acesso só do dono
+    match /notificacoes/{notificacaoId} {
+      allow read, write: if request.auth != null &&
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.userId;
+    }
+  }
+} 

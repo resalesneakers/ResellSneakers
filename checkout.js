@@ -12,11 +12,12 @@ const produtoId = params.get("id");
 const detalhesDiv = document.getElementById("detalhes-produto");
 const form = document.getElementById("form-pagamento");
 const mensagem = document.getElementById("mensagem-pagamento");
+const finalizarBtn = document.getElementById("finalizar-btn");
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    alert("Tens de fazer login primeiro.");
-    window.location.href = "log.html";
+    detalhesDiv.innerHTML = '<div class="alert alert-warning">Tens de fazer login para finalizar a compra.</div>';
+    form.style.display = 'none';
     return;
   }
 
@@ -25,7 +26,7 @@ onAuthStateChanged(auth, async (user) => {
   const carrinhoSnap = await getDoc(carrinhoRef);
   const carrinhoIds = carrinhoSnap.exists() ? (carrinhoSnap.data().produtos || []) : [];
   if (carrinhoIds.length === 0) {
-    detalhesDiv.textContent = "O teu carrinho está vazio.";
+    detalhesDiv.innerHTML = '<div class="alert alert-info">O teu carrinho está vazio.</div>';
     form.style.display = 'none';
     return;
   }
@@ -36,11 +37,16 @@ onAuthStateChanged(auth, async (user) => {
   let total = 0;
   detalhesDiv.innerHTML = produtos.map(p => {
     total += parseFloat(p.preco);
-    return `<div style='margin-bottom:20px;'><h2>${p.nome}</h2><p>Preço: €${p.preco}</p><img src='${p.imagemPrincipal}' width='200'/></div>`;
-  }).join('') + `<h3>Total: €${total.toFixed(2)}</h3>`;
+    return `<div class='d-flex align-items-center mb-3'><img src='${p.imagemPrincipal || 'images/no-image.png'}' width='80' class='me-3 rounded shadow-sm'><div><h5 class='mb-1'>${p.nome}</h5><div class='text-muted'>Preço: €${p.preco}</div></div></div>`;
+  }).join('') + `<h3 class='mt-4'>Total: €${total.toFixed(2)}</h3>`;
 
-  form.addEventListener("submit", async (e) => {
+  form.style.display = 'block';
+  finalizarBtn.disabled = false;
+
+  form.onsubmit = async (e) => {
     e.preventDefault();
+    finalizarBtn.disabled = true;
+    finalizarBtn.textContent = 'Processando...';
     // Criar pedido na coleção 'compras' do utilizador
     await addDoc(collection(db, 'compras'), {
       userId: user.uid,
@@ -50,9 +56,9 @@ onAuthStateChanged(auth, async (user) => {
     });
     // Limpar carrinho
     await setDoc(carrinhoRef, { produtos: [] });
-    mensagem.textContent = "Pagamento processado com sucesso! Obrigado pela compra.";
+    mensagem.innerHTML = "<div class='alert alert-success'>Pagamento processado com sucesso! Obrigado pela compra.</div>";
     detalhesDiv.innerHTML = '';
     form.reset();
     form.style.display = 'none';
-  });
+  };
 });

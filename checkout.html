@@ -4,36 +4,33 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pagamento - ResellSneakers</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <link href="navbar-styles.css" rel="stylesheet" />
   <script type="module" src="checkout.js"></script>
 </head>
 <body>
   <div id="menu-container"></div>
-  <h1>Finalizar Compra</h1>
-  <div id="detalhes-produto"></div>
-
-  <div class="container" style="max-width:500px;margin:auto;">
-    <h3 class="mb-3">Pagamento Seguro</h3>
-    <div class="mb-4">
-      <div id="stripe-form">
-        <label class="form-label">Pagar com Cartão (Stripe)</label>
-        <form id="stripe-payment-form">
-          <div id="stripe-card-element" style="padding:12px;border:1px solid #eee;border-radius:8px;"></div>
-          <button id="stripe-pay-btn" class="btn btn-primary w-100 mt-3" type="submit">Pagar com Cartão</button>
-        </form>
-      </div>
-      <hr class="my-4">
-      <div id="paypal-form">
-        <label class="form-label">Pagar com PayPal</label>
-        <div id="paypal-button-container"></div>
-      </div>
-    </div>
-    <div id="checkout-mensagem" class="mt-3"></div>
+  <script>
+    fetch('menu.html').then(res => res.text()).then(html => {
+      document.getElementById('menu-container').innerHTML = html;
+    });
+  </script>
+  <div class="container mt-4">
+    <h1>Finalizar Compra</h1>
+    <div id="detalhes-produto"></div>
+    <form id="form-pagamento" class="mt-4">
+      <button id="finalizar-btn" class="btn btn-success w-100" type="submit">Finalizar Compra</button>
+    </form>
+    <div id="mensagem-pagamento" class="mt-3"></div>
     <div class="small text-muted">Pagamentos reais requerem backend seguro. Veja instruções no código.</div>
+  </div>
   </div>
 
   <script src="https://js.stripe.com/v3/"></script>
   <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=EUR"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script type="module">
     // Stripe Elements (modo demo)
     const stripe = Stripe('YOUR_STRIPE_PUBLISHABLE_KEY');

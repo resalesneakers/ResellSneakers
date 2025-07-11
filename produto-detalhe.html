@@ -3,712 +3,123 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title id="meta-title">Produto Detalhe - ResellSneakers</title>
-  <meta name="description" id="meta-desc" content="Veja detalhes do sneaker no ResellSneakers.">
-  <meta property="og:title" id="og-title" content="Produto Detalhe - ResellSneakers">
-  <meta property="og:description" id="og-desc" content="Veja detalhes do sneaker no ResellSneakers.">
-  <meta property="og:image" id="og-image" content="images/banner1.png">
-  <meta property="og:url" id="og-url" content="https://resellsneakers.com/produto-detalhe.html">
-  <meta property="og:type" content="product">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" id="tw-title" content="Produto Detalhe - ResellSneakers">
-  <meta name="twitter:description" id="tw-desc" content="Veja detalhes do sneaker no ResellSneakers.">
-  <meta name="twitter:image" id="tw-image" content="images/banner1.png">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <title>Detalhe do Produto - ResellSneakers</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f8f9fa;
-      color: #333;
-      line-height: 1.6;
-    }
-
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 16px;
-    }
-
-    /* Header */
-    .header {
-      background: #fff;
-      border-bottom: 1px solid #e9ecef;
-      padding: 15px 0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .logo {
-      font-size: 24px;
-      font-weight: 800;
-      color: #000;
-      text-decoration: none;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 30px;
-      align-items: center;
-    }
-
-    .nav-link {
-      color: #666;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-
-    .nav-link:hover {
-      color: #000;
-    }
-
-    .user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #e9ecef;
-    }
-
-    /* Breadcrumb */
-    .breadcrumb {
-      background: #fff;
-      border-radius: 8px;
-      margin-top: 24px;
-      margin-bottom: 24px;
-      padding: 12px 18px;
-      font-size: 15px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-
-    .breadcrumb a {
-      color: #666;
-      text-decoration: none;
-    }
-
-    .breadcrumb a:hover {
-      color: #000;
-    }
-
-    /* Product Section */
-    .product-section {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 32px;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-      padding: 32px 24px;
-      margin-bottom: 32px;
-    }
-
-    /* Image Gallery */
-    .image-gallery {
-      flex: 1 1 320px;
-      min-width: 280px;
-      max-width: 420px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .main-image {
-      width: 100%;
-      max-width: 380px;
-      aspect-ratio: 1;
-      border-radius: 14px;
-      object-fit: cover;
-      background: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      margin-bottom: 8px;
-    }
-
-    .thumbnail-grid {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .thumbnail {
-      width: 56px;
-      height: 56px;
-      border-radius: 8px;
-      object-fit: cover;
-      cursor: pointer;
-      border: 2px solid transparent;
-      transition: border 0.2s;
-      background: #fff;
-    }
-
-    .thumbnail:hover,
-    .thumbnail.active {
-      border-color: #000;
-    }
-
-    /* Product Info */
-    .product-info-col {
-      flex: 2 1 400px;
-      min-width: 280px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .product-title {
-      font-size: 2.1rem;
-      font-weight: 700;
-      color: #000;
-      margin-bottom: 0.2em;
-    }
-
-    .product-subtitle {
-      font-size: 1.1rem;
-      color: #666;
-      margin-bottom: 0.5em;
-    }
-
-    .price-section {
-      background: #fff;
-      border: 1px solid #e9ecef;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-
-    .current-price {
-      font-size: 2rem;
-      font-weight: 800;
-      color: #000;
-    }
-
-    .price-change {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .price-up {
-      color: #10b981;
-    }
-
-    .price-down {
-      color: #ef4444;
-    }
-
-    .size-selector {
-      margin-bottom: 24px;
-    }
-
-    .size-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: #000;
-    }
-
-    .size-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-      gap: 8px;
-    }
-
-    .size-option {
-      padding: 12px 8px;
-      border: 1px solid #e9ecef;
-      border-radius: 8px;
-      background: #fff;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 500;
-    }
-
-    .size-option:hover {
-      border-color: #000;
-    }
-
-    .size-option.selected {
-      background: #000;
-      color: #fff;
-      border-color: #000;
-    }
-
-    .size-option.unavailable {
-      background: #f8f9fa;
-      color: #ccc;
-      cursor: not-allowed;
-    }
-
-    .action-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 32px;
-    }
-
-    .btn {
-      font-size: 1rem;
-      font-weight: 600;
-      border-radius: 8px;
-      padding: 12px 0;
-      margin-bottom: 8px;
-    }
-
+    body { background: #f8f9fa; font-family: 'Inter', Arial, sans-serif; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+    .product-section { display: flex; flex-wrap: wrap; gap: 32px; background: #fff; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); padding: 32px 24px; margin-bottom: 32px; }
+    .image-gallery { flex: 1 1 320px; min-width: 280px; max-width: 420px; display: flex; flex-direction: row; align-items: flex-start; gap: 18px; }
+    .main-image { width: 100%; max-width: 380px; aspect-ratio: 1; border-radius: 14px; object-fit: cover; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 8px; }
+    .thumbnail-grid { display: flex; flex-direction: column; gap: 8px; justify-content: flex-start; }
+    .thumbnail { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; cursor: pointer; border: 2px solid transparent; background: #fff; }
+    .thumbnail.active, .thumbnail:hover { border-color: #dc2626; }
+    .product-info-col { flex: 2 1 400px; min-width: 280px; display: flex; flex-direction: column; gap: 18px; }
+    .product-title { font-size: 2.1rem; font-weight: 700; color: #000; margin-bottom: 0.2em; }
+    .product-subtitle { font-size: 1.1rem; color: #666; margin-bottom: 0.5em; }
+    .current-price { font-size: 2rem; font-weight: 800; color: #dc2626; }
+    .badge { font-size: 1rem; }
+    .action-buttons { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+    .btn { font-size: 1rem; font-weight: 600; border-radius: 8px; padding: 12px 0; margin-bottom: 8px; }
     .btn-lg { font-size: 1.15rem; }
-
-    .btn-primary {
-      background: #000;
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: #333;
-      transform: translateY(-1px);
-    }
-
-    .btn-secondary {
-      background: #fff;
-      color: #000;
-      border: 2px solid #000;
-    }
-
-    .btn-secondary:hover {
-      background: #f8f9fa;
-    }
-
-    .btn-outline {
-      background: transparent;
-      color: #666;
-      border: 1px solid #e9ecef;
-    }
-
-    .btn-outline:hover {
-      background: #f8f9fa;
-      border-color: #000;
-      color: #000;
-    }
-
-    /* Product Details */
-    .product-details {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      padding: 20px 18px;
-      margin-bottom: 18px;
-    }
-
-    .details-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-
-    .details-grid {
-      display: grid;
-      gap: 10px;
-    }
-
-    .detail-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 0;
-      border-bottom: 1px solid #f8f9fa;
-    }
-
-    .detail-row:last-child {
-      border-bottom: none;
-    }
-
-    .detail-label {
-      color: #666;
-      font-weight: 500;
-    }
-
-    .detail-value {
-      font-weight: 600;
-      color: #000;
-    }
-
-    .condition-badge {
-      padding: 4px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      text-transform: uppercase;
-      margin-left: 8px;
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .condition-used {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    #estoqueBaixo {
-      font-size: 13px;
-      font-weight: 600;
-      background: #fff3cd;
-      color: #856404;
-      border-radius: 20px;
-      padding: 4px 12px;
-      margin-left: 8px;
-    }
-
-    /* Seller Info */
-    .seller-info {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      padding: 20px 18px;
-      margin-bottom: 18px;
-    }
-
-    .seller-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 10px;
-    }
-
-    .seller-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #e9ecef;
-    }
-
-    .seller-details h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 2px;
-    }
-
-    .seller-rating {
-      font-size: 0.95rem;
-      color: #666;
-    }
-
-    .seller-stats {
-      display: flex;
-      gap: 18px;
-      margin-top: 8px;
-    }
-
-    .stat {
-      text-align: center;
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 10px 8px;
-      min-width: 70px;
-    }
-
-    .stat-number {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #000;
-    }
-
-    .stat-label {
-      font-size: 0.8rem;
-      color: #666;
-      text-transform: uppercase;
-      font-weight: 500;
-    }
-
-    /* Shipping Info */
-    .shipping-info {
-      background: #fff;
-      border: 1px solid #e9ecef;
-      border-radius: 12px;
-      padding: 24px;
-    }
-
-    .shipping-options {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .shipping-option {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px;
-      border: 1px solid #e9ecef;
-      border-radius: 8px;
-    }
-
-    .shipping-details {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .shipping-icon {
-      font-size: 20px;
-    }
-
-    .shipping-text {
-      font-weight: 500;
-    }
-
-    .shipping-time {
-      font-size: 14px;
-      color: #666;
-    }
-
-    .shipping-price {
-      font-weight: 600;
-      color: #000;
-    }
-
-    /* Protection Info */
-    .protection-badges {
-      display: flex;
-      gap: 12px;
-      margin-top: 24px;
-      flex-wrap: wrap;
-    }
-
-    .protection-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      background: #f0f9ff;
-      border: 1px solid #bae6fd;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #0369a1;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 991px) {
-      .product-section {
-        flex-direction: column;
-        padding: 18px 6px;
-      }
-      .image-gallery, .product-info-col {
-        max-width: 100%;
-        min-width: 0;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .container {
-        padding: 0 4px;
-      }
-      .product-section {
-        padding: 8px 2px;
-        gap: 18px;
-      }
-      .main-image {
-        max-width: 98vw;
-      }
-      .btn {
-        font-size: 0.98rem;
-        padding: 10px 0;
-      }
-      .product-title {
-        font-size: 1.2rem;
-      }
-    }
-
-    .back-button {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: #666;
-      text-decoration: none;
-      font-weight: 500;
-      margin-bottom: 20px;
-      transition: color 0.3s ease;
-    }
-
-    .back-button:hover {
-      color: #000;
-    }
+    .btn-primary { background: #dc2626; color: #fff; border: none; }
+    .btn-primary:hover { background: #991b1b; }
+    .btn-outline-dark { border: 2px solid #dc2626; color: #dc2626; background: #fff; }
+    .btn-outline-dark:hover { background: #dc2626; color: #fff; }
+    .btn-outline-info { border: 2px solid #0dcaf0; color: #0dcaf0; background: #fff; }
+    .btn-outline-info:hover { background: #0dcaf0; color: #fff; }
+    .btn-success { background: #16a34a; color: #fff; border: none; }
+    .btn-success:hover { background: #166534; }
+    .product-details { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); padding: 20px 18px; margin-bottom: 18px; }
+    .details-grid { display: grid; gap: 10px; }
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f8f9fa; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: #666; font-weight: 500; }
+    .detail-value { font-weight: 600; color: #000; }
+    @media (max-width: 991px) { .product-section { flex-direction: column; padding: 18px 6px; } .image-gallery, .product-info-col { max-width: 100%; min-width: 0; flex-direction: column; } .thumbnail-grid { flex-direction: row; } }
+    @media (max-width: 600px) { .container { padding: 0 4px; } .product-section { padding: 8px 2px; gap: 18px; } .main-image { max-width: 98vw; } .btn { font-size: 0.98rem; padding: 10px 0; } .product-title { font-size: 1.2rem; } }
   </style>
 </head>
 <body>
   <div id="menu-container"></div>
-  <script>
-    fetch('menu.html').then(res => res.text()).then(html => {
-      document.getElementById('menu-container').innerHTML = html;
-    });
-  </script>
-  <div class="container py-4">
-    <nav class="breadcrumb bg-white rounded mb-4 px-3 py-2">
-      <a href="produtos.html" class="back-button">← Voltar aos produtos</a>
-      <span id="breadcrumbProduto" class="ms-2">Sneakers</span>
-    </nav>
-    <div class="product-section d-flex flex-wrap">
-      <div class="image-gallery">
-        <img src="images/no-image.png" alt="Imagem principal" class="main-image mb-3 rounded shadow" id="mainImage" loading="lazy">
-        <div class="thumbnail-grid"></div>
-      </div>
-      <div class="product-info-col">
-        <h1 class="product-title fw-bold mb-2">...</h1>
-        <div class="product-subtitle text-muted mb-3"></div>
-        <div class="d-flex align-items-center mb-3">
-          <span class="current-price display-5 fw-bold me-3">...</span>
-          <span class="condition-badge ms-2"></span>
-          <span class="badge bg-warning ms-2 d-none" id="estoqueBaixo">Últimas unidades!</span>
+  <script>fetch('menu.html').then(res => res.text()).then(html => { document.getElementById('menu-container').innerHTML = html; });</script>
+  <div class="container">
+    <nav class="breadcrumb mt-4"><a href="home.html">← Voltar aos produtos Sneakers</a><span id="breadcrumbProduto"></span></nav>
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10">
+        <div class="row g-4 align-items-start product-section bg-white rounded-4 shadow p-4 flex-lg-nowrap flex-wrap">
+          <!-- Coluna de imagens -->
+          <div class="col-12 col-md-5 d-flex flex-column align-items-center mb-3 mb-md-0">
+            <div class="w-100 d-flex flex-column align-items-center">
+              <img id="mainImage" src="images/no-image.png" class="main-image mb-2" alt="Imagem principal">
+              <div class="thumbnail-grid d-flex flex-row flex-md-column gap-2 mt-2" id="thumbnailGrid"></div>
+            </div>
+          </div>
+          <!-- Coluna de informações -->
+          <div class="col-12 col-md-7 d-flex flex-column gap-3 product-info-col">
+            <div>
+              <div class="product-title" id="productTitle">A carregar...</div>
+              <div class="product-subtitle" id="productSubtitle"></div>
+              <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                <span class="current-price" id="productPrice"></span>
+                <span class="badge bg-light text-dark" id="productCondition"></span>
+              </div>
+            </div>
+            <div id="detailsGrid" class="details-grid"></div>
+            <div class="action-buttons mt-2">
+              <button class="btn btn-primary btn-lg w-100" id="btnComprar">Comprar Agora</button>
+              <button class="btn btn-outline-dark btn-lg w-100" id="btnCarrinho">Adicionar ao Carrinho</button>
+              <button class="btn btn-outline-dark btn-lg w-100" id="btnFavorito">💙 Adicionar aos Favoritos</button>
+              <button class="btn btn-success btn-lg w-100" id="btnChatVendedor"><i class="fa fa-comments"></i> Conversar com o Vendedor</button>
+              <button class="btn btn-outline-info btn-lg w-100" id="btnCompartilhar"><i class="fa fa-share"></i> Compartilhar</button>
+            </div>
+            <div id="sellerInfo" class="mt-4"></div>
+          </div>
         </div>
-        <div class="mb-3" id="sizeSelector"></div>
-        <div class="mb-3">
-          <button class="btn btn-primary btn-lg me-2 w-100 mb-2" id="btnComprar">Comprar Agora</button>
-          <button class="btn btn-outline-dark btn-lg w-100 mb-2" id="btnCarrinho">Adicionar ao Carrinho</button>
-          <button class="btn btn-outline-secondary w-100 mb-2" id="btnFavorito">💙 Adicionar aos Favoritos</button>
-          <button class="btn btn-success w-100 mb-2 d-flex align-items-center justify-content-center gap-2" id="btnChatVendedor"><i class="bi bi-chat-dots"></i> Conversar com o Vendedor</button>
-          <button class="btn btn-outline-info w-100 mb-2" id="btnCompartilhar">🔗 Compartilhar</button>
-        </div>
-        <div class="product-details mb-4">
-          <h3 class="details-title mb-3">Detalhes do Produto</h3>
-          <div class="details-grid" id="detailsGrid"></div>
-        </div>
-        <div class="seller-info mb-4" id="sellerInfo"></div>
-        <div class="product-reviews mb-4" id="reviews"></div>
-        <div class="suggested-products mb-4" id="suggestedProducts"></div>
       </div>
     </div>
+    <div id="suggestedProducts" class="mt-5"></div>
   </div>
-
-  <!-- Lightbox Modal -->
-  <div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-transparent border-0">
-        <img id="lightboxImg" src="" class="w-100 rounded shadow" style="max-height:80vh; object-fit:contain;">
-      </div>
-    </div>
-  </div>
-
   <script type="module">
-    import { auth, db, storage } from "./firebase-config.js";
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { doc, getDoc, collection, query, where, limit, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-    function showLightbox(url) {
-      document.getElementById('lightboxImg').src = url;
-      const modal = new bootstrap.Modal(document.getElementById('lightboxModal'));
-      modal.show();
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { doc, getDoc, collection, query, where, getDocs, addDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+    import { auth, db, storage } from './firebase-config.js';
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+    if (!productId) {
+      document.body.innerHTML = '<div class="container py-5 text-center"><h2>Produto não encontrado.</h2></div>';
+      throw new Error('Produto não encontrado');
     }
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = 'log.html';
+    let user = null;
+    let product = null;
+    // Exibir placeholders imediatamente
+    document.getElementById('productTitle').textContent = 'A carregar...';
+    document.getElementById('productSubtitle').textContent = '';
+    document.getElementById('productPrice').textContent = '';
+    document.getElementById('productCondition').textContent = '';
+    document.getElementById('detailsGrid').innerHTML = "<div class='detail-row'><span class='detail-label'>Marca</span><span class='detail-value'>...</span></div>";
+    document.getElementById('sellerInfo').innerHTML = "<div class='seller-header d-flex align-items-center gap-3 mb-2'><img src='images/default-profile.png' alt='Seller' class='seller-avatar'><div class='seller-details'><h3 class='mb-0'>A carregar vendedor...</h3></div></div>";
+    onAuthStateChanged(auth, async (u) => {
+      user = u;
+      await carregarProduto();
+    });
+    async function carregarProduto() {
+      const docRef = doc(db, 'produtos', productId);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        document.body.innerHTML = '<div class="container py-5 text-center"><h2>Produto não encontrado.</h2></div>';
         return;
       }
-      const urlParams = new URLSearchParams(window.location.search);
-      const productId = urlParams.get('id');
-      if (!productId) {
-        alert('Produto não encontrado.');
-        return;
-      }
-      // Registrar visualização no histórico
-      try {
-        await addDoc(collection(db, 'historico_usuario'), {
-          userId: user.uid,
-          produtoId: productId,
-          acao: 'visualizacao',
-          timestamp: new Date()
-        });
-      } catch (e) { console.warn('Não foi possível registrar histórico:', e); }
-      const productRef = doc(db, 'produtos', productId);
-      const productSnap = await getDoc(productRef);
-      if (!productSnap.exists()) {
-        alert('Produto não encontrado.');
-        return;
-      }
-      const product = productSnap.data();
-      // Título, marca, preço, condição
-      document.querySelector('.product-title').textContent = product.nome || 'Produto';
-      document.querySelector('.product-subtitle').textContent = product.marca || '';
-      document.querySelector('.current-price').textContent = product.preco ? `€${product.preco}` : '--';
-      // Condição badge
-      let condBadge = document.querySelector('.condition-badge');
-      condBadge.textContent = product.condicao || 'Usado';
-      condBadge.classList.remove('condition-new', 'condition-used');
-      condBadge.classList.add(product.condicao === 'Novo' ? 'condition-new' : 'condition-used');
-      // Estoque baixo
-      if (product.estoque && product.estoque <= 3) {
-        document.getElementById('estoqueBaixo').classList.remove('d-none');
-      }
-      // Breadcrumb
+      product = docSnap.data();
+      // Atualizar informações principais imediatamente
+      document.getElementById('productTitle').textContent = product.nome || 'Produto';
+      document.getElementById('productSubtitle').textContent = product.marca || '';
+      document.getElementById('productPrice').textContent = product.preco ? `€${product.preco}` : '--';
+      document.getElementById('productCondition').textContent = product.condicao || 'Usado';
       document.getElementById('breadcrumbProduto').textContent = `${product.marca || ''} > ${product.nome || ''}`;
-      // Galeria de imagens
-      const mainImage = document.getElementById('mainImage');
-      let mainUrl = 'https://via.placeholder.com/400x400?text=Sem+Imagem';
-      // Se houver imagemPrincipal, usa ela; senão, usa a primeira do array imagens
-      if (product.imagemPrincipal) {
-        try {
-          const imgRef = ref(storage, product.imagemPrincipal);
-          mainUrl = await getDownloadURL(imgRef);
-          mainImage.src = mainUrl;
-        } catch {}
-      } else if (product.imagens && Array.isArray(product.imagens) && product.imagens.length > 0) {
-        try {
-          const imgRef = ref(storage, product.imagens[0]);
-          mainUrl = await getDownloadURL(imgRef);
-          mainImage.src = mainUrl;
-        } catch {}
-      } else {
-        mainImage.src = mainUrl;
-      }
-      // Miniaturas
-      if (product.imagens && Array.isArray(product.imagens) && product.imagens.length > 0) {
-        const thumbGrid = document.querySelector('.thumbnail-grid');
-        thumbGrid.innerHTML = '';
-        product.imagens.forEach(async (path, idx) => {
-          try {
-            const thumbRef = ref(storage, path);
-            const thumbUrl = await getDownloadURL(thumbRef);
-            const img = document.createElement('img');
-            img.src = thumbUrl;
-            img.className = 'thumbnail rounded shadow-sm';
-            img.style.width = '60px';
-            img.style.height = '60px';
-            img.style.objectFit = 'cover';
-            img.onclick = () => {
-              mainImage.src = thumbUrl;
-            };
-            img.ondblclick = () => showLightbox(thumbUrl);
-            // Deixa a primeira miniatura ativa
-            if (idx === 0 && !product.imagemPrincipal) img.classList.add('active');
-            thumbGrid.appendChild(img);
-          } catch {}
-        });
-        // Lightbox na imagem principal
-        mainImage.onclick = () => showLightbox(mainImage.src);
-      }
-      // Detalhes do produto
+      // Detalhes
       const details = [
         { label: 'Marca', value: product.marca },
         { label: 'Modelo', value: product.modelo },
@@ -720,27 +131,96 @@
       ];
       const detailsGrid = document.getElementById('detailsGrid');
       detailsGrid.innerHTML = '';
-      details.forEach(d => {
-        if (d.value) {
-          detailsGrid.innerHTML += `<div class='detail-row'><span class='detail-label'>${d.label}</span><span class='detail-value'>${d.value}</span></div>`;
+      details.forEach(d => { if (d.value) detailsGrid.innerHTML += `<div class='detail-row'><span class='detail-label'>${d.label}</span><span class='detail-value'>${d.value}</span></div>`; });
+      // Imagens (carregar de forma assíncrona)
+      let imagensUrls = [];
+      if (product.imagemPrincipal) {
+        let url = product.imagemPrincipal;
+        if (url.startsWith('http')) {
+          imagensUrls.push(url);
+        } else {
+          try {
+            const downloadUrl = await getDownloadURL(ref(storage, url));
+            imagensUrls.push(downloadUrl);
+          } catch (e) {
+            imagensUrls.push(url);
+          }
         }
-      });
-      // Tamanhos
-      if (product.tamanhos && Array.isArray(product.tamanhos) && product.tamanhos.length > 0) {
-        const sizeSelector = document.getElementById('sizeSelector');
-        sizeSelector.innerHTML = `<div class='size-title mb-2'>Selecionar Tamanho</div><div class='size-grid mb-2'>${product.tamanhos.map(t => `<div class='size-option'>${t}</div>`).join('')}</div>`;
-        // Seleção de tamanho
-        sizeSelector.querySelectorAll('.size-option').forEach(opt => {
-          opt.onclick = function() {
-            sizeSelector.querySelectorAll('.size-option').forEach(o => o.classList.remove('selected'));
-            this.classList.add('selected');
-          };
+      }
+      if (product.imagens && Array.isArray(product.imagens) && product.imagens.length > 0) {
+        for (let idx = 0; idx < product.imagens.length; idx++) {
+          let path = product.imagens[idx];
+          if (path.startsWith('http')) {
+            if (!imagensUrls.includes(path)) imagensUrls.push(path);
+          } else {
+            try {
+              const downloadUrl = await getDownloadURL(ref(storage, path));
+              if (!imagensUrls.includes(downloadUrl)) imagensUrls.push(downloadUrl);
+            } catch (e) {
+              if (!imagensUrls.includes(path)) imagensUrls.push(path);
+            }
+          }
+        }
+      }
+      if (imagensUrls.length === 0) {
+        imagensUrls = [ 'images/no-image.png' ];
+      }
+      let currentImgIdx = 0;
+      const mainImage = document.getElementById('mainImage');
+      const thumbGrid = document.getElementById('thumbnailGrid');
+      function renderMainImage(idx) {
+        mainImage.src = imagensUrls[idx];
+        mainImage.onerror = () => { mainImage.src = 'images/no-image.png'; };
+        thumbGrid.querySelectorAll('.thumbnail').forEach((t, i) => {
+          t.classList.toggle('active', i === idx);
         });
       }
-      // Vendedor
+      function renderThumbnails() {
+        thumbGrid.innerHTML = '';
+        imagensUrls.forEach((url, idx) => {
+          const img = document.createElement('img');
+          img.src = url;
+          img.className = 'thumbnail';
+          if (idx === currentImgIdx) img.classList.add('active');
+          img.onclick = () => {
+            currentImgIdx = idx;
+            renderMainImage(currentImgIdx);
+          };
+          img.ondblclick = () => showLightbox(url);
+          thumbGrid.appendChild(img);
+        });
+      }
+      let navPrev = document.getElementById('galleryPrev');
+      let navNext = document.getElementById('galleryNext');
+      if (!navPrev) {
+        navPrev = document.createElement('button');
+        navPrev.id = 'galleryPrev';
+        navPrev.className = 'btn btn-outline-secondary btn-sm me-2';
+        navPrev.innerHTML = '<i class="fa fa-chevron-left"></i>';
+        mainImage.parentNode.insertBefore(navPrev, mainImage);
+      }
+      if (!navNext) {
+        navNext = document.createElement('button');
+        navNext.id = 'galleryNext';
+        navNext.className = 'btn btn-outline-secondary btn-sm ms-2';
+        navNext.innerHTML = '<i class="fa fa-chevron-right"></i>';
+        mainImage.parentNode.insertBefore(navNext, mainImage.nextSibling);
+      }
+      navPrev.onclick = () => {
+        currentImgIdx = (currentImgIdx - 1 + imagensUrls.length) % imagensUrls.length;
+        renderMainImage(currentImgIdx);
+      };
+      navNext.onclick = () => {
+        currentImgIdx = (currentImgIdx + 1) % imagensUrls.length;
+        renderMainImage(currentImgIdx);
+      };
+      renderThumbnails();
+      renderMainImage(currentImgIdx);
+      mainImage.onclick = () => showLightbox(imagensUrls[currentImgIdx]);
+      // Vendedor (carregar de forma assíncrona)
       if (product.vendedorId) {
         try {
-          const userRef = doc(db, 'usuarios', product.vendedorId);
+          const userRef = doc(db, 'users', product.vendedorId);
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const vendedor = userSnap.data();
@@ -752,52 +232,104 @@
                   <div class='seller-rating'><span class='stars'>★★★★★</span><span>4.9 (127 avaliações)</span></div>
                   <a href='perfil.html?id=${product.vendedorId}' class='btn btn-link p-0'>Ver perfil</a>
                 </div>
-                <button class='btn btn-outline-success ms-auto' id='btnChatVendedor2'><i class='bi bi-chat-dots'></i> Chat</button>
-              </div>
-              <div class='seller-stats d-flex gap-3 mt-2'>
-                <div class='stat'><div class='stat-number'>156</div><div class='stat-label'>Vendas</div></div>
-                <div class='stat'><div class='stat-number'>98%</div><div class='stat-label'>Positivas</div></div>
-                <div class='stat'><div class='stat-number'>2.1</div><div class='stat-label'>Dias Envio</div></div>
+                <button class='btn btn-outline-success ms-auto' id='btnChatVendedor2'><i class='fa fa-comments'></i> Chat</button>
               </div>
             `;
             document.getElementById('btnChatVendedor').onclick = () => {
-              window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
+              if (!user) {
+                alert('Faça login para conversar com o vendedor.');
+                window.location.href = 'log.html';
+                return;
+              }
+              if (productId && product.vendedorId) {
+                window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
+              } else {
+                alert('Não foi possível abrir o chat: vendedor não encontrado.');
+              }
             };
             document.getElementById('btnChatVendedor2').onclick = () => {
-              window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
+              if (!user) {
+                alert('Faça login para conversar com o vendedor.');
+                window.location.href = 'log.html';
+                return;
+              }
+              if (productId && product.vendedorId) {
+                window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
+              } else {
+                alert('Não foi possível abrir o chat: vendedor não encontrado.');
+              }
             };
           }
         } catch {}
       }
-      // Favoritos (simples, localStorage)
+      // Favoritos
       const favBtn = document.getElementById('btnFavorito');
-      favBtn.onclick = () => {
-        let favs = JSON.parse(localStorage.getItem('favoritos') || '[]');
-        if (favs.includes(productId)) {
-          favs = favs.filter(f => f !== productId);
+      async function atualizarFavoritoBtn() {
+        if (!user) {
           favBtn.textContent = '💙 Adicionar aos Favoritos';
-        } else {
-          favs.push(productId);
-          favBtn.textContent = '❤️ Nos Favoritos';
+          favBtn.classList.remove('btn-danger');
+          favBtn.classList.add('btn-outline-dark');
+          return;
         }
-        localStorage.setItem('favoritos', JSON.stringify(favs));
+        const favRef = query(collection(db, "favoritos"), where("userId", "==", user.uid), where("produtoId", "==", productId));
+        const favSnap = await getDocs(favRef);
+        if (favSnap.empty) {
+          favBtn.textContent = '💙 Adicionar aos Favoritos';
+          favBtn.classList.remove('btn-danger');
+          favBtn.classList.add('btn-outline-dark');
+        } else {
+          favBtn.textContent = '❤️ Nos Favoritos';
+          favBtn.classList.remove('btn-outline-dark');
+          favBtn.classList.add('btn-danger');
+        }
+      }
+      favBtn.onclick = async () => {
+        if (!user) {
+          alert('Faça login para favoritar produtos.');
+          window.location.href = 'log.html';
+          return;
+        }
+        const favRef = query(collection(db, "favoritos"), where("userId", "==", user.uid), where("produtoId", "==", productId));
+        const favSnap = await getDocs(favRef);
+        if (favSnap.empty) {
+          await addDoc(collection(db, "favoritos"), { userId: user.uid, produtoId: productId });
+          alert('Adicionado aos favoritos!');
+        } else {
+          await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js').then(({ deleteDoc }) => deleteDoc(favSnap.docs[0].ref));
+          alert('Removido dos favoritos.');
+        }
+        atualizarFavoritoBtn();
       };
+      atualizarFavoritoBtn();
       // Comprar agora
       document.getElementById('btnComprar').onclick = () => {
         window.location.href = `checkout.html?id=${productId}`;
       };
       // Adicionar ao carrinho
-      document.getElementById('btnCarrinho').onclick = async () => {
-        // Exemplo: adicionar ao carrinho do Firestore
+      const btnCarrinho = document.getElementById('btnCarrinho');
+      btnCarrinho.onclick = async () => {
+        if (!user) {
+          alert('Faça login para adicionar ao carrinho.');
+          window.location.href = 'log.html';
+          return;
+        }
         const carrinhoRef = doc(db, 'carrinhos', user.uid);
         let carrinhoSnap = await getDoc(carrinhoRef);
         let produtos = carrinhoSnap.exists() ? (carrinhoSnap.data().produtos || []) : [];
         if (!produtos.includes(productId)) produtos.push(productId);
-        await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js').then(({ setDoc }) => setDoc(carrinhoRef, { produtos }));
-        document.getElementById('btnCarrinho').textContent = '✓ Adicionado ao Carrinho!';
-        setTimeout(() => {
-          document.getElementById('btnCarrinho').textContent = 'Adicionar ao Carrinho';
-        }, 2000);
+        await setDoc(carrinhoRef, { produtos });
+        alert('Adicionado ao carrinho!');
+        setTimeout(() => window.location.href = 'carrinho.html', 1000);
+      };
+      // Conversar com o vendedor
+      const btnChat = document.getElementById('btnChatVendedor');
+      btnChat.onclick = () => {
+        if (!user) {
+          alert('Faça login para conversar com o vendedor.');
+          window.location.href = 'log.html';
+          return;
+        }
+        window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
       };
       // Compartilhar
       document.getElementById('btnCompartilhar').onclick = () => {
@@ -809,34 +341,30 @@
           alert('Link copiado!');
         }
       };
-      // Sugestão de produtos
-      const suggestedDiv = document.getElementById('suggestedProducts');
-      const q = query(collection(db, 'produtos'), where('marca', '==', product.marca), limit(4));
-      const snap = await getDocs(q);
-      let html = '<h5 class="mb-3">Você também pode gostar</h5><div class="row">';
-      snap.forEach(docu => {
-        if (docu.id !== productId) {
-          const p = docu.data();
-          html += `<div class='col-6 col-md-3 mb-2'><div class='card h-100 shadow-sm' style='cursor:pointer' onclick="window.location.href='produto-detalhe.html?id=${docu.id}'"><img src='${(p.imagemPrincipal || 'https://via.placeholder.com/200x200?text=Sneaker')}' class='card-img-top' style='object-fit:cover; height:120px;'><div class='card-body p-2'><div class='fw-bold small'>${p.nome}</div><div class='text-muted small'>${p.marca}</div></div></div></div>`;
-        }
-      });
-      html += '</div>';
-      suggestedDiv.innerHTML = html;
-      // Atualizar meta tags dinamicamente
-      if (product) {
-        document.title = `${product.nome} - ${product.marca} | ResellSneakers`;
-        document.getElementById('meta-title').content = document.title;
-        document.getElementById('meta-desc').content = product.descricao || 'Veja detalhes do sneaker no ResellSneakers.';
-        document.getElementById('og-title').content = document.title;
-        document.getElementById('og-desc').content = product.descricao || 'Veja detalhes do sneaker no ResellSneakers.';
-        document.getElementById('og-image').content = product.imagemPrincipal || 'images/banner1.png';
-        document.getElementById('og-url').content = window.location.href;
-        document.getElementById('tw-title').content = document.title;
-        document.getElementById('tw-desc').content = product.descricao || 'Veja detalhes do sneaker no ResellSneakers.';
-        document.getElementById('tw-image').content = product.imagemPrincipal || 'images/banner1.png';
-      }
-    });
+    }
+    // Lightbox para imagens
+    function showLightbox(url) {
+      const overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.top = 0;
+      overlay.style.left = 0;
+      overlay.style.width = '100vw';
+      overlay.style.height = '100vh';
+      overlay.style.background = 'rgba(0,0,0,0.8)';
+      overlay.style.display = 'flex';
+      overlay.style.alignItems = 'center';
+      overlay.style.justifyContent = 'center';
+      overlay.style.zIndex = 9999;
+      overlay.onclick = () => document.body.removeChild(overlay);
+      const img = document.createElement('img');
+      img.src = url;
+      img.style.maxWidth = '90vw';
+      img.style.maxHeight = '90vh';
+      img.style.borderRadius = '16px';
+      overlay.appendChild(img);
+      document.body.appendChild(overlay);
+    }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -149,31 +149,13 @@
     <div class="row" id="produtosContainer"></div>
   </div>
   <!-- LINKS PARA TODAS AS PÁGINAS -->
-  <div class="container mt-5">
-    <h5 class="mb-3">Links do Projeto</h5>
-    <div class="row g-2">
-      <div class="col-6 col-md-3"><a href="adicionar.html" class="btn btn-outline-secondary w-100">Adicionar Produto</a></div>
-      <div class="col-6 col-md-3"><a href="editar-perfil.html" class="btn btn-outline-secondary w-100">Editar Perfil</a></div>
-      <div class="col-6 col-md-3"><a href="editar-produto.html" class="btn btn-outline-secondary w-100">Editar Produto</a></div>
-      <div class="col-6 col-md-3"><a href="favoritos.html" class="btn btn-outline-secondary w-100">Favoritos</a></div>
-      <div class="col-6 col-md-3"><a href="index.html" class="btn btn-outline-secondary w-100">Login (Index)</a></div>
-      <div class="col-6 col-md-3"><a href="log.html" class="btn btn-outline-secondary w-100">Log</a></div>
-      <div class="col-6 col-md-3"><a href="mensagens.html" class="btn btn-outline-secondary w-100">Mensagens</a></div>
-      <div class="col-6 col-md-3"><a href="meu-perfil.html" class="btn btn-outline-secondary w-100">Meu Perfil</a></div>
-      <div class="col-6 col-md-3"><a href="meus-produtos.html" class="btn btn-outline-secondary w-100">Meus Produtos</a></div>
-      <div class="col-6 col-md-3"><a href="perfil.html" class="btn btn-outline-secondary w-100">Perfil</a></div>
-      <div class="col-6 col-md-3"><a href="produto-detalhe.html" class="btn btn-outline-secondary w-100">Detalhe Produto</a></div>
-      <div class="col-6 col-md-3"><a href="produto.html" class="btn btn-outline-secondary w-100">Produto</a></div>
-    </div>
-  </div>
+  <!-- Removido: Links do Projeto de teste -->
 
   <!-- Rodapé -->
   <footer class="bg-dark text-white text-center py-4 mt-5">
     <div class="container">
       <p class="mb-1">&copy; 2025 ResellSneakers. Todos os direitos reservados.</p>
-      <a href="firebase-config.js" class="text-white me-3">Firebase Config</a>
-      <a href="produtos.html" class="text-white me-3">Produtos</a>
-      <a href="vender.html" class="text-white">Vender</a>
+      <!-- Removido: Links de teste do rodapé -->
     </div>
   </footer>
 
@@ -200,16 +182,10 @@
 
   <!-- Autenticação e Logout -->
   <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { auth, db, storage } from "./firebase-config.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-  import { firebaseConfig } from "./firebase-config.js";
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const storage = getStorage(app);
 
   const logoutBtn = document.getElementById("logoutBtn");
   const produtosContainer = document.getElementById("produtosContainer");
@@ -251,7 +227,7 @@
             <p class="card-text mb-2"><strong>Condição:</strong> ${data.condicao}</p>
             <p class="text-muted mt-auto"><i class="bi bi-bag-check"></i> ${data.disponibilidade}</p>
             <button class="btn btn-sm btn-outline-dark mt-2" onclick="window.location.href='produto-detalhe.html?id=${docSnap.id}'">Ver detalhes</button>
-            <a href="chat.html?id=${docSnap.id}" class="btn btn-sm btn-primary mt-2">Conversar</a>
+            <a href="chat.html?produto=${docSnap.id}&vendedor=${data.vendedorId ? data.vendedorId : ''}" class="btn btn-sm btn-primary mt-2" ${!data.vendedorId ? 'onclick="alert(\'Vendedor não encontrado\');return false;"' : ''}>Conversar</a>
           </div>
         </div>
       `;

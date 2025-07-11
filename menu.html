@@ -1,3 +1,175 @@
+<link rel="stylesheet" href="navbar-styles.css">
+<style>
+  /* Estilos unificados para a navbar em todas as páginas */
+  .modern-navbar {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+    backdrop-filter: blur(20px);
+    border-bottom: 2px solid #e9ecef;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 0.75rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .modern-navbar .navbar-brand {
+    font-weight: 800;
+    font-size: 1.8rem;
+    color: #000 !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .modern-navbar .navbar-brand:hover {
+    color: #dc2626 !important;
+    transform: scale(1.05);
+  }
+
+  .modern-navbar .nav-link {
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.7) !important;
+    transition: all 0.3s ease;
+    margin: 0 0.25rem;
+    border-radius: 8px;
+    padding: 0.5rem 1rem !important;
+    position: relative;
+  }
+
+  .modern-navbar .nav-link:hover {
+    color: #dc2626 !important;
+    background: rgba(220, 38, 38, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .modern-navbar .nav-link i {
+    margin-right: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .modern-navbar .navbar-toggler {
+    border: none;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .modern-navbar .navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.25);
+  }
+
+  .modern-navbar .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.7%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  }
+
+  .modern-navbar .form-control {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    background: #fafafa;
+  }
+
+  .modern-navbar .form-control:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.15);
+    background: white;
+  }
+
+  .modern-navbar .btn-link {
+    text-decoration: none;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .modern-navbar .btn-link:hover {
+    color: #dc2626 !important;
+    background: rgba(220, 38, 38, 0.1);
+    transform: translateY(-2px);
+  }
+
+  /* Responsividade */
+  @media (max-width: 991.98px) {
+    .modern-navbar .navbar-collapse {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 12px;
+      margin-top: 1rem;
+      padding: 1rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .modern-navbar .nav-link {
+      margin: 0.25rem 0;
+      padding: 0.75rem 1rem !important;
+    }
+
+    .modern-navbar .form-control {
+      margin: 0.5rem 0;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .modern-navbar .navbar-brand {
+      font-size: 1.5rem;
+    }
+
+    .modern-navbar .nav-link {
+      font-size: 0.9rem;
+      padding: 0.5rem 0.75rem !important;
+    }
+
+    .modern-navbar .form-control {
+      font-size: 0.85rem;
+      padding: 0.4rem 0.75rem;
+    }
+  }
+
+  /* Animações */
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modern-navbar {
+    animation: fadeInDown 0.3s ease-out;
+  }
+
+  /* Estados ativos */
+  .modern-navbar .nav-link.active {
+    color: #dc2626 !important;
+    background: rgba(220, 38, 38, 0.1);
+    font-weight: 700;
+  }
+
+  /* Efeitos de hover melhorados */
+  .modern-navbar .nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: #dc2626;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+  }
+
+  .modern-navbar .nav-link:hover::before {
+    width: 80%;
+  }
+</style>
+
 <nav class="navbar navbar-expand-lg modern-navbar bg-white shadow-sm">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold" href="home.html">ResellSneakers</a>
@@ -62,14 +234,53 @@
     </div>
   </div>
 </nav>
+
 <script type="module">
   import { auth } from './firebase-config.js';
   import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+  
   const UID_ADMIN = "Up3RIVwJBGQVYWW3kPJCg0I5GIf1";
+  
+  // Marcar link ativo baseado na página atual
+  function setActiveNavLink() {
+    const currentPage = window.location.pathname.split('/').pop() || 'home.html';
+    const navLinks = document.querySelectorAll('.modern-navbar .nav-link');
+    
+    navLinks.forEach(link => {
+      const href = link.getAttribute('href');
+      if (href === currentPage) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  }
+
+  // Verificar se é admin e mostrar links correspondentes
   onAuthStateChanged(auth, user => {
     if (user && user.uid === UID_ADMIN) {
       document.getElementById('adminLink').classList.remove('d-none');
       document.getElementById('dashboardLink').classList.remove('d-none');
     }
+    
+    // Marcar link ativo
+    setActiveNavLink();
+  });
+
+  // Adicionar funcionalidade de logout
+  document.addEventListener('DOMContentLoaded', function() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await auth.signOut();
+          window.location.href = 'log.html';
+        } catch (error) {
+          console.error('Erro ao fazer logout:', error);
+        }
+      });
+    }
   });
 </script>
+
+<script src="navbar-script.js"></script>

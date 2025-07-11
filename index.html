@@ -21,29 +21,7 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    /* Header & Navbar */
-    .navbar-brand {
-      font-weight: 800;
-      font-size: 1.8rem;
-    }
-    
-    .navbar-brand span {
-      color: var(--primary-color);
-    }
-    
-    .nav-link {
-      font-weight: 600;
-      color: rgba(0, 0, 0, 0.7) !important;
-    }
-    
-    .nav-link:hover {
-      color: var(--primary-color) !important;
-    }
-    
-    .form-control:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.25rem rgba(255, 107, 107, 0.25);
-    }
+    /* Removido: estilos de navbar customizado - agora usa menu.html unificado */
     
     .btn-primary {
       background-color: var(--primary-color);
@@ -288,15 +266,20 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <!-- Navbar exclusiva da index -->
-  <nav class="navbar navbar-expand-lg bg-white shadow-sm">
-    <div class="container-fluid">
-      <span class="navbar-brand fw-bold" style="font-size:1.8rem;">ResellSneakers</span>
-      <div class="d-flex">
-        <a href="log.html" class="btn btn-primary btn-lg">Entrar ou Criar Conta</a>
+  <div id="menu-container">
+    <nav class="navbar navbar-expand-lg modern-navbar bg-white shadow-sm">
+      <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="home.html">ResellSneakers</a>
+        <div class="d-flex ms-auto">
+          <a href="log.html" class="btn btn-primary btn-lg">Entrar</a>
+        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
+  </div>
+  <script>
+    // This script block is no longer needed as the menu is now statically included.
+    // Keeping it for now, but it will be removed in a subsequent edit if not used.
+  </script>
 
   <!-- Hero Section -->
   <section class="hero position-relative" style="background: url('images/banner1.png') center/cover no-repeat; min-height: 420px;">

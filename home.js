@@ -1,12 +1,22 @@
 // home.js modificado com botão de chat nos cards
 import { auth, db, storage } from './firebase-config.js';
-import { collection, query, where, orderBy, onSnapshot, getDocs, limit } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { collection, query, where, orderBy, onSnapshot, getDocs, limit, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 const marcasPadrao = ["Nike", "Adidas", "Jordan", "Yeezy", "New Balance", "Puma", "Converse", "Vans"];
+let favoritosIds = new Set();
+
+// Buscar favoritos do usuário autenticado
+async function carregarFavoritosUsuario() {
+  favoritosIds.clear();
+  const user = auth.currentUser;
+  if (!user) return;
+  const favsSnap = await getDocs(query(collection(db, "favoritos"), where("userId", "==", user.uid)));
+  favsSnap.forEach(doc => favoritosIds.add(doc.data().produtoId));
+}
 
 function criarCardProduto(produto, id) {
   const verificadoBadge = produto.verificado ? `<i class="fas fa-check-circle verified-badge ms-1"></i>` : '';
-  const heartIcon = produto.favorito ? 'fas fa-heart' : 'far fa-heart';
+  const heartIcon = favoritosIds.has(id) ? 'fas fa-heart' : 'far fa-heart';
   const disponibilidade = produto.disponibilidade || 'Indefinido';
   const imagem = produto.imagemPrincipal && produto.imagemPrincipal !== ''
     ? produto.imagemPrincipal
@@ -32,7 +42,7 @@ function criarCardProduto(produto, id) {
           <a href="produto-detalhe.html?id=${id}" class="btn btn-sm btn-outline-primary mt-auto w-100">
             Ver detalhes
           </a>
-          <a href="chat.html?user=${produto.userId}" class="btn btn-outline-primary btn-sm mt-2 w-100">
+          <a href="chat.html?produto=${id}&vendedor=${produto.vendedorId || produto.userId || ''}" class="btn btn-outline-primary btn-sm mt-2 w-100" ${(produto.vendedorId || produto.userId) ? '' : 'onclick="alert(\'Vendedor não encontrado\');return false;"'}>
             <i class="bi bi-chat-dots"></i> Chat
           </a>
         </div>
@@ -41,8 +51,9 @@ function criarCardProduto(produto, id) {
   `;
 }
 
-function carregarProdutosFiltradosRealtime({ termo = '', marca = '', condicao = '', disponibilidade = '' } = {}) {
+async function carregarProdutosFiltradosRealtime({ termo = '', marca = '', condicao = '', disponibilidade = '' } = {}) {
   const container = document.querySelector('#produtosContainer');
+  await carregarFavoritosUsuario();
   let q = collection(db, "produtos");
   let filtros = [];
 
@@ -119,14 +130,58 @@ function configurarFiltrosInteligentes() {
   }
 }
 
+// Toast para feedback visual
+function showToast(msg, success = true) {
+  let toast = document.getElementById('toast-feedback');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast-feedback';
+    toast.style.position = 'fixed';
+    toast.style.bottom = '30px';
+    toast.style.right = '30px';
+    toast.style.zIndex = '9999';
+    toast.style.padding = '16px 28px';
+    toast.style.borderRadius = '12px';
+    toast.style.background = success ? '#28a745' : '#dc3545';
+    toast.style.color = 'white';
+    toast.style.fontWeight = 'bold';
+    toast.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
+    toast.style.fontSize = '1rem';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.background = success ? '#28a745' : '#dc3545';
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 2000);
+}
+
 window.toggleFavorito = async function(produtoId) {
+  const user = auth.currentUser;
+  if (!user) {
+    showToast('Faça login para favoritar produtos.', false);
+    return;
+  }
+  const favRef = query(collection(db, "favoritos"), where("userId", "==", user.uid), where("produtoId", "==", produtoId));
+  const favSnap = await getDocs(favRef);
   const wishlistIcon = document.querySelector(`.card[data-id="${produtoId}"] .wishlist-icon i`);
-  if (wishlistIcon.classList.contains('far')) {
+  if (favSnap.empty) {
+    // Adicionar favorito
+    await setDoc(doc(collection(db, "favoritos")), { userId: user.uid, produtoId });
+    favoritosIds.add(produtoId);
     wishlistIcon.classList.remove('far');
     wishlistIcon.classList.add('fas');
+    wishlistIcon.classList.add('animate__animated', 'animate__bounceIn');
+    showToast('Adicionado aos favoritos!');
+    setTimeout(() => wishlistIcon.classList.remove('animate__animated', 'animate__bounceIn'), 800);
   } else {
+    // Remover favorito
+    await deleteDoc(favSnap.docs[0].ref);
+    favoritosIds.delete(produtoId);
     wishlistIcon.classList.remove('fas');
     wishlistIcon.classList.add('far');
+    wishlistIcon.classList.add('animate__animated', 'animate__fadeOut');
+    showToast('Removido dos favoritos.', false);
+    setTimeout(() => wishlistIcon.classList.remove('animate__animated', 'animate__fadeOut'), 800);
   }
 };
 
@@ -135,7 +190,11 @@ window.abrirChatComVendedor = function(produtoId, vendedorId) {
     alert("Vendedor n\u00e3o identificado.");
     return;
   }
-  window.location.href = `chat.html?produto=${produtoId}&vendedor=${vendedorId}`;
+  if (produtoId && vendedorId) {
+    window.location.href = `chat.html?produto=${produtoId}&vendedor=${vendedorId}`;
+  } else {
+    alert('Não foi possível abrir o chat: vendedor não encontrado.');
+  }
 };
 
 async function carregarRecomendadosParaUsuario() {

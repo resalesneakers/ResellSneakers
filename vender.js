@@ -66,13 +66,18 @@ function uploadImages(userId) {
           progressText.textContent = `A carregar imagens... ${Math.floor(progress)}%`;
         },
         reject,
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then(resolve);
+        async () => {
+          // Após upload, buscar o downloadURL (lógica antiga)
+          try {
+            const url = await getDownloadURL(fileRef);
+            resolve(url);
+          } catch (e) {
+            resolve(filePath); // fallback para o caminho
+          }
         }
       );
     });
   });
-
   return Promise.all(uploadPromises);
 }
 
@@ -115,26 +120,36 @@ onAuthStateChanged(auth, (u) => {
       const urls = await uploadImages(user.uid);
       const formData = new FormData(form);
 
+      // Se não houver imagens, adicionar banners antigos
+      let imagensFinal = urls.length > 0 ? urls : [
+        'images/banner1.png',
+        'images/banner2.png',
+        'images/banner3.png'
+      ];
+
+      // Garantir que todos os campos obrigatórios estão preenchidos corretamente
+      const preco = parseFloat(formData.get("price"));
       const produto = {
-        nome: formData.get("title"),
+        nome: formData.get("title") || "Produto sem nome",
         marca: formData.get("brand") || "Desconhecida",
         modelo: formData.get("model") || "",
         tamanho: formData.get("size") || "",
         condicao: formData.get("condition") || "",
-        preco: parseFloat(formData.get("price")) || 0,
-        negociavel: formData.get("negotiable") === "yes",
+        preco: isNaN(preco) ? 0 : preco,
+        negociavel: formData.get("negotiable") === "yes" || formData.get("negotiable") === "Sim",
         disponibilidade: formData.get("saleType") || "venda",
         descricao: formData.get("description") || "",
         localizacao: formData.get("location") || "",
-        imagemPrincipal: urls[0],
-        imagens: urls,
+        imagemPrincipal: imagensFinal[0],
+        imagens: imagensFinal,
         visualizacoes: 0,
         favorito: false,
         verificado: false,
         dataCriacao: serverTimestamp(),
         userId: user.uid,
+        vendedorId: user.uid,
       };
-
+      console.log("Produto a ser publicado:", produto);
       await addDoc(collection(db, "produtos"), produto);
 
       // Notificar seguidores

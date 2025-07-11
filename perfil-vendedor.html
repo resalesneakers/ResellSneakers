@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Perfil - ResellSneakers</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-  <link rel="stylesheet" href="navbar-styles.css">
+  <meta charset="UTF-8" />
+  <title>Perfil do Vendedor - ResellSneakers</title>
+  <link href="navbar-styles.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <style>
     body { background: #f8f9fa; }
     .profile-header { display: flex; align-items: center; gap: 32px; background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 32px 24px; margin-bottom: 32px; }
@@ -44,7 +43,7 @@
   <div class="container mt-4">
     <div id="profileHeader" class="profile-header"></div>
     <div class="products-section">
-      <h3>Meus Produtos</h3>
+      <h3>Produtos publicados</h3>
       <div id="productsList" class="products-list"></div>
     </div>
   </div>
@@ -53,42 +52,49 @@
     import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
     import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('id');
     const profileHeader = document.getElementById('profileHeader');
     const productsList = document.getElementById('productsList');
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = 'log.html';
-        return;
-      }
-      const userRef = doc(db, 'users', user.uid);
+    if (!userId) {
+      profileHeader.innerHTML = '<h2>Usuário não encontrado.</h2>';
+      productsList.innerHTML = '';
+    } else {
+      carregarPerfil(userId);
+      carregarProdutos(userId);
+    }
+    async function carregarPerfil(uid) {
+      const userRef = doc(db, 'users', uid);
       const userSnap = await getDoc(userRef);
       if (!userSnap.exists()) {
         profileHeader.innerHTML = '<h2>Usuário não encontrado.</h2>';
         return;
       }
       const u = userSnap.data();
-      let foto = u.foto || user.photoURL || 'images/default-profile.png';
+      let foto = u.foto || 'images/default-profile.png';
       if (foto && !foto.startsWith('http') && foto !== 'images/default-profile.png') {
         try { foto = await getDownloadURL(ref(storage, foto)); } catch {}
       }
-      const nome = u.nome || user.displayName || user.email || 'Usuário';
-      const email = user.email || '';
+      const nome = u.nome || u.displayName || u.email || 'Usuário';
+      const email = u.email || '';
       const joined = u.dataCriacao ? new Date(u.dataCriacao.seconds*1000).toLocaleDateString('pt-PT') : '';
       // Buscar estatísticas
       let produtos = 0, vendas = 0, compras = 0, rating = 0.0;
       // Produtos publicados
-      const qProdutos = query(collection(db, 'produtos'), where('vendedorId', '==', user.uid));
+      const qProdutos = query(collection(db, 'produtos'), where('vendedorId', '==', uid));
       const snapProdutos = await getDocs(qProdutos);
       produtos = snapProdutos.size;
       // Vendas (produtos vendidos)
       vendas = snapProdutos.docs.filter(doc => (doc.data().vendido === true)).length;
       // Compras (pedidos feitos pelo usuário)
-      const qCompras = query(collection(db, 'pedidos'), where('compradorId', '==', user.uid));
+      const qCompras = query(collection(db, 'pedidos'), where('compradorId', '==', uid));
       const snapCompras = await getDocs(qCompras);
       compras = snapCompras.size;
       // Classificação (rating médio)
       if (u.rating) rating = Number(u.rating).toFixed(1);
       else rating = '0.0';
+      let isMe = false;
+      onAuthStateChanged(auth, user => { if (user && user.uid === uid) isMe = true; });
       profileHeader.innerHTML = `
         <img src="${foto}" alt="Foto do usuário">
         <div class="profile-info">
@@ -102,18 +108,21 @@
             <div class="stat"><div class="value">${rating}</div><div class="label">Classificação</div></div>
           </div>
           <div class="profile-actions">
-            <a href="editar-perfil.html" class="btn btn-outline-primary"><i class="fa fa-edit"></i> Editar Perfil</a>
+            ${!isMe && uid ? `<a href="chat.html?vendedor=${uid}" class="btn btn-primary"><i class="fa fa-comments"></i> Enviar mensagem</a>` : (!isMe ? `<button class="btn btn-secondary" disabled>Vendedor não encontrado</button>` : '')}
           </div>
         </div>
       `;
-      // Carregar produtos do usuário
+    }
+    async function carregarProdutos(uid) {
       productsList.innerHTML = '<div class="text-muted">Carregando produtos...</div>';
-      if (snapProdutos.empty) {
+      const q = query(collection(db, 'produtos'), where('vendedorId', '==', uid));
+      const snap = await getDocs(q);
+      if (snap.empty) {
         productsList.innerHTML = '<div class="text-muted">Nenhum produto publicado.</div>';
         return;
       }
       let html = '';
-      for (const docSnap of snapProdutos.docs) {
+      for (const docSnap of snap.docs) {
         const p = docSnap.data();
         let img = p.imagemPrincipal || (p.imagens && p.imagens[0]) || 'images/no-image.png';
         if (img && !img.startsWith('http') && img !== 'images/no-image.png') {
@@ -128,9 +137,7 @@
         </div>`;
       }
       productsList.innerHTML = html;
-    });
+    }
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-  <script src="navbar-script.js"></script>
 </body>
-</html>
+</html> 

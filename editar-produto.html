@@ -17,55 +17,10 @@
       background: linear-gradient(135deg, #dc2626 0%, #991b1b 50%, #7f1d1d 100%);
       min-height: 100vh;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding-top: 4.5rem;
+      padding-top: 0; /* Removido padding-top para não conflitar com navbar fixa */
     }
 
-    /* Navbar Styling */
-    .navbar {
-      background: rgba(0, 0, 0, 0.95) !important;
-      backdrop-filter: blur(20px);
-      border-bottom: 2px solid #dc2626;
-      box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
-    }
-
-    .navbar-brand {
-      font-weight: 700;
-      font-size: 1.5rem;
-      color: #dc2626 !important;
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
-
-    .navbar-brand:hover {
-      color: #f87171 !important;
-      transform: scale(1.05);
-    }
-
-    .nav-link {
-      color: #f3f4f6 !important;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      margin: 0 5px;
-      border-radius: 8px;
-      padding: 8px 15px !important;
-    }
-
-    .nav-link:hover {
-      color: #dc2626 !important;
-      background: rgba(220, 38, 38, 0.1);
-      transform: translateY(-2px);
-    }
-
-    .nav-link.text-danger {
-      color: #ef4444 !important;
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    .nav-link.text-danger:hover {
-      background: #ef4444 !important;
-      color: white !important;
-    }
+    /* Removido: estilos de navbar customizado - agora usa menu.html unificado */
 
     /* Container Styling */
     .container {
@@ -572,9 +527,21 @@
     document.getElementById("disponibilidade").value = produtoAtual.disponibilidade || "";
 
     if (produtoAtual.imagemPrincipal) {
-      previewImagem.src = produtoAtual.imagemPrincipal;
-      previewImagem.style.display = "block";
-      imagemAnterior = produtoAtual.imagemPrincipal;
+      // Se for um caminho do Storage, buscar o downloadURL
+      if (!produtoAtual.imagemPrincipal.startsWith('http')) {
+        storage.ref(produtoAtual.imagemPrincipal).getDownloadURL().then(url => {
+          previewImagem.src = url;
+          previewImagem.style.display = "block";
+          imagemAnterior = produtoAtual.imagemPrincipal;
+        }).catch(() => {
+          previewImagem.style.display = "none";
+        });
+      } else {
+        // Suporte legado: se for URL completo
+        previewImagem.src = produtoAtual.imagemPrincipal;
+        previewImagem.style.display = "block";
+        imagemAnterior = produtoAtual.imagemPrincipal;
+      }
     }
     
     hideLoading();
@@ -599,23 +566,29 @@
     if (!condicao || !disponibilidade) return mostrarMensagem("Preencha todos os campos obrigatórios.", "danger", submitBtn);
 
     try {
-      let imagemURL = produtoAtual.imagemPrincipal;
+      let imagemPath = produtoAtual.imagemPrincipal;
       const novaImagem = imagemInput.files[0];
 
       if (novaImagem) {
         if (imagemAnterior) {
           try {
-            const antigaRef = storage.refFromURL(imagemAnterior);
-            await antigaRef.delete();
+            // Se for caminho do Storage, deletar corretamente
+            if (!imagemAnterior.startsWith('http')) {
+              await storage.ref(imagemAnterior).delete();
+            } else {
+              const antigaRef = storage.refFromURL(imagemAnterior);
+              await antigaRef.delete();
+            }
           } catch (err) {
             console.warn("Erro ao apagar imagem anterior:", err);
           }
         }
 
         const nomeImagem = `${Date.now()}_${novaImagem.name}`;
-        const storageRef = storage.ref().child(`produtos/${user.uid}/${nomeImagem}`);
-        const uploadResult = await storageRef.put(novaImagem);
-        imagemURL = await uploadResult.ref.getDownloadURL();
+        const storagePath = `produtos/${user.uid}/${nomeImagem}`;
+        const storageRef = storage.ref().child(storagePath);
+        await storageRef.put(novaImagem);
+        imagemPath = storagePath; // Salva apenas o caminho!
       }
 
       await db.collection("produtos").doc(produtoId).update({
@@ -623,7 +596,7 @@
         preco,
         condicao,
         disponibilidade,
-        imagemPrincipal: imagemURL,
+        imagemPrincipal: imagemPath, // Salva só o caminho
         ultimaAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
       });
 

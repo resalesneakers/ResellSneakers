@@ -2,441 +2,475 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ResellSneakers - Chat</title>
-  
-  
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-
+  <title>Mensagens - ResellSneakers</title>
+  <link rel="stylesheet" href="navbar-styles.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <style>
-    :root {
-      --primary-color: #ff5a5f;
-      --secondary-color: #484848;
-      --accent-color: #767676;
-      --background-color: #f7f7f7;
-      --chat-sender: #e6f7ff;
-      --chat-receiver: #f0f0f0;
+    body { 
+      background: #f8f9fa; 
+      font-family: 'Inter', Arial, sans-serif;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    .container { 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 32px 16px; 
     }
-
-    body {
-      background-color: var(--background-color);
+    .messages-header { 
+      text-align: center; 
+      margin-bottom: 32px; 
     }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
+    .messages-header h1 {
+      color: #333;
+      font-weight: 700;
     }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 0;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--primary-color);
-    }
-
-    .nav-links a {
-      margin-left: 20px;
-      color: var(--secondary-color);
-      text-decoration: none;
-    }
-
-    .chat-container {
-      display: flex;
-      height: calc(100vh - 120px);
-      margin-top: 20px;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .conversations {
-      width: 30%;
-      background-color: white;
-      border-right: 1px solid #ddd;
+    .messages-list { 
+      background: #fff; 
+      border-radius: 12px; 
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); 
+      padding: 18px; 
+      margin-bottom: 24px; 
+      min-height: 400px; 
+      max-height: 600px;
       overflow-y: auto;
     }
-
-    .conversation {
+    .chat-area { 
+      background: #fff; 
+      border-radius: 12px; 
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); 
+      padding: 18px; 
+      min-height: 300px; 
+      max-height: 500px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .empty-state { 
+      text-align: center; 
+      color: #aaa; 
+      padding: 3rem 0; 
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #ddd;
+    }
+    .conv-item {
       display: flex;
       align-items: center;
-      padding: 15px;
-      border-bottom: 1px solid #eee;
+      gap: 16px;
+      padding: 12px 10px;
+      border-radius: 10px;
+      transition: background 0.15s;
       cursor: pointer;
-      transition: background-color 0.2s;
+      margin-bottom: 8px;
+      border: 1px solid transparent;
     }
-
-    .conversation:hover, .conversation.active {
-      background-color: #f0f0f0;
+    .conv-item:hover, .conv-item.active {
+      background: #f0f4ff;
+      border-color: #e0e7ff;
     }
-
-    .user-avatar {
-      width: 50px;
-      height: 50px;
+    .conv-item img {
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background-color: #ddd;
-      margin-right: 15px;
-      overflow: hidden;
-    }
-
-    .user-avatar img {
-      width: 100%;
-      height: 100%;
       object-fit: cover;
+      border: 2px solid #e9ecef;
     }
-
-    .conversation-info {
+    .conv-item .conv-info {
       flex: 1;
+      min-width: 0;
     }
-
-    .user-name {
-      font-weight: bold;
-    }
-
-    .last-message {
-      font-size: 14px;
-      color: var(--accent-color);
+    .conv-item .conv-info .conv-nome {
+      font-weight: 600;
+      font-size: 1.08em;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: #333;
     }
-
-    .chat-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background-color: white;
+    .conv-item .conv-info .conv-msg {
+      font-size: 0.97em;
+      color: #888;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
     }
-
-    .chat-header {
+    .conv-item .conv-info .conv-hora {
+      font-size: 0.85em;
+      color: #bbb;
+      margin-top: 2px;
+    }
+    .online-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 7px;
+      vertical-align: middle;
+      border: 1.5px solid #fff;
+      box-shadow: 0 0 0 1.5px #e9ecef;
+    }
+    .online-indicator.online {
+      background: #22c55e;
+    }
+    .online-indicator.offline {
+      background: #bbb;
+    }
+    .unread-badge {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.85em;
+      font-weight: 700;
+      border-radius: 50%;
+      margin-left: 6px;
+      vertical-align: middle;
       display: flex;
       align-items: center;
-      padding: 15px;
-      border-bottom: 1px solid #eee;
+      justify-content: center;
     }
-
-    .product-info {
-      display: flex;
-      align-items: center;
-      margin-left: auto;
-      padding: 5px 10px;
-      background-color: #f5f5f5;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    .product-info img {
-      width: 30px;
-      height: 30px;
-      border-radius: 4px;
-      margin-right: 10px;
-    }
-
-    .messages {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .message {
+    .message-bubble {
+      padding: 8px 14px;
+      border-radius: 12px;
       max-width: 70%;
-      padding: 10px 15px;
-      margin-bottom: 15px;
-      border-radius: 18px;
+      margin-bottom: 8px;
       word-wrap: break-word;
     }
-
-    .sender {
+    .message-bubble.my-message {
       align-self: flex-end;
-      background-color: var(--chat-sender);
-      border-bottom-right-radius: 5px;
+      background: #e0e7ff;
+      color: #333;
     }
-
-    .receiver {
+    .message-bubble.other-message {
       align-self: flex-start;
-      background-color: var(--chat-receiver);
-      border-bottom-left-radius: 5px;
+      background: #f1f5f9;
+      color: #333;
     }
-
-    .input-area {
+    .message-time {
+      font-size: 0.8em;
+      color: #888;
+      text-align: right;
+      margin-top: 2px;
+    }
+    .product-mini-card {
       display: flex;
       align-items: center;
-      padding: 15px;
-      border-top: 1px solid #eee;
+      gap: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
     }
-
-    .image-upload {
-      position: relative;
-      overflow: hidden;
+    .product-mini-card img {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
     }
-
-    .image-upload input {
-      position: absolute;
-      top: 0;
-      right: 0;
-      opacity: 0;
-      cursor: pointer;
-    }
-
-    #message-input {
+    .product-mini-card .prod-info {
       flex: 1;
-      border: 1px solid #ddd;
-      border-radius: 20px;
-      padding: 10px 15px;
-      margin: 0 10px;
     }
-
-    #send-button {
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: var(--accent-color);
+    .product-mini-card .prod-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #333;
     }
-
-    #send-button:hover {
-      color: var(--primary-color);
+    .product-mini-card .prod-price {
+      color: #0d6efd;
+      font-weight: 700;
+      font-size: 1rem;
     }
-
-    .empty-state {
+    .send-form {
       display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      color: var(--accent-color);
-      text-align: center;
+      gap: 8px;
+      margin-top: 12px;
     }
-
-    @media (max-width: 768px) {
-      .chat-container {
-        flex-direction: column;
-        height: auto;
-      }
-
-      .conversations {
-        width: 100%;
-        height: 200px;
-        border-right: none;
-        border-bottom: 1px solid #ddd;
-      }
-
-      .chat-area {
-        height: auto;
-      }
+    .send-form input {
+      flex: 1;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+      padding: 10px 14px;
+      font-size: 1rem;
+    }
+    .send-form input:focus {
+      outline: none;
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 2px rgba(13,110,253,0.1);
+    }
+    .send-form button {
+      border-radius: 8px;
+      font-weight: 600;
+      padding: 10px 16px;
+      border: none;
+      background: #0d6efd;
+      color: white;
+      transition: background-color 0.2s;
+    }
+    .send-form button:hover {
+      background: #0b5ed7;
+    }
+    @media (max-width: 900px) {
+      .container { padding: 12px 2px; }
+      .messages-list, .chat-area { padding: 8px; }
+      .conv-item img { width: 38px; height: 38px; }
     }
   </style>
 </head>
-
 <body>
   <div id="menu-container"></div>
+  <script>fetch('menu.html').then(res => res.text()).then(html => {document.getElementById('menu-container').innerHTML = html;});</script>
   <div class="container">
-    <header>
-      <div class="logo">ResellSneakers</div>
-      <div class="nav-links">
-        <a href="home.html">Início</a>
-        <a href="produto.html">Produtos</a>
-        <a href="mensagens.html" class="active">Mensagens</a>
-        <a href="perfil.html">Perfil</a>
+    <div class="messages-header">
+      <h1><i class="fa fa-comments"></i> As Suas Mensagens</h1>
+      <p>Selecione uma conversa ou inicie uma nova a partir de um produto.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-12 col-md-4">
+        <div class="messages-list" id="messages-list">
+          <div class="empty-state">
+            <i class="fa fa-spinner fa-spin"></i>
+            <h5>A carregar...</h5>
+          </div>
+        </div>
       </div>
-    </header>
-
-    <div class="chat-container">
-    <div class="conversations" id="conversation-list"></div>
-     <div class="chat-area" id="chat-area">
-        <div class="empty-state" id="empty-chat">
-          <i class="fas fa-comments fa-2x"></i>
-          <h3>As Suas Mensagens</h3>
-          <p>Selecione uma conversa ou inicie uma nova a partir de um produto.</p>
-        </div>
-
-        <div id="active-chat" style="display: none; flex-direction: column; height: 100%;">
-          <div class="chat-header">
-            <div class="user-avatar">
-              <img id="chat-user-avatar" src="https://via.placeholder.com/50" alt="Avatar">
-            </div>
-            <div>
-              <div class="user-name" id="chat-user-name">Utilizador</div>
-              <div class="last-seen" id="chat-user-status">Visto recentemente</div>
-            </div>
-            <div class="product-info" id="product-info">
-              <img id="product-image" src="https://via.placeholder.com/30" alt="Produto">
-              <span id="product-name">Produto</span>
-            </div>
-          </div>
-
-          <div class="messages" id="messages-container"></div>
-
-          <div class="input-area">
-            <div class="image-upload">
-              <button title="Anexar Imagem">📷</button>
-              <input type="file" id="image-upload" accept="image/*">
-            </div>
-            <input type="text" id="message-input" placeholder="Escreva uma mensagem...">
-            <button id="send-button" title="Enviar">📤</button>
+      <div class="col-12 col-md-8">
+        <div class="chat-area" id="chat-area">
+          <div class='empty-state'>
+            <i class='fa fa-comments'></i>
+            <h5>Selecione uma conversa para ver as mensagens.</h5>
           </div>
         </div>
+        <form id="sendMsgForm" class="send-form d-none">
+          <input type="text" id="msgInput" placeholder="Digite sua mensagem..." autocomplete="off" />
+          <button type="submit"><i class="fa fa-paper-plane"></i></button>
+        </form>
       </div>
     </div>
   </div>
-
-  <!-- Firebase SDKs -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, query, where, orderBy, doc, getDoc, getDocs, onSnapshot, addDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-    import { firebaseConfig } from './firebase-config.js';
-
-    // Carregar menu universal
-    fetch('menu.html').then(res => res.text()).then(html => {
-      document.getElementById('menu-container').innerHTML = html;
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { collection, query, where, onSnapshot, doc, getDoc, addDoc, orderBy, serverTimestamp, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    
+    const messagesList = document.getElementById('messages-list');
+    const chatArea = document.getElementById('chat-area');
+    const sendMsgForm = document.getElementById('sendMsgForm');
+    const msgInput = document.getElementById('msgInput');
+    
+    let currentConvId = null;
+    let user = null;
+    let convs = [];
+    let unsubscribeMsgs = null;
+    let unsubscribeConvs = null;
+    
+    onAuthStateChanged(auth, u => {
+      if (!u) return (window.location.href = "log.html");
+      user = u;
+      carregarConversas();
     });
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-
-    const conversationsList = document.getElementById("conversation-list");
-    const messagesContainer = document.getElementById("messages-container");
-    const messageInput = document.getElementById("message-input");
-    const sendButton = document.getElementById("send-button");
-    const imageInput = document.getElementById("image-upload");
-    const emptyChat = document.getElementById("empty-chat");
-    const activeChat = document.getElementById("active-chat");
-    const chatUserAvatar = document.getElementById("chat-user-avatar");
-    const chatUserName = document.getElementById("chat-user-name");
-    const chatUserStatus = document.getElementById("chat-user-status");
-    const productImage = document.getElementById("product-image");
-    const productName = document.getElementById("product-name");
-
-    let currentUser = null;
-    let currentChatId = null;
-    let currentReceiverId = null;
-    let currentProduct = null;
-
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        currentUser = user;
-        carregarConversas();
-      } else {
-        window.location.href = "log.html";
-      }
-    });
-
+    
     function carregarConversas() {
-      const q = query(collection(db, "conversas"), where("participants", "array-contains", currentUser.uid));
-      onSnapshot(q, async snapshot => {
-        conversationsList.innerHTML = "";
-        for (const docSnap of snapshot.docs) {
-          const conversa = docSnap.data();
-          const chatId = docSnap.id;
-          const otherUserId = conversa.participants.find(uid => uid !== currentUser.uid);
-          const userDoc = await getDoc(doc(db, "usuarios", otherUserId));
-          const userData = userDoc.exists() ? userDoc.data() : { nome: "Utilizador", foto: "" };
-          const produtoDoc = await getDoc(doc(db, "produtos", conversa.produtoId));
-          const produto = produtoDoc.exists() ? produtoDoc.data() : { nome: "Produto", imagemPrincipal: "" };
-          const div = document.createElement("div");
-          div.classList.add("conversation");
-          div.dataset.chatId = chatId;
-          div.dataset.receiverId = otherUserId;
-          div.onclick = () => abrirConversa(chatId, otherUserId, userData, produto);
-          div.innerHTML = `
-            <div class="user-avatar">
-              <img src="${userData.foto || 'https://via.placeholder.com/50'}" alt="Avatar">
-            </div>
-            <div class="conversation-info">
-              <div class="user-name">${userData.nome}</div>
-              <div class="last-message">${conversa.lastMessage || ''}</div>
-            </div>
-          `;
-          conversationsList.appendChild(div);
+      messagesList.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin"></i><h5>A carregar...</h5></div>`;
+      
+      const convsQuery = query(collection(db, "conversas"), where("participantes", "array-contains", user.uid));
+      unsubscribeConvs = onSnapshot(convsQuery, async (convsSnap) => {
+        if (convsSnap.empty) {
+          messagesList.innerHTML = "<div class='empty-state'><i class='fa fa-comments'></i><h5>Sem conversas ainda.</h5></div>";
+          chatArea.innerHTML = "<div class='empty-state'><i class='fa fa-comments'></i><h5>Selecione uma conversa para ver as mensagens.</h5></div>";
+          sendMsgForm.classList.add('d-none');
+          return;
         }
-      });
-    }
-
-    function abrirConversa(chatId, receiverId, userData, produto) {
-      currentChatId = chatId;
-      currentReceiverId = receiverId;
-      currentProduct = produto;
-      emptyChat.style.display = "none";
-      activeChat.style.display = "flex";
-      chatUserAvatar.src = userData.foto || 'https://via.placeholder.com/50';
-      chatUserName.textContent = userData.nome || "Utilizador";
-      chatUserStatus.textContent = "Online agora";
-      productImage.src = produto.imagemPrincipal || 'https://via.placeholder.com/30';
-      productName.textContent = produto.nome || "Produto";
-      // Carregar mensagens
-      const msgsQ = query(collection(db, "conversas", chatId, "mensagens"), orderBy("timestamp"));
-      onSnapshot(msgsQ, snapshot => {
-        messagesContainer.innerHTML = "";
-        snapshot.forEach(doc => {
-          const msg = doc.data();
-          const div = document.createElement("div");
-          div.classList.add("message", msg.from === currentUser.uid ? "sender" : "receiver");
-          if (msg.imageUrl) {
-            div.innerHTML = `<img src='${msg.imageUrl}' style='max-width:200px; border-radius:8px;'><br>${msg.text || ''}`;
-          } else {
-            div.textContent = msg.text;
+        
+        convs = convsSnap.docs.map(docSnap => ({id: docSnap.id, ...docSnap.data()}));
+        convs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+        
+        let html = '';
+        for (const conv of convs) {
+          const otherId = conv.participantes.find(id => id !== user.uid);
+          let nome = 'Outro utilizador';
+          let foto = 'images/default-profile.png';
+          let online = false;
+          let numNaoLidas = conv.naoLidas && conv.naoLidas[user.uid] ? conv.naoLidas[user.uid] : 0;
+          
+          if (otherId) {
+            try {
+              const userRef = doc(db, 'users', otherId);
+              const userSnap = await getDoc(userRef);
+              if (userSnap.exists()) {
+                const u = userSnap.data();
+                nome = u.nome || 'Outro utilizador';
+                foto = u.foto || 'images/default-profile.png';
+                if (u.lastOnline && u.lastOnline.toDate) {
+                  const diff = Date.now() - u.lastOnline.toDate().getTime();
+                  online = diff < 2 * 60 * 1000;
+                }
+              }
+            } catch (error) {
+              console.error('Erro ao carregar dados do usuário:', error);
+            }
           }
-          messagesContainer.appendChild(div);
+          
+          let hora = '';
+          if (conv.timestamp?.toDate) {
+            hora = new Date(conv.timestamp.toDate()).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+          }
+          
+          const onlineClass = online ? 'online' : 'offline';
+          const unreadBadge = numNaoLidas > 0 ? `<span class="unread-badge">${numNaoLidas}</span>` : '';
+          
+          html += `<div class='conv-item' data-id='${conv.id}'>
+            <span class='online-indicator ${onlineClass}'></span>
+            <img src='${foto}' alt='Foto'>
+            <div class='conv-info'>
+              <div class='conv-nome'>${nome} ${unreadBadge}</div>
+              <div class='conv-msg'>${conv.ultimaMensagem || 'Sem mensagens ainda.'}</div>
+              <div class='conv-hora'>${hora}</div>
+            </div>
+          </div>`;
+        }
+        
+        messagesList.innerHTML = html;
+        
+        document.querySelectorAll('.conv-item').forEach(item => {
+          item.onclick = () => abrirConversa(item.getAttribute('data-id'));
         });
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
       });
     }
-
-    sendButton.onclick = async () => {
-      if (!currentChatId || !messageInput.value.trim()) return;
-      await addDoc(collection(db, "conversas", currentChatId, "mensagens"), {
-        text: messageInput.value.trim(),
-        from: currentUser.uid,
-        to: currentReceiverId,
-        produtoId: currentProduct?.id,
-        timestamp: new Date()
+    
+    async function abrirConversa(convId) {
+      currentConvId = convId;
+      
+      // Remover classe active de todas as conversas
+      document.querySelectorAll('.conv-item').forEach(item => {
+        item.classList.remove('active');
       });
-      await updateDoc(doc(db, "conversas", currentChatId), {
-        lastMessage: messageInput.value.trim(),
-        lastMessageTime: new Date()
+      
+      // Adicionar classe active à conversa selecionada
+      document.querySelector(`[data-id="${convId}"]`).classList.add('active');
+      
+      chatArea.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin"></i><h5>Carregando mensagens...</h5></div>`;
+      sendMsgForm.classList.remove('d-none');
+      msgInput.value = '';
+      
+      // Mini-card do produto (se for conversa de produto)
+      const conv = convs.find(c => c.id === convId);
+      let miniCardHtml = '';
+      
+      if (conv && conv.produtoId) {
+        try {
+          const produtoId = conv.produtoId;
+          const prodSnap = await getDoc(doc(db, 'produtos', produtoId));
+          if (prodSnap.exists()) {
+            const p = prodSnap.data();
+            let img = p.imagemPrincipal || (p.imagens && p.imagens[0]) || 'images/banner1.png';
+            miniCardHtml = `<div class="product-mini-card">
+              <img src='${img}' alt='Produto'>
+              <div class='prod-info'>
+                <div class='prod-name'>${p.nome}</div>
+                <div class='prod-price'>€${p.preco || '--'}</div>
+              </div>
+              <a href='produto-detalhe.html?id=${produtoId}' class='btn btn-link p-0'>Ver Produto</a>
+            </div>`;
+          }
+        } catch (error) {
+          console.error('Erro ao carregar produto:', error);
+        }
+      }
+      
+      // Marcar mensagens como lidas
+      try {
+        await updateDoc(doc(db, "conversas", convId), {
+          [`naoLidas.${user.uid}`]: 0
+        });
+      } catch (error) {
+        console.error('Erro ao marcar mensagens como lidas:', error);
+      }
+      
+      // Exibir mensagens em tempo real
+      if (unsubscribeMsgs) unsubscribeMsgs();
+      
+      const msgsRef = collection(db, "conversas", convId, "mensagens");
+      const msgsQuery = query(msgsRef, orderBy("timestamp"));
+      
+      unsubscribeMsgs = onSnapshot(msgsQuery, (msgsSnap) => {
+        if (msgsSnap.empty) {
+          chatArea.innerHTML = miniCardHtml + "<div class='empty-state'><i class='fa fa-comments'></i><h5>Sem mensagens ainda.</h5></div>";
+          return;
+        }
+        
+        let html = miniCardHtml + '<div style="display:flex;flex-direction:column;gap:10px;flex:1;">';
+        
+        msgsSnap.forEach(docSnap => {
+          const m = docSnap.data();
+          const isMe = m.from === user.uid;
+          const messageClass = isMe ? 'my-message' : 'other-message';
+          
+          let timeStr = '';
+          if (m.timestamp?.toDate) {
+            timeStr = new Date(m.timestamp.toDate()).toLocaleTimeString('pt-PT', { 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            });
+          }
+          
+          html += `<div class='message-bubble ${messageClass}'>
+            <div>${m.text}</div>
+            <div class='message-time'>${timeStr}</div>
+          </div>`;
+        });
+        
+        html += '</div>';
+        chatArea.innerHTML = html;
+        chatArea.scrollTop = chatArea.scrollHeight;
       });
-      messageInput.value = "";
+    }
+    
+    sendMsgForm.onsubmit = async (e) => {
+      e.preventDefault();
+      if (!currentConvId || !msgInput.value.trim()) return;
+      
+      const conv = convs.find(c => c.id === currentConvId);
+      const otherId = conv.participantes.find(id => id !== user.uid);
+      
+      try {
+        const msgsRef = collection(db, "conversas", currentConvId, "mensagens");
+        await addDoc(msgsRef, {
+          text: msgInput.value,
+          from: user.uid,
+          to: otherId,
+          produtoId: conv.produtoId || null,
+          timestamp: serverTimestamp(),
+          lida: false
+        });
+        
+        // Atualizar última mensagem e contador de não lidas
+        await updateDoc(doc(db, "conversas", currentConvId), {
+          ultimaMensagem: msgInput.value,
+          timestamp: serverTimestamp(),
+          [`naoLidas.${otherId}`]: increment(1)
+        });
+        
+        msgInput.value = '';
+      } catch (error) {
+        console.error('Erro ao enviar mensagem:', error);
+        alert('Erro ao enviar mensagem. Tente novamente.');
+      }
     };
-
-    imageInput.onchange = async (e) => {
-      if (!currentChatId || !e.target.files[0]) return;
-      const file = e.target.files[0];
-      const storageRef = ref(storage, `conversas/${currentChatId}/${Date.now()}_${file.name}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      await addDoc(collection(db, "conversas", currentChatId, "mensagens"), {
-        imageUrl: url,
-        from: currentUser.uid,
-        to: currentReceiverId,
-        produtoId: currentProduct?.id,
-        timestamp: new Date()
-      });
-      await updateDoc(doc(db, "conversas", currentChatId), {
-        lastMessage: "[imagem]",
-        lastMessageTime: new Date()
-      });
-    };
+    
+    // Cleanup ao sair da página
+    window.addEventListener('beforeunload', () => {
+      if (unsubscribeMsgs) unsubscribeMsgs();
+      if (unsubscribeConvs) unsubscribeConvs();
+    });
   </script>
 </body>
 </html>

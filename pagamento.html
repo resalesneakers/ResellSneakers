@@ -4,11 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pagamento - ResellSneakers</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css">
   <script type="module" src="pagamento.js"></script>
 </head>
 <body>
-  <h1>Finalizar Compra</h1>
+  <div id="menu-container"></div>
+  <script>
+    fetch('menu.html').then(res => res.text()).then(html => {
+      document.getElementById('menu-container').innerHTML = html;
+    });
+  </script>
+  <div class="container mt-4">
+    <h1>Finalizar Compra</h1>
 
   <div id="resumo-pedido"></div>
   <h2 id="total"></h2>
@@ -31,5 +40,7 @@
   </form>
 
   <p id="mensagemFinal" style="color: green; font-weight: bold;"></p>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
