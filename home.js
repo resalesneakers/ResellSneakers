@@ -42,7 +42,7 @@ function criarCardProduto(produto, id) {
           <a href="produto-detalhe.html?id=${id}" class="btn btn-sm btn-outline-primary mt-auto w-100">
             Ver detalhes
           </a>
-          <a href="chat.html?user=${produto.userId}" class="btn btn-outline-primary btn-sm mt-2 w-100">
+          <a href="chat.html?vendedor=${produto.userId}" class="btn btn-outline-primary btn-sm mt-2 w-100">
             <i class="bi bi-chat-dots"></i> Chat
           </a>
         </div>
