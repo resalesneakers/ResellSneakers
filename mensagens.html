@@ -59,14 +59,16 @@
           sendMsgForm.classList.add('d-none');
           return;
         }
+        // Ordenar por timestamp decrescente
+        const convs = convsSnap.docs.map(docSnap => ({id: docSnap.id, ...docSnap.data()}));
+        convs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
         let html = '';
-        for (const docSnap of convsSnap.docs) {
-          const conv = docSnap.data();
+        for (const conv of convs) {
           const otherId = conv.participantes.find(id => id !== user.uid);
           let nome = 'Outro utilizador';
           let foto = 'images/default-profile.png';
           if (otherId) {
-            const userRef = doc(db, 'users', otherId); // padronizado para 'users'
+            const userRef = doc(db, 'users', otherId);
             const userSnap = await getDoc(userRef);
             if (userSnap.exists()) {
               const u = userSnap.data();
@@ -74,9 +76,10 @@
               foto = u.foto || 'images/default-profile.png';
             }
           }
-          html += `<div class='d-flex align-items-center gap-3 mb-3 conv-item' style='cursor:pointer;' data-id='${docSnap.id}'>
+          let hora = conv.timestamp?.toDate ? new Date(conv.timestamp.toDate()).toLocaleString('pt-PT') : '';
+          html += `<div class='d-flex align-items-center gap-3 mb-3 conv-item' style='cursor:pointer;' data-id='${conv.id}'>
             <img src='${foto}' alt='Foto' style='width:48px;height:48px;border-radius:50%;object-fit:cover;'>
-            <div><div style='font-weight:600;'>${nome}</div><div style='font-size:0.95em;color:#888;'>${conv.ultimaMensagem || 'Sem mensagens ainda.'}</div></div>
+            <div><div style='font-weight:600;'>${nome}</div><div style='font-size:0.95em;color:#888;'>${conv.ultimaMensagem || 'Sem mensagens ainda.'}</div><div style='font-size:0.85em;color:#bbb;'>${hora}</div></div>
           </div>`;
         }
         messagesList.innerHTML = html;
@@ -91,7 +94,7 @@
       sendMsgForm.classList.remove('d-none');
       msgInput.value = '';
       const msgsRef = collection(db, "conversas", convId, "mensagens");
-      onSnapshot(query(msgsRef, orderBy("data", "asc")), (msgsSnap) => {
+      onSnapshot(query(msgsRef, orderBy("timestamp")), (msgsSnap) => {
         if (msgsSnap.empty) {
           chatArea.innerHTML = "<div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Sem mensagens ainda.</h5></div>";
           return;
@@ -99,10 +102,10 @@
         let html = '<div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">';
         msgsSnap.forEach(docSnap => {
           const m = docSnap.data();
-          const isMe = m.remetente === user.uid;
+          const isMe = m.from === user.uid;
           html += `<div style='align-self:${isMe ? 'flex-end' : 'flex-start'};background:${isMe ? '#e0e7ff' : '#f1f5f9'};padding:8px 14px;border-radius:12px;max-width:70%;'>
-            <div style='font-size:0.98em;'>${m.texto}</div>
-            <div style='font-size:0.8em;color:#888;text-align:right;'>${m.data?.toDate ? m.data.toDate().toLocaleString('pt-PT') : ''}</div>
+            <div style='font-size:0.98em;'>${m.text}</div>
+            <div style='font-size:0.8em;color:#888;text-align:right;'>${m.timestamp?.toDate ? new Date(m.timestamp.toDate()).toLocaleString('pt-PT') : ''}</div>
           </div>`;
         });
         html += '</div>';
@@ -115,14 +118,14 @@
       if (!currentConvId || !msgInput.value.trim()) return;
       const msgsRef = collection(db, "conversas", currentConvId, "mensagens");
       await addDoc(msgsRef, {
-        texto: msgInput.value,
-        remetente: user.uid,
-        data: serverTimestamp()
+        text: msgInput.value,
+        from: user.uid,
+        timestamp: serverTimestamp()
       });
       // Atualizar última mensagem na conversa
       await updateDoc(doc(db, "conversas", currentConvId), {
         ultimaMensagem: msgInput.value,
-        ultimaData: serverTimestamp()
+        timestamp: serverTimestamp()
       });
       msgInput.value = '';
     };

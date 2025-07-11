@@ -147,6 +147,7 @@ onAuthStateChanged(auth, (u) => {
         verificado: false,
         dataCriacao: serverTimestamp(),
         userId: user.uid,
+        vendedorId: user.uid,
       };
       console.log("Produto a ser publicado:", produto);
       await addDoc(collection(db, "produtos"), produto);

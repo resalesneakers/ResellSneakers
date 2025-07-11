@@ -108,15 +108,15 @@
         otherUserId = vendedorId;
         chatId = `direct_${[currentUser.uid, otherUserId].sort().join('_')}`;
       }
-      // Garantir que o documento da conversa existe e tem o campo participantes
+      // Garantir que o documento da conversa existe e tem o campo participantes, ultimaMensagem e timestamp
       const conversaRef = doc(db, 'conversas', chatId);
       let conversaSnap = await getDoc(conversaRef);
       if (!conversaSnap.exists()) {
         await setDoc(conversaRef, {
           participantes: [currentUser.uid, otherUserId],
-          criadoEm: serverTimestamp()
+          timestamp: serverTimestamp(),
+          ultimaMensagem: '',
         });
-        // Buscar novamente após criar
         conversaSnap = await getDoc(conversaRef);
       } else {
         // Se já existe, mas não tem participantes, atualiza
@@ -199,6 +199,11 @@
           productId: productId || null,
           timestamp: serverTimestamp()
         });
+        // Atualizar última mensagem e timestamp na conversa
+        await setDoc(conversaRef, {
+          ultimaMensagem: text,
+          timestamp: serverTimestamp()
+        }, { merge: true });
       };
     });
   </script>
