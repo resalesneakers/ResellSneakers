@@ -42,7 +42,7 @@ function criarCardProduto(produto, id) {
           <a href="produto-detalhe.html?id=${id}" class="btn btn-sm btn-outline-primary mt-auto w-100">
             Ver detalhes
           </a>
-          <a href="chat.html?vendedor=${produto.userId ? produto.userId : ''}" class="btn btn-outline-primary btn-sm mt-2 w-100" ${!produto.userId ? 'onclick="alert(\'Vendedor não encontrado\');return false;"' : ''}>
+          <a href="chat.html?produto=${id}&vendedor=${produto.vendedorId || produto.userId || ''}" class="btn btn-outline-primary btn-sm mt-2 w-100" ${(produto.vendedorId || produto.userId) ? '' : 'onclick="alert(\'Vendedor não encontrado\');return false;"'}>
             <i class="bi bi-chat-dots"></i> Chat
           </a>
         </div>
