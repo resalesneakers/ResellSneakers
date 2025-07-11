@@ -55,115 +55,44 @@
     </form>
   </div>
   <script type="module">
-    import { auth, db, storage } from './firebase-config.js';
-    import { getDoc, doc, collection, addDoc, setDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+    import { auth, db } from './firebase-config.js';
+    import { getDoc, doc, collection, addDoc, setDoc, updateDoc, arrayUnion, arrayRemove, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
     // Carregar menu universal
     fetch('menu.html').then(res => res.text()).then(html => {
       document.getElementById('menu-container').innerHTML = html;
     });
     const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('produto');
     let vendedorId = urlParams.get('vendedor');
-    // Validação robusta dos parâmetros
-    if (!vendedorId || vendedorId === 'undefined') {
-      document.querySelector('.chat-container').innerHTML = `<div class='p-5 text-center text-danger'><h4>Erro: Parâmetro do vendedor ausente.<br>Por favor, acesse o chat a partir de um usuário válido.</h4></div>`;
-      throw new Error('Parâmetro de chat inválido: vendedorId ausente.');
-    }
-    let currentUser = null;
-    let otherUserId = null;
+    let productId = urlParams.get('produto');
     let chatId = null;
-    let product = null;
+    let otherUserId = null;
+    let currentUser = null;
     onAuthStateChanged(auth, async user => {
       if (!user) return window.location.href = 'log.html';
       currentUser = user;
-      // Se for chat de produto
-      if (productId && productId !== 'undefined') {
-        const productRef = doc(db, 'produtos', productId);
-        const productSnap = await getDoc(productRef);
-        if (!productSnap.exists()) {
-          document.querySelector('.chat-container').innerHTML = `<div class='p-5 text-center text-danger'><h4>Produto não encontrado.</h4></div>`;
-          return;
-        }
-        product = productSnap.data();
-        if (!vendedorId || vendedorId === currentUser.uid) {
-          document.getElementById('userName').textContent = 'Este é o seu produto.';
-          document.getElementById('sendBtn').disabled = true;
-          document.getElementById('messageInput').disabled = true;
-          document.getElementById('userProfileLink').href = `perfil.html?id=${currentUser.uid}`;
-          return;
-        }
-        otherUserId = vendedorId;
-        chatId = [productId, ...[currentUser.uid, otherUserId].sort()].join('_');
-      } else {
-        // Chat direto entre usuários
-        if (vendedorId === currentUser.uid) {
-          document.getElementById('userName').textContent = 'Este é o seu perfil.';
-          document.getElementById('sendBtn').disabled = true;
-          document.getElementById('messageInput').disabled = true;
-          document.getElementById('userProfileLink').href = `perfil.html?id=${currentUser.uid}`;
-          return;
-        }
-        otherUserId = vendedorId;
-        chatId = `direct_${[currentUser.uid, otherUserId].sort().join('_')}`;
+      if (!vendedorId || vendedorId === 'undefined' || vendedorId === currentUser.uid) {
+        document.querySelector('.chat-container').innerHTML = `<div class='p-5 text-center text-danger'><h4>Erro: Parâmetro do vendedor ausente ou inválido.<br>Por favor, acesse o chat a partir de um usuário válido.</h4></div>`;
+        throw new Error('Parâmetro de chat inválido: vendedorId ausente ou igual ao usuário.');
       }
-      // Garantir que o documento da conversa existe e tem o campo participantes, ultimaMensagem e timestamp
+      otherUserId = vendedorId;
+      chatId = productId && productId !== 'undefined'
+        ? [productId, ...[currentUser.uid, otherUserId].sort()].join('_')
+        : [currentUser.uid, otherUserId].sort().join('_');
+      // Criar conversa se não existir
       const conversaRef = doc(db, 'conversas', chatId);
-      let conversaSnap = await getDoc(conversaRef);
+      const conversaSnap = await getDoc(conversaRef);
       if (!conversaSnap.exists()) {
         await setDoc(conversaRef, {
           participantes: [currentUser.uid, otherUserId],
-          timestamp: serverTimestamp(),
           ultimaMensagem: '',
+          timestamp: serverTimestamp(),
+          naoLidas: []
         });
-        conversaSnap = await getDoc(conversaRef);
-      } else {
-        // Se já existe, mas não tem participantes, atualiza
-        const data = conversaSnap.data();
-        if (!data.participantes || !Array.isArray(data.participantes) || data.participantes.length < 2) {
-          await setDoc(conversaRef, {
-            ...data,
-            participantes: [currentUser.uid, otherUserId]
-          }, { merge: true });
-        }
       }
-      // Exibir nome, foto e link do outro usuário
-      const userRef = doc(db, 'users', otherUserId);
-      const userSnap = await getDoc(userRef);
-      let nome = 'Usuário';
-      let foto = 'images/default-profile.png';
-      let email = '';
-      if (userSnap.exists()) {
-        const u = userSnap.data();
-        nome = u.nome || u.displayName || u.email || 'Usuário';
-        foto = u.foto || 'images/default-profile.png';
-        email = u.email || '';
-        document.getElementById('userProfileLink').href = `perfil-vendedor.html?id=${otherUserId}`;
-        document.getElementById('userProfileLink').onclick = null;
-      } else {
-        document.getElementById('userProfileLink').href = '#';
-        document.getElementById('userProfileLink').onclick = (e) => { e.preventDefault(); };
-      }
-      if (foto && !foto.startsWith('http') && foto !== 'images/default-profile.png') {
-        try { foto = await getDownloadURL(ref(storage, foto)); } catch {}
-      }
-      document.getElementById('userName').textContent = nome;
-      document.getElementById('userPhoto').src = foto;
-      document.getElementById('userSubtitle').textContent = email;
-      // Mini-card do produto (apenas se houver produto)
-      const miniCard = document.getElementById('productMiniCard');
-      if (product) {
-        miniCard.style.display = 'flex';
-        let prodImg = product.imagemPrincipal || (product.imagens && product.imagens[0]) || 'images/banner1.png';
-        if (prodImg && !prodImg.startsWith('http') && prodImg !== 'images/banner1.png') {
-          try { prodImg = await getDownloadURL(ref(storage, prodImg)); } catch {}
-        }
-        miniCard.innerHTML = `<img src='${prodImg}' alt='Produto'><div class='prod-info'><div class='prod-name'>${product.nome}</div><div class='prod-price'>€${product.preco || '--'}</div></div><a href='produto-detalhe.html?id=${productId}' class='btn btn-link p-0'>Ver Produto</a>`;
-      } else {
-        miniCard.style.display = 'none';
-      }
-      // Ouvir mensagens em tempo real
+      // Marcar como lida ao abrir
+      await updateDoc(conversaRef, { naoLidas: arrayRemove(currentUser.uid) });
+      // Exibir mensagens em tempo real
       const mensagensRef = collection(db, 'conversas', chatId, 'mensagens');
       const mensagensQuery = query(mensagensRef, orderBy('timestamp'));
       const messagesContainer = document.getElementById('messages');
@@ -187,10 +116,6 @@
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
         });
       });
-      // Ao abrir a conversa, remover o UID do usuário autenticado do array naoLidas
-      await setDoc(conversaRef, {
-        naoLidas: (conversaSnap.data()?.naoLidas || []).filter(uid => uid !== currentUser.uid)
-      }, { merge: true });
       document.getElementById('formMensagem').onsubmit = async (e) => {
         e.preventDefault();
         const text = document.getElementById('messageInput').value.trim();
@@ -203,12 +128,11 @@
           productId: productId || null,
           timestamp: serverTimestamp()
         });
-        // Atualizar última mensagem e timestamp na conversa
-        await setDoc(conversaRef, {
+        await updateDoc(conversaRef, {
           ultimaMensagem: text,
           timestamp: serverTimestamp(),
-          naoLidas: Array.from(new Set([...(conversaSnap.data()?.naoLidas || []), otherUserId]))
-        }, { merge: true });
+          naoLidas: arrayUnion(otherUserId)
+        });
       };
     });
   </script>
