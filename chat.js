@@ -123,6 +123,7 @@ async function loadOtherUserData() {
     console.error('Erro ao carregar dados do usuário:', error);
     userName.textContent = 'Usuário';
     userPhoto.src = 'images/default-profile.png';
+    userSubtitle.textContent = 'Usuário não encontrado';
   }
 }
 
