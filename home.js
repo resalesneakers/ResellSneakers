@@ -1,6 +1,6 @@
 // home.js modificado com botão de chat nos cards
 import { auth, db, storage } from './firebase-config.js';
-import { collection, query, where, orderBy, onSnapshot, getDocs, limit, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { collection, query, where, orderBy, onSnapshot, getDocs, limit, doc, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 const marcasPadrao = ["Nike", "Adidas", "Jordan", "Yeezy", "New Balance", "Puma", "Converse", "Vans"];
 let favoritosIds = new Set();

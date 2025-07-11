@@ -1,6 +1,6 @@
 import { app, auth, db, storage } from './firebase-config.js';
-import { collection, query, where, orderBy, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-import { getDownloadURL, ref as storageRef } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+import { collection, query, where, orderBy, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getDownloadURL, ref as storageRef } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
 const container = document.getElementById("produtosContainer");
 
