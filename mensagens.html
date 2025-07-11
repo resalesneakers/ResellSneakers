@@ -86,14 +86,16 @@
   </div>
   <script type="module">
     import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { collection, query, where, onSnapshot, doc, getDoc, addDoc, orderBy, serverTimestamp, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { collection, query, where, onSnapshot, doc, getDoc, addDoc, orderBy, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
     const messagesList = document.getElementById('messages-list');
     const chatArea = document.getElementById('chat-area');
     const sendMsgForm = document.getElementById('sendMsgForm');
     const msgInput = document.getElementById('msgInput');
     let currentConvId = null;
     let user = null;
+    let convs = [];
+    let unsubscribeMsgs = null;
     onAuthStateChanged(auth, u => {
       if (!u) return (window.location.href = "log.html");
       user = u;
@@ -108,8 +110,7 @@
           sendMsgForm.classList.add('d-none');
           return;
         }
-        // Ordenar por timestamp decrescente
-        const convs = convsSnap.docs.map(docSnap => ({id: docSnap.id, ...docSnap.data()}));
+        convs = convsSnap.docs.map(docSnap => ({id: docSnap.id, ...docSnap.data()}));
         convs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
         let html = '';
         for (const conv of convs) {
@@ -117,15 +118,7 @@
           let nome = 'Outro utilizador';
           let foto = 'images/default-profile.png';
           let online = false;
-          let temNaoLida = Array.isArray(conv.naoLidas) && conv.naoLidas.includes(user.uid);
-          let numNaoLidas = 0;
-          if (temNaoLida) {
-            // Contar mensagens não lidas para o usuário
-            const msgsRef = collection(db, "conversas", conv.id, "mensagens");
-            const q = query(msgsRef, where("to", "==", user.uid), where("timestamp", ">", conv.timestamp));
-            const msgsSnap = await getDocs(q);
-            numNaoLidas = msgsSnap.size;
-          }
+          let numNaoLidas = conv.naoLidas && conv.naoLidas[user.uid] ? conv.naoLidas[user.uid] : 0;
           if (otherId) {
             const userRef = doc(db, 'users', otherId);
             const userSnap = await getDoc(userRef);
@@ -135,7 +128,7 @@
               foto = u.foto || 'images/default-profile.png';
               if (u.lastOnline && u.lastOnline.toDate) {
                 const diff = Date.now() - u.lastOnline.toDate().getTime();
-                online = diff < 2 * 60 * 1000; // 2 minutos
+                online = diff < 2 * 60 * 1000;
               }
             }
           }
@@ -144,7 +137,7 @@
             <span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:${online ? '#22c55e' : '#bbb'};margin-right:7px;vertical-align:middle;border:1.5px solid #fff;box-shadow:0 0 0 1.5px #e9ecef;'></span>
             <img src='${foto}' alt='Foto'>
             <div class='conv-info'>
-              <div class='conv-nome'>${nome} ${temNaoLida ? `<span style='display:inline-block;width:18px;height:18px;background:#ef4444;color:#fff;font-size:0.85em;font-weight:700;border-radius:50%;margin-left:6px;vertical-align:middle;display:flex;align-items:center;justify-content:center;'>${numNaoLidas > 0 ? numNaoLidas : ''}</span>` : ''}</div>
+              <div class='conv-nome'>${nome} ${numNaoLidas > 0 ? `<span style='display:inline-block;width:18px;height:18px;background:#ef4444;color:#fff;font-size:0.85em;font-weight:700;border-radius:50%;margin-left:6px;vertical-align:middle;display:flex;align-items:center;justify-content:center;'>${numNaoLidas}</span>` : ''}</div>
               <div class='conv-msg'>${conv.ultimaMensagem || 'Sem mensagens ainda.'}</div>
               <div class='conv-hora'>${hora}</div>
             </div>
@@ -156,7 +149,7 @@
         });
       });
     }
-    function abrirConversa(convId) {
+    async function abrirConversa(convId) {
       currentConvId = convId;
       chatArea.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin fa-2x mb-2"></i><h5>Carregando mensagens...</h5></div>`;
       sendMsgForm.classList.remove('d-none');
@@ -164,64 +157,68 @@
       // Mini-card do produto (se for conversa de produto)
       const conv = convs.find(c => c.id === convId);
       let miniCardHtml = '';
-      if (conv && conv.id.startsWith('direct_') === false) {
-        // Chat de produto: id = produtoId_uid1_uid2
-        const produtoId = conv.id.split('_')[0];
-        getDoc(doc(db, 'produtos', produtoId)).then(prodSnap => {
-          if (prodSnap.exists()) {
-            const p = prodSnap.data();
-            let img = p.imagemPrincipal || (p.imagens && p.imagens[0]) || 'images/banner1.png';
-            miniCardHtml = `<div style='display:flex;align-items:center;gap:12px;background:#f8f9fa;border-radius:8px;padding:8px 12px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.03);'>
-              <img src='${img}' alt='Produto' style='width:48px;height:48px;border-radius:8px;object-fit:cover;'>
-              <div style='flex:1;'>
-                <div style='font-weight:600;font-size:1rem;'>${p.nome}</div>
-                <div style='color:#0d6efd;font-weight:700;font-size:1rem;'>€${p.preco || '--'}</div>
-              </div>
-              <a href='produto-detalhe.html?id=${produtoId}' class='btn btn-link p-0'>Ver Produto</a>
-            </div>`;
-            renderChatArea();
-          } else {
-            renderChatArea();
-          }
-        });
-      } else {
-        renderChatArea();
+      if (conv && conv.produtoId) {
+        const produtoId = conv.produtoId;
+        const prodSnap = await getDoc(doc(db, 'produtos', produtoId));
+        if (prodSnap.exists()) {
+          const p = prodSnap.data();
+          let img = p.imagemPrincipal || (p.imagens && p.imagens[0]) || 'images/banner1.png';
+          miniCardHtml = `<div style='display:flex;align-items:center;gap:12px;background:#f8f9fa;border-radius:8px;padding:8px 12px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.03);'>
+            <img src='${img}' alt='Produto' style='width:48px;height:48px;border-radius:8px;object-fit:cover;'>
+            <div style='flex:1;'>
+              <div style='font-weight:600;font-size:1rem;'>${p.nome}</div>
+              <div style='color:#0d6efd;font-weight:700;font-size:1rem;'>€${p.preco || '--'}</div>
+            </div>
+            <a href='produto-detalhe.html?id=${produtoId}' class='btn btn-link p-0'>Ver Produto</a>
+          </div>`;
+        }
       }
-      function renderChatArea() {
-        const msgsRef = collection(db, "conversas", convId, "mensagens");
-        onSnapshot(query(msgsRef, orderBy("timestamp")), (msgsSnap) => {
-          if (msgsSnap.empty) {
-            chatArea.innerHTML = miniCardHtml + "<div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Sem mensagens ainda.</h5></div>";
-            return;
-          }
-          let html = miniCardHtml + '<div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">';
-          msgsSnap.forEach(docSnap => {
-            const m = docSnap.data();
-            const isMe = m.from === user.uid;
-            html += `<div style='align-self:${isMe ? 'flex-end' : 'flex-start'};background:${isMe ? '#e0e7ff' : '#f1f5f9'};padding:8px 14px;border-radius:12px;max-width:70%;'>
-              <div style='font-size:0.98em;'>${m.text}</div>
-              <div style='font-size:0.8em;color:#888;text-align:right;'>${m.timestamp?.toDate ? new Date(m.timestamp.toDate()).toLocaleString('pt-PT') : ''}</div>
-            </div>`;
-          });
-          html += '</div>';
-          chatArea.innerHTML = html;
-          chatArea.scrollTop = chatArea.scrollHeight;
+      // Marcar mensagens como lidas
+      await updateDoc(doc(db, "conversas", convId), {
+        [`naoLidas.${user.uid}`]: 0
+      });
+      // Exibir mensagens em tempo real
+      if (unsubscribeMsgs) unsubscribeMsgs();
+      const msgsRef = collection(db, "conversas", convId, "mensagens");
+      const msgsQuery = query(msgsRef, orderBy("timestamp"));
+      unsubscribeMsgs = onSnapshot(msgsQuery, (msgsSnap) => {
+        if (msgsSnap.empty) {
+          chatArea.innerHTML = miniCardHtml + "<div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Sem mensagens ainda.</h5></div>";
+          return;
+        }
+        let html = miniCardHtml + '<div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">';
+        msgsSnap.forEach(docSnap => {
+          const m = docSnap.data();
+          const isMe = m.from === user.uid;
+          html += `<div style='align-self:${isMe ? 'flex-end' : 'flex-start'};background:${isMe ? '#e0e7ff' : '#f1f5f9'};padding:8px 14px;border-radius:12px;max-width:70%;'>
+            <div style='font-size:0.98em;'>${m.text}</div>
+            <div style='font-size:0.8em;color:#888;text-align:right;'>${m.timestamp?.toDate ? new Date(m.timestamp.toDate()).toLocaleString('pt-PT') : ''}</div>
+          </div>`;
         });
-      }
+        html += '</div>';
+        chatArea.innerHTML = html;
+        chatArea.scrollTop = chatArea.scrollHeight;
+      });
     }
     sendMsgForm.onsubmit = async (e) => {
       e.preventDefault();
       if (!currentConvId || !msgInput.value.trim()) return;
+      const conv = convs.find(c => c.id === currentConvId);
+      const otherId = conv.participantes.find(id => id !== user.uid);
       const msgsRef = collection(db, "conversas", currentConvId, "mensagens");
       await addDoc(msgsRef, {
         text: msgInput.value,
         from: user.uid,
-        timestamp: serverTimestamp()
+        to: otherId,
+        produtoId: conv.produtoId || null,
+        timestamp: serverTimestamp(),
+        lida: false
       });
-      // Atualizar última mensagem na conversa
+      // Atualizar última mensagem e contador de não lidas
       await updateDoc(doc(db, "conversas", currentConvId), {
         ultimaMensagem: msgInput.value,
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
+        [`naoLidas.${otherId}`]: (conv.naoLidas && conv.naoLidas[otherId] ? conv.naoLidas[otherId] : 0) + 1
       });
       msgInput.value = '';
     };
