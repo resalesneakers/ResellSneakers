@@ -227,7 +227,7 @@
             <p class="card-text mb-2"><strong>Condição:</strong> ${data.condicao}</p>
             <p class="text-muted mt-auto"><i class="bi bi-bag-check"></i> ${data.disponibilidade}</p>
             <button class="btn btn-sm btn-outline-dark mt-2" onclick="window.location.href='produto-detalhe.html?id=${docSnap.id}'">Ver detalhes</button>
-            <a href="chat.html?produto=${docSnap.id}&vendedor=${data.vendedorId}" class="btn btn-sm btn-primary mt-2">Conversar</a>
+            <a href="chat.html?produto=${docSnap.id}&vendedor=${data.vendedorId ? data.vendedorId : ''}" class="btn btn-sm btn-primary mt-2" ${!data.vendedorId ? 'onclick="alert(\'Vendedor não encontrado\');return false;"' : ''}>Conversar</a>
           </div>
         </div>
       `;

@@ -187,6 +187,10 @@
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
         });
       });
+      // Ao abrir a conversa, remover o UID do usuário autenticado do array naoLidas
+      await setDoc(conversaRef, {
+        naoLidas: (conversaSnap.data()?.naoLidas || []).filter(uid => uid !== currentUser.uid)
+      }, { merge: true });
       document.getElementById('formMensagem').onsubmit = async (e) => {
         e.preventDefault();
         const text = document.getElementById('messageInput').value.trim();
@@ -202,7 +206,8 @@
         // Atualizar última mensagem e timestamp na conversa
         await setDoc(conversaRef, {
           ultimaMensagem: text,
-          timestamp: serverTimestamp()
+          timestamp: serverTimestamp(),
+          naoLidas: Array.from(new Set([...(conversaSnap.data()?.naoLidas || []), otherUserId]))
         }, { merge: true });
       };
     });

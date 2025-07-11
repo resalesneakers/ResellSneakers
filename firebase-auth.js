@@ -10,7 +10,8 @@ auth.onAuthStateChanged(async (user) => {
       email: user.email,
       foto: user.photoURL || "",
       provider: user.providerData[0]?.providerId || "desconhecido",
-      dataCriacao: serverTimestamp()
+      dataCriacao: serverTimestamp(),
+      lastOnline: serverTimestamp()
     }, { merge: true });
     console.log("Usuário salvo/atualizado no Firestore!");
   }

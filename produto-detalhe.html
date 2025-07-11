@@ -236,10 +236,18 @@
               </div>
             `;
             document.getElementById('btnChatVendedor').onclick = () => {
-              window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
+              if (productId && product.vendedorId) {
+                window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
+              } else {
+                alert('Não foi possível abrir o chat: vendedor não encontrado.');
+              }
             };
             document.getElementById('btnChatVendedor2').onclick = () => {
-              window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
+              if (productId && product.vendedorId) {
+                window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
+              } else {
+                alert('Não foi possível abrir o chat: vendedor não encontrado.');
+              }
             };
           }
         } catch {}

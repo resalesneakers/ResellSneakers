@@ -9,9 +9,58 @@
     body { background: #f8f9fa; }
     .container { max-width: 1100px; margin: 0 auto; padding: 32px 16px; }
     .messages-header { text-align: center; margin-bottom: 32px; }
-    .messages-list { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 18px; margin-bottom: 24px; }
+    .messages-list { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 18px; margin-bottom: 24px; min-height: 400px; }
     .chat-area { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 18px; min-height: 300px; }
     .empty-state { text-align: center; color: #aaa; padding: 3rem 0; }
+    .conv-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 10px;
+      border-radius: 10px;
+      transition: background 0.15s;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .conv-item:hover, .conv-item.active {
+      background: #f0f4ff;
+    }
+    .conv-item img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e9ecef;
+    }
+    .conv-item .conv-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .conv-item .conv-info .conv-nome {
+      font-weight: 600;
+      font-size: 1.08em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .conv-item .conv-info .conv-msg {
+      font-size: 0.97em;
+      color: #888;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .conv-item .conv-info .conv-hora {
+      font-size: 0.85em;
+      color: #bbb;
+      margin-top: 2px;
+    }
+    @media (max-width: 900px) {
+      .container { padding: 12px 2px; }
+      .messages-list, .chat-area { padding: 8px; }
+      .conv-item img { width: 38px; height: 38px; }
+    }
   </style>
 </head>
 <body>
@@ -38,7 +87,7 @@
   <script type="module">
     import { auth, db } from './firebase-config.js';
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { collection, query, where, onSnapshot, doc, getDoc, addDoc, orderBy, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { collection, query, where, onSnapshot, doc, getDoc, addDoc, orderBy, serverTimestamp, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
     const messagesList = document.getElementById('messages-list');
     const chatArea = document.getElementById('chat-area');
     const sendMsgForm = document.getElementById('sendMsgForm');
@@ -67,6 +116,16 @@
           const otherId = conv.participantes.find(id => id !== user.uid);
           let nome = 'Outro utilizador';
           let foto = 'images/default-profile.png';
+          let online = false;
+          let temNaoLida = Array.isArray(conv.naoLidas) && conv.naoLidas.includes(user.uid);
+          let numNaoLidas = 0;
+          if (temNaoLida) {
+            // Contar mensagens não lidas para o usuário
+            const msgsRef = collection(db, "conversas", conv.id, "mensagens");
+            const q = query(msgsRef, where("to", "==", user.uid), where("timestamp", ">", conv.timestamp));
+            const msgsSnap = await getDocs(q);
+            numNaoLidas = msgsSnap.size;
+          }
           if (otherId) {
             const userRef = doc(db, 'users', otherId);
             const userSnap = await getDoc(userRef);
@@ -74,12 +133,21 @@
               const u = userSnap.data();
               nome = u.nome || 'Outro utilizador';
               foto = u.foto || 'images/default-profile.png';
+              if (u.lastOnline && u.lastOnline.toDate) {
+                const diff = Date.now() - u.lastOnline.toDate().getTime();
+                online = diff < 2 * 60 * 1000; // 2 minutos
+              }
             }
           }
-          let hora = conv.timestamp?.toDate ? new Date(conv.timestamp.toDate()).toLocaleString('pt-PT') : '';
-          html += `<div class='d-flex align-items-center gap-3 mb-3 conv-item' style='cursor:pointer;' data-id='${conv.id}'>
-            <img src='${foto}' alt='Foto' style='width:48px;height:48px;border-radius:50%;object-fit:cover;'>
-            <div><div style='font-weight:600;'>${nome}</div><div style='font-size:0.95em;color:#888;'>${conv.ultimaMensagem || 'Sem mensagens ainda.'}</div><div style='font-size:0.85em;color:#bbb;'>${hora}</div></div>
+          let hora = conv.timestamp?.toDate ? new Date(conv.timestamp.toDate()).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '';
+          html += `<div class='conv-item' data-id='${conv.id}'>
+            <span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:${online ? '#22c55e' : '#bbb'};margin-right:7px;vertical-align:middle;border:1.5px solid #fff;box-shadow:0 0 0 1.5px #e9ecef;'></span>
+            <img src='${foto}' alt='Foto'>
+            <div class='conv-info'>
+              <div class='conv-nome'>${nome} ${temNaoLida ? `<span style='display:inline-block;width:18px;height:18px;background:#ef4444;color:#fff;font-size:0.85em;font-weight:700;border-radius:50%;margin-left:6px;vertical-align:middle;display:flex;align-items:center;justify-content:center;'>${numNaoLidas > 0 ? numNaoLidas : ''}</span>` : ''}</div>
+              <div class='conv-msg'>${conv.ultimaMensagem || 'Sem mensagens ainda.'}</div>
+              <div class='conv-hora'>${hora}</div>
+            </div>
           </div>`;
         }
         messagesList.innerHTML = html;
@@ -93,25 +161,53 @@
       chatArea.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin fa-2x mb-2"></i><h5>Carregando mensagens...</h5></div>`;
       sendMsgForm.classList.remove('d-none');
       msgInput.value = '';
-      const msgsRef = collection(db, "conversas", convId, "mensagens");
-      onSnapshot(query(msgsRef, orderBy("timestamp")), (msgsSnap) => {
-        if (msgsSnap.empty) {
-          chatArea.innerHTML = "<div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Sem mensagens ainda.</h5></div>";
-          return;
-        }
-        let html = '<div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">';
-        msgsSnap.forEach(docSnap => {
-          const m = docSnap.data();
-          const isMe = m.from === user.uid;
-          html += `<div style='align-self:${isMe ? 'flex-end' : 'flex-start'};background:${isMe ? '#e0e7ff' : '#f1f5f9'};padding:8px 14px;border-radius:12px;max-width:70%;'>
-            <div style='font-size:0.98em;'>${m.text}</div>
-            <div style='font-size:0.8em;color:#888;text-align:right;'>${m.timestamp?.toDate ? new Date(m.timestamp.toDate()).toLocaleString('pt-PT') : ''}</div>
-          </div>`;
+      // Mini-card do produto (se for conversa de produto)
+      const conv = convs.find(c => c.id === convId);
+      let miniCardHtml = '';
+      if (conv && conv.id.startsWith('direct_') === false) {
+        // Chat de produto: id = produtoId_uid1_uid2
+        const produtoId = conv.id.split('_')[0];
+        getDoc(doc(db, 'produtos', produtoId)).then(prodSnap => {
+          if (prodSnap.exists()) {
+            const p = prodSnap.data();
+            let img = p.imagemPrincipal || (p.imagens && p.imagens[0]) || 'images/banner1.png';
+            miniCardHtml = `<div style='display:flex;align-items:center;gap:12px;background:#f8f9fa;border-radius:8px;padding:8px 12px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.03);'>
+              <img src='${img}' alt='Produto' style='width:48px;height:48px;border-radius:8px;object-fit:cover;'>
+              <div style='flex:1;'>
+                <div style='font-weight:600;font-size:1rem;'>${p.nome}</div>
+                <div style='color:#0d6efd;font-weight:700;font-size:1rem;'>€${p.preco || '--'}</div>
+              </div>
+              <a href='produto-detalhe.html?id=${produtoId}' class='btn btn-link p-0'>Ver Produto</a>
+            </div>`;
+            renderChatArea();
+          } else {
+            renderChatArea();
+          }
         });
-        html += '</div>';
-        chatArea.innerHTML = html;
-        chatArea.scrollTop = chatArea.scrollHeight;
-      });
+      } else {
+        renderChatArea();
+      }
+      function renderChatArea() {
+        const msgsRef = collection(db, "conversas", convId, "mensagens");
+        onSnapshot(query(msgsRef, orderBy("timestamp")), (msgsSnap) => {
+          if (msgsSnap.empty) {
+            chatArea.innerHTML = miniCardHtml + "<div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Sem mensagens ainda.</h5></div>";
+            return;
+          }
+          let html = miniCardHtml + '<div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">';
+          msgsSnap.forEach(docSnap => {
+            const m = docSnap.data();
+            const isMe = m.from === user.uid;
+            html += `<div style='align-self:${isMe ? 'flex-end' : 'flex-start'};background:${isMe ? '#e0e7ff' : '#f1f5f9'};padding:8px 14px;border-radius:12px;max-width:70%;'>
+              <div style='font-size:0.98em;'>${m.text}</div>
+              <div style='font-size:0.8em;color:#888;text-align:right;'>${m.timestamp?.toDate ? new Date(m.timestamp.toDate()).toLocaleString('pt-PT') : ''}</div>
+            </div>`;
+          });
+          html += '</div>';
+          chatArea.innerHTML = html;
+          chatArea.scrollTop = chatArea.scrollHeight;
+        });
+      }
     }
     sendMsgForm.onsubmit = async (e) => {
       e.preventDefault();

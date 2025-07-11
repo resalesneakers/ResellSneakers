@@ -42,7 +42,7 @@ function criarCardProduto(produto, id) {
           <a href="produto-detalhe.html?id=${id}" class="btn btn-sm btn-outline-primary mt-auto w-100">
             Ver detalhes
           </a>
-          <a href="chat.html?vendedor=${produto.userId}" class="btn btn-outline-primary btn-sm mt-2 w-100">
+          <a href="chat.html?vendedor=${produto.userId ? produto.userId : ''}" class="btn btn-outline-primary btn-sm mt-2 w-100" ${!produto.userId ? 'onclick="alert(\'Vendedor não encontrado\');return false;"' : ''}>
             <i class="bi bi-chat-dots"></i> Chat
           </a>
         </div>
@@ -190,7 +190,11 @@ window.abrirChatComVendedor = function(produtoId, vendedorId) {
     alert("Vendedor n\u00e3o identificado.");
     return;
   }
-  window.location.href = `chat.html?produto=${produtoId}&vendedor=${vendedorId}`;
+  if (produtoId && vendedorId) {
+    window.location.href = `chat.html?produto=${produtoId}&vendedor=${vendedorId}`;
+  } else {
+    alert('Não foi possível abrir o chat: vendedor não encontrado.');
+  }
 };
 
 async function carregarRecomendadosParaUsuario() {
