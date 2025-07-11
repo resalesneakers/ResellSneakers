@@ -52,6 +52,7 @@
     import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
     import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { auth, db, storage } from './firebase-config.js';
     const profileHeader = document.getElementById('profileHeader');
     const productsList = document.getElementById('productsList');
     onAuthStateChanged(auth, async (user) => {

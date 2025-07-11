@@ -1,6 +1,58 @@
-<!-- Adicionar botão de dark mode -->
+<!-- Navbar Moderna com Firebase Auth -->
+<nav class="navbar navbar-expand-lg modern-navbar bg-white shadow-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="home.html">ResellSneakers</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="home.html"><i class="fas fa-home"></i> Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="produtos.html"><i class="fas fa-box"></i> Produtos</a></li>
+        <li class="nav-item"><a class="nav-link" href="favoritos.html"><i class="fas fa-heart"></i> Favoritos</a></li>
+        <li class="nav-item"><a class="nav-link" href="vender.html"><i class="fas fa-tag"></i> Vender</a></li>
+        <li class="nav-item"><a class="nav-link" href="meus-produtos.html"><i class="fas fa-list"></i> Meus Produtos</a></li>
+        <li class="nav-item position-relative"><a class="nav-link" href="mensagens.html" id="menuMensagensLink"><i class="fa fa-comments"></i> Mensagens <span id="badgeMensagens" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none;">0</span></a></li>
+        <li class="nav-item d-none" id="adminLink"><a class="nav-link" href="admin.html"><i class="fas fa-user-shield"></i> Admin</a></li>
+        <li class="nav-item d-none" id="dashboardLink"><a class="nav-link" href="dashboard.html"><i class="fas fa-chart-bar"></i> Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="faq.html"><i class="fa fa-question-circle"></i> Ajuda</a></li>
+      </ul>
+      <form class="d-flex me-3" role="search" autocomplete="off">
+        <input class="form-control me-2" list="marcasList" id="inputMarcaNavbar" type="search" placeholder="Marca (Nike, Adidas, ...)" aria-label="Marca">
+        <datalist id="marcasList">
+          <option value="Nike"><option value="Adidas"><option value="Jordan"><option value="Yeezy"><option value="New Balance"><option value="Puma"><option value="Converse"><option value="Vans">
+        </datalist>
+      </form>
+      <ul class="navbar-nav ms-auto align-items-center" id="userArea"></ul>
+    </div>
+  </div>
+</nav>
+<script type="module">
+import { auth } from './firebase-config.js';
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+const userArea = document.getElementById('userArea');
+onAuthStateChanged(auth, user => {
+  if (user) {
+    userArea.innerHTML = `
+      <li class="nav-item d-flex align-items-center">
+        <img src="${user.photoURL || 'images/default-profile.png'}" alt="Foto" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;margin-right:8px;">
+        <span class="me-2">${user.displayName || user.email}</span>
+        <button class="btn btn-link nav-link" id="logoutBtn" title="Sair"><i class="fas fa-sign-out-alt"></i></button>
+      </li>
+    `;
+    document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => window.location.href = 'log.html');
+  } else {
+    userArea.innerHTML = `
+      <li class="nav-item">
+        <a class="btn btn-link nav-link" href="log.html"><i class="fas fa-sign-in-alt"></i> Entrar</a>
+      </li>
+    `;
+  }
+});
+</script>
+<!-- Dark mode toggle e loader -->
 <button id="darkModeToggle" title="Alternar modo escuro/claro">🌙</button>
-<!-- Loader universal -->
 <div id="globalLoader" class="loader" style="display:none;"></div>
 <link rel="stylesheet" href="navbar-styles.css" />
 <script>
@@ -191,143 +243,3 @@ window.hideLoader = () => { document.getElementById('globalLoader').style.displa
     width: 80%;
   }
 </style>
-
-<nav class="navbar navbar-expand-lg modern-navbar bg-white shadow-sm">
-  <div class="container-fluid">
-    <a class="navbar-brand fw-bold" href="home.html">ResellSneakers</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link" href="home.html"><i class="fas fa-home"></i> Início</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="produtos.html"><i class="fas fa-box"></i> Produtos</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="favoritos.html"><i class="fas fa-heart"></i> Favoritos</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="vender.html"><i class="fas fa-tag"></i> Vender</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="meus-produtos.html"><i class="fas fa-list"></i> Meus Produtos</a>
-        </li>
-        <li class="nav-item position-relative">
-          <a class="nav-link" href="mensagens.html" id="menuMensagensLink">
-            <i class="fa fa-comments"></i> Mensagens
-            <span id="badgeMensagens" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none;">0</span>
-          </a>
-        </li>
-        <li class="nav-item d-none" id="adminLink">
-          <a class="nav-link" href="admin.html"><i class="fas fa-user-shield"></i> Admin</a>
-        </li>
-        <li class="nav-item d-none" id="dashboardLink">
-          <a class="nav-link" href="dashboard.html"><i class="fas fa-chart-bar"></i> Dashboard</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="faq.html"><i class="fa fa-question-circle"></i> Ajuda</a>
-        </li>
-      </ul>
-      <form class="d-flex me-3" role="search" autocomplete="off">
-        <input class="form-control me-2" list="marcasList" id="inputMarcaNavbar" type="search" placeholder="Marca (Nike, Adidas, ...)" aria-label="Marca">
-        <datalist id="marcasList">
-          <option value="Nike">
-          <option value="Adidas">
-          <option value="Jordan">
-          <option value="Yeezy">
-          <option value="New Balance">
-          <option value="Puma">
-          <option value="Converse">
-          <option value="Vans">
-        </datalist>
-      </form>
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" href="carrinho.html"><i class="fas fa-shopping-cart"></i> Carrinho</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="meu-perfil.html"><i class="fas fa-user"></i> Meu Perfil</a>
-        </li>
-        <li class="nav-item">
-          <button id="logoutBtn" class="btn btn-link nav-link" style="color:inherit;"><i class="fas fa-sign-out-alt"></i> Sair</button>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<script type="module">
-  import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
-  import { auth, db } from './firebase-config.js';
-  import { collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-  
-  const UID_ADMIN = "Up3RIVwJBGQVYWW3kPJCg0I5GIf1";
-  
-  // Marcar link ativo baseado na página atual
-  function setActiveNavLink() {
-    const currentPage = window.location.pathname.split('/').pop() || 'home.html';
-    const navLinks = document.querySelectorAll('.modern-navbar .nav-link');
-    
-    navLinks.forEach(link => {
-      const href = link.getAttribute('href');
-      if (href === currentPage) {
-        link.classList.add('active');
-      } else {
-        link.classList.remove('active');
-      }
-    });
-  }
-
-  // Verificar se é admin e mostrar links correspondentes
-  onAuthStateChanged(auth, user => {
-    if (user && user.uid === UID_ADMIN) {
-      document.getElementById('adminLink').classList.remove('d-none');
-      document.getElementById('dashboardLink').classList.remove('d-none');
-    }
-    
-    // Marcar link ativo
-    setActiveNavLink();
-  });
-
-  // Adicionar funcionalidade de logout
-  document.addEventListener('DOMContentLoaded', function() {
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', async () => {
-        try {
-          await auth.signOut();
-          window.location.href = 'log.html';
-        } catch (error) {
-          console.error('Erro ao fazer logout:', error);
-        }
-      });
-    }
-  });
-
-  const badgeMensagens = document.getElementById('badgeMensagens');
-  onAuthStateChanged(auth, user => {
-    if (!user) return;
-    const q = query(collection(db, 'conversas'), where('participantes', 'array-contains', user.uid));
-    onSnapshot(q, snapshot => {
-      let totalNaoLidas = 0;
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        if (data.naoLidas && data.naoLidas[user.uid] && data.naoLidas[user.uid] > 0) {
-          totalNaoLidas += data.naoLidas[user.uid];
-        }
-      });
-      if (totalNaoLidas > 0) {
-        badgeMensagens.textContent = totalNaoLidas;
-        badgeMensagens.style.display = 'inline-block';
-      } else {
-        badgeMensagens.style.display = 'none';
-      }
-    });
-  });
-</script>
-
-<script src="navbar-script.js"></script>
