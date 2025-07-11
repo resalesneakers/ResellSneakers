@@ -7,31 +7,204 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <style>
-    body { background: #f8f9fa; }
-    .chat-container { max-width: 600px; margin: auto; margin-top: 40px; background: white; border-radius: 12px; box-shadow: 0 0 16px rgba(0,0,0,0.07); padding: 0; }
-    .chat-header { display: flex; align-items: center; gap: 16px; border-bottom: 1px solid #eee; padding: 18px 24px 12px 24px; }
-    .chat-header img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #e9ecef; }
-    .chat-header .user-info { flex: 1; }
-    .chat-header .user-info .name { font-weight: 700; font-size: 1.1rem; }
-    .chat-header .user-info .subtitle { font-size: 0.95rem; color: #888; }
-    .chat-header .btn-back { font-size: 1.2rem; color: #666; background: none; border: none; margin-right: 8px; }
-    .product-mini-card { display: flex; align-items: center; gap: 12px; background: #f8f9fa; border-radius: 8px; padding: 8px 12px; margin: 0 24px 12px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
-    .product-mini-card img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; }
-    .product-mini-card .prod-info { flex: 1; }
-    .product-mini-card .prod-info .prod-name { font-weight: 600; font-size: 1rem; }
-    .product-mini-card .prod-info .prod-price { color: #0d6efd; font-weight: 700; font-size: 1rem; }
-    .message-box { height: 380px; overflow-y: auto; padding: 18px 24px; background: #fff; display: flex; flex-direction: column; }
-    .message-row { display: flex; margin-bottom: 8px; }
-    .message.me { margin-left: auto; background: #0d6efd; color: #fff; border-radius: 18px 18px 4px 18px; padding: 10px 16px; max-width: 70%; box-shadow: 0 1px 4px rgba(13,110,253,0.07); }
-    .message.other { margin-right: auto; background: #e9ecef; color: #333; border-radius: 18px 18px 18px 4px; padding: 10px 16px; max-width: 70%; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
-    .timestamp { font-size: 0.75rem; color: #888; margin-top: 2px; margin-left: 8px; }
-    .chat-input-row { border-top: 1px solid #eee; padding: 14px 24px; background: #fff; display: flex; gap: 8px; }
-    .chat-input-row input { flex: 1; border-radius: 8px; border: 1px solid #e9ecef; padding: 10px 14px; }
-    .chat-input-row button { border-radius: 8px; font-weight: 600; }
+    body { 
+      background: #f8f9fa; 
+      font-family: 'Inter', Arial, sans-serif;
+    }
+    .chat-container { 
+      max-width: 600px; 
+      margin: auto; 
+      margin-top: 40px; 
+      background: white; 
+      border-radius: 12px; 
+      box-shadow: 0 0 16px rgba(0,0,0,0.07); 
+      padding: 0; 
+      height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-header { 
+      display: flex; 
+      align-items: center; 
+      gap: 16px; 
+      border-bottom: 1px solid #eee; 
+      padding: 18px 24px 12px 24px; 
+      background: #fff;
+      border-radius: 12px 12px 0 0;
+    }
+    .chat-header img { 
+      width: 44px; 
+      height: 44px; 
+      border-radius: 50%; 
+      object-fit: cover; 
+      border: 2px solid #e9ecef; 
+    }
+    .chat-header .user-info { 
+      flex: 1; 
+    }
+    .chat-header .user-info .name { 
+      font-weight: 700; 
+      font-size: 1.1rem; 
+      color: #333;
+    }
+    .chat-header .user-info .subtitle { 
+      font-size: 0.95rem; 
+      color: #888; 
+    }
+    .chat-header .btn-back { 
+      font-size: 1.2rem; 
+      color: #666; 
+      background: none; 
+      border: none; 
+      margin-right: 8px; 
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .chat-header .btn-back:hover {
+      color: #333;
+    }
+    .product-mini-card { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      background: #f8f9fa; 
+      border-radius: 8px; 
+      padding: 8px 12px; 
+      margin: 0 24px 12px 24px; 
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03); 
+    }
+    .product-mini-card img { 
+      width: 48px; 
+      height: 48px; 
+      border-radius: 8px; 
+      object-fit: cover; 
+    }
+    .product-mini-card .prod-info { 
+      flex: 1; 
+    }
+    .product-mini-card .prod-info .prod-name { 
+      font-weight: 600; 
+      font-size: 1rem; 
+      color: #333;
+    }
+    .product-mini-card .prod-info .prod-price { 
+      color: #0d6efd; 
+      font-weight: 700; 
+      font-size: 1rem; 
+    }
+    .message-box { 
+      flex: 1;
+      overflow-y: auto; 
+      padding: 18px 24px; 
+      background: #fff; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px;
+    }
+    .message-row { 
+      display: flex; 
+      margin-bottom: 8px; 
+      align-items: flex-end;
+    }
+    .message.me { 
+      margin-left: auto; 
+      background: #0d6efd; 
+      color: #fff; 
+      border-radius: 18px 18px 4px 18px; 
+      padding: 10px 16px; 
+      max-width: 70%; 
+      box-shadow: 0 1px 4px rgba(13,110,253,0.07); 
+      word-wrap: break-word;
+    }
+    .message.other { 
+      margin-right: auto; 
+      background: #e9ecef; 
+      color: #333; 
+      border-radius: 18px 18px 18px 4px; 
+      padding: 10px 16px; 
+      max-width: 70%; 
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03); 
+      word-wrap: break-word;
+    }
+    .timestamp { 
+      font-size: 0.75rem; 
+      color: #888; 
+      margin-top: 2px; 
+      margin-left: 8px; 
+      white-space: nowrap;
+    }
+    .chat-input-row { 
+      border-top: 1px solid #eee; 
+      padding: 14px 24px; 
+      background: #fff; 
+      display: flex; 
+      gap: 8px; 
+      border-radius: 0 0 12px 12px;
+    }
+    .chat-input-row input { 
+      flex: 1; 
+      border-radius: 8px; 
+      border: 1px solid #e9ecef; 
+      padding: 10px 14px; 
+      font-size: 1rem;
+    }
+    .chat-input-row input:focus {
+      outline: none;
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 2px rgba(13,110,253,0.1);
+    }
+    .chat-input-row button { 
+      border-radius: 8px; 
+      font-weight: 600; 
+      padding: 10px 20px;
+      border: none;
+      background: #0d6efd;
+      color: white;
+      transition: background-color 0.2s;
+    }
+    .chat-input-row button:hover {
+      background: #0b5ed7;
+    }
+    .chat-input-row button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    .empty-state {
+      text-align: center;
+      color: #aaa;
+      padding: 2rem 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #ddd;
+    }
     @media (max-width: 700px) {
-      .chat-container { max-width: 100vw; margin: 0; border-radius: 0; box-shadow: none; }
-      .chat-header, .product-mini-card, .message-box, .chat-input-row { padding-left: 8px; padding-right: 8px; }
-      .product-mini-card { margin: 0 8px 10px 8px; }
+      .chat-container { 
+        max-width: 100vw; 
+        margin: 0; 
+        border-radius: 0; 
+        box-shadow: none; 
+        height: 100vh;
+      }
+      .chat-header, .product-mini-card, .message-box, .chat-input-row { 
+        padding-left: 8px; 
+        padding-right: 8px; 
+      }
+      .product-mini-card { 
+        margin: 0 8px 10px 8px; 
+      }
+      .chat-header {
+        border-radius: 0;
+      }
+      .chat-input-row {
+        border-radius: 0;
+      }
     }
   </style>
 </head>
@@ -39,7 +212,9 @@
   <div id="menu-container"></div>
   <div class="chat-container">
     <div class="chat-header">
-      <button class="btn-back" onclick="window.history.back()"><i class="bi bi-arrow-left"></i></button>
+      <button class="btn-back" onclick="window.history.back()">
+        <i class="bi bi-arrow-left"></i>
+      </button>
       <img id="userPhoto" src="images/default-profile.png" alt="Foto do usuário">
       <div class="user-info">
         <div class="name" id="userName">Usuário</div>
@@ -47,13 +222,22 @@
       </div>
       <a id="userProfileLink" href="#" class="btn btn-outline-secondary btn-sm">Ver Perfil</a>
     </div>
+    
     <div class="product-mini-card" id="productMiniCard" style="display:none;"></div>
-    <div id="messages" class="message-box"></div>
+    
+    <div id="messages" class="message-box">
+      <div class="empty-state">
+        <i class="bi bi-chat-dots"></i>
+        <h5>Carregando conversa...</h5>
+      </div>
+    </div>
+    
     <form class="chat-input-row" id="formMensagem">
       <input type="text" id="messageInput" placeholder="Digite sua mensagem..." autocomplete="off" />
       <button id="sendBtn" class="btn btn-primary" type="submit">Enviar</button>
     </form>
   </div>
+  
   <script type="module" src="chat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

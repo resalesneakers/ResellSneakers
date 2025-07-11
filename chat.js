@@ -12,7 +12,8 @@ import {
   serverTimestamp,
   updateDoc,
   where,
-  getDocs
+  getDocs,
+  increment
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 // Variáveis globais
@@ -22,6 +23,7 @@ let chatId = null;
 let productId = null;
 let unsubscribeMessages = null;
 let unsubscribeUser = null;
+let unsubscribeConversation = null;
 
 // Elementos DOM
 const messagesContainer = document.getElementById('messages');
@@ -223,6 +225,15 @@ function initializeChatListeners() {
       }
     }
   });
+
+  // Listener para atualizações da conversa
+  const conversationRef = doc(db, 'conversas', chatId);
+  unsubscribeConversation = onSnapshot(conversationRef, (doc) => {
+    if (doc.exists()) {
+      const data = doc.data();
+      // Atualizar contadores de não lidas se necessário
+    }
+  });
 }
 
 // Criar elemento de mensagem
@@ -341,18 +352,11 @@ function showError(message) {
   `;
 }
 
-// Função para incremento (Firestore)
-function increment(value) {
-  return {
-    __type: 'increment',
-    value: value
-  };
-}
-
 // Cleanup ao sair da página
 window.addEventListener('beforeunload', () => {
   if (unsubscribeMessages) unsubscribeMessages();
   if (unsubscribeUser) unsubscribeUser();
+  if (unsubscribeConversation) unsubscribeConversation();
 });
 
 // Inicializar quando o DOM estiver pronto

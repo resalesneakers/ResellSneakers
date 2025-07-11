@@ -236,6 +236,11 @@
               </div>
             `;
             document.getElementById('btnChatVendedor').onclick = () => {
+              if (!user) {
+                alert('Faça login para conversar com o vendedor.');
+                window.location.href = 'log.html';
+                return;
+              }
               if (productId && product.vendedorId) {
                 window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
               } else {
@@ -243,6 +248,11 @@
               }
             };
             document.getElementById('btnChatVendedor2').onclick = () => {
+              if (!user) {
+                alert('Faça login para conversar com o vendedor.');
+                window.location.href = 'log.html';
+                return;
+              }
               if (productId && product.vendedorId) {
                 window.location.href = `chat.html?produto=${productId}&vendedor=${product.vendedorId}`;
               } else {

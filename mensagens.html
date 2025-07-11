@@ -6,12 +6,59 @@
   <link rel="stylesheet" href="navbar-styles.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <style>
-    body { background: #f8f9fa; }
-    .container { max-width: 1100px; margin: 0 auto; padding: 32px 16px; }
-    .messages-header { text-align: center; margin-bottom: 32px; }
-    .messages-list { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 18px; margin-bottom: 24px; min-height: 400px; }
-    .chat-area { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 18px; min-height: 300px; }
-    .empty-state { text-align: center; color: #aaa; padding: 3rem 0; }
+    body { 
+      background: #f8f9fa; 
+      font-family: 'Inter', Arial, sans-serif;
+    }
+    .container { 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 32px 16px; 
+    }
+    .messages-header { 
+      text-align: center; 
+      margin-bottom: 32px; 
+    }
+    .messages-header h1 {
+      color: #333;
+      font-weight: 700;
+    }
+    .messages-list { 
+      background: #fff; 
+      border-radius: 12px; 
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); 
+      padding: 18px; 
+      margin-bottom: 24px; 
+      min-height: 400px; 
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .chat-area { 
+      background: #fff; 
+      border-radius: 12px; 
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); 
+      padding: 18px; 
+      min-height: 300px; 
+      max-height: 500px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .empty-state { 
+      text-align: center; 
+      color: #aaa; 
+      padding: 3rem 0; 
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #ddd;
+    }
     .conv-item {
       display: flex;
       align-items: center;
@@ -21,9 +68,11 @@
       transition: background 0.15s;
       cursor: pointer;
       margin-bottom: 8px;
+      border: 1px solid transparent;
     }
     .conv-item:hover, .conv-item.active {
       background: #f0f4ff;
+      border-color: #e0e7ff;
     }
     .conv-item img {
       width: 48px;
@@ -42,6 +91,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: #333;
     }
     .conv-item .conv-info .conv-msg {
       font-size: 0.97em;
@@ -55,6 +105,118 @@
       font-size: 0.85em;
       color: #bbb;
       margin-top: 2px;
+    }
+    .online-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 7px;
+      vertical-align: middle;
+      border: 1.5px solid #fff;
+      box-shadow: 0 0 0 1.5px #e9ecef;
+    }
+    .online-indicator.online {
+      background: #22c55e;
+    }
+    .online-indicator.offline {
+      background: #bbb;
+    }
+    .unread-badge {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.85em;
+      font-weight: 700;
+      border-radius: 50%;
+      margin-left: 6px;
+      vertical-align: middle;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .message-bubble {
+      padding: 8px 14px;
+      border-radius: 12px;
+      max-width: 70%;
+      margin-bottom: 8px;
+      word-wrap: break-word;
+    }
+    .message-bubble.my-message {
+      align-self: flex-end;
+      background: #e0e7ff;
+      color: #333;
+    }
+    .message-bubble.other-message {
+      align-self: flex-start;
+      background: #f1f5f9;
+      color: #333;
+    }
+    .message-time {
+      font-size: 0.8em;
+      color: #888;
+      text-align: right;
+      margin-top: 2px;
+    }
+    .product-mini-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    }
+    .product-mini-card img {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .product-mini-card .prod-info {
+      flex: 1;
+    }
+    .product-mini-card .prod-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #333;
+    }
+    .product-mini-card .prod-price {
+      color: #0d6efd;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .send-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .send-form input {
+      flex: 1;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+      padding: 10px 14px;
+      font-size: 1rem;
+    }
+    .send-form input:focus {
+      outline: none;
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 2px rgba(13,110,253,0.1);
+    }
+    .send-form button {
+      border-radius: 8px;
+      font-weight: 600;
+      padding: 10px 16px;
+      border: none;
+      background: #0d6efd;
+      color: white;
+      transition: background-color 0.2s;
+    }
+    .send-form button:hover {
+      background: #0b5ed7;
     }
     @media (max-width: 900px) {
       .container { padding: 12px 2px; }
@@ -73,13 +235,23 @@
     </div>
     <div class="row g-4">
       <div class="col-12 col-md-4">
-        <div class="messages-list" id="messages-list"></div>
+        <div class="messages-list" id="messages-list">
+          <div class="empty-state">
+            <i class="fa fa-spinner fa-spin"></i>
+            <h5>A carregar...</h5>
+          </div>
+        </div>
       </div>
       <div class="col-12 col-md-8">
-        <div class="chat-area" id="chat-area"><div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Selecione uma conversa para ver as mensagens.</h5></div></div>
-        <form id="sendMsgForm" class="d-none mt-3" style="display:flex;gap:8px;">
-          <input type="text" id="msgInput" class="form-control" placeholder="Digite sua mensagem..." autocomplete="off" />
-          <button type="submit" class="btn btn-primary"><i class="fa fa-paper-plane"></i></button>
+        <div class="chat-area" id="chat-area">
+          <div class='empty-state'>
+            <i class='fa fa-comments'></i>
+            <h5>Selecione uma conversa para ver as mensagens.</h5>
+          </div>
+        </div>
+        <form id="sendMsgForm" class="send-form d-none">
+          <input type="text" id="msgInput" placeholder="Digite sua mensagem..." autocomplete="off" />
+          <button type="submit"><i class="fa fa-paper-plane"></i></button>
         </form>
       </div>
     </div>
@@ -87,31 +259,40 @@
   <script type="module">
     import { auth, db } from './firebase-config.js';
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { collection, query, where, onSnapshot, doc, getDoc, addDoc, orderBy, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { collection, query, where, onSnapshot, doc, getDoc, addDoc, orderBy, serverTimestamp, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    
     const messagesList = document.getElementById('messages-list');
     const chatArea = document.getElementById('chat-area');
     const sendMsgForm = document.getElementById('sendMsgForm');
     const msgInput = document.getElementById('msgInput');
+    
     let currentConvId = null;
     let user = null;
     let convs = [];
     let unsubscribeMsgs = null;
+    let unsubscribeConvs = null;
+    
     onAuthStateChanged(auth, u => {
       if (!u) return (window.location.href = "log.html");
       user = u;
       carregarConversas();
     });
+    
     function carregarConversas() {
-      messagesList.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin fa-2x mb-2"></i><h5>A carregar...</h5></div>`;
-      onSnapshot(query(collection(db, "conversas"), where("participantes", "array-contains", user.uid)), async (convsSnap) => {
+      messagesList.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin"></i><h5>A carregar...</h5></div>`;
+      
+      const convsQuery = query(collection(db, "conversas"), where("participantes", "array-contains", user.uid));
+      unsubscribeConvs = onSnapshot(convsQuery, async (convsSnap) => {
         if (convsSnap.empty) {
-          messagesList.innerHTML = "<div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Sem conversas ainda.</h5></div>";
-          chatArea.innerHTML = "<div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Selecione uma conversa para ver as mensagens.</h5></div>";
+          messagesList.innerHTML = "<div class='empty-state'><i class='fa fa-comments'></i><h5>Sem conversas ainda.</h5></div>";
+          chatArea.innerHTML = "<div class='empty-state'><i class='fa fa-comments'></i><h5>Selecione uma conversa para ver as mensagens.</h5></div>";
           sendMsgForm.classList.add('d-none');
           return;
         }
+        
         convs = convsSnap.docs.map(docSnap => ({id: docSnap.id, ...docSnap.data()}));
         convs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+        
         let html = '';
         for (const conv of convs) {
           const otherId = conv.participantes.find(id => id !== user.uid);
@@ -119,109 +300,177 @@
           let foto = 'images/default-profile.png';
           let online = false;
           let numNaoLidas = conv.naoLidas && conv.naoLidas[user.uid] ? conv.naoLidas[user.uid] : 0;
+          
           if (otherId) {
-            const userRef = doc(db, 'users', otherId);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists()) {
-              const u = userSnap.data();
-              nome = u.nome || 'Outro utilizador';
-              foto = u.foto || 'images/default-profile.png';
-              if (u.lastOnline && u.lastOnline.toDate) {
-                const diff = Date.now() - u.lastOnline.toDate().getTime();
-                online = diff < 2 * 60 * 1000;
+            try {
+              const userRef = doc(db, 'users', otherId);
+              const userSnap = await getDoc(userRef);
+              if (userSnap.exists()) {
+                const u = userSnap.data();
+                nome = u.nome || 'Outro utilizador';
+                foto = u.foto || 'images/default-profile.png';
+                if (u.lastOnline && u.lastOnline.toDate) {
+                  const diff = Date.now() - u.lastOnline.toDate().getTime();
+                  online = diff < 2 * 60 * 1000;
+                }
               }
+            } catch (error) {
+              console.error('Erro ao carregar dados do usuário:', error);
             }
           }
-          let hora = conv.timestamp?.toDate ? new Date(conv.timestamp.toDate()).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '';
+          
+          let hora = '';
+          if (conv.timestamp?.toDate) {
+            hora = new Date(conv.timestamp.toDate()).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+          }
+          
+          const onlineClass = online ? 'online' : 'offline';
+          const unreadBadge = numNaoLidas > 0 ? `<span class="unread-badge">${numNaoLidas}</span>` : '';
+          
           html += `<div class='conv-item' data-id='${conv.id}'>
-            <span style='display:inline-block;width:12px;height:12px;border-radius:50%;background:${online ? '#22c55e' : '#bbb'};margin-right:7px;vertical-align:middle;border:1.5px solid #fff;box-shadow:0 0 0 1.5px #e9ecef;'></span>
+            <span class='online-indicator ${onlineClass}'></span>
             <img src='${foto}' alt='Foto'>
             <div class='conv-info'>
-              <div class='conv-nome'>${nome} ${numNaoLidas > 0 ? `<span style='display:inline-block;width:18px;height:18px;background:#ef4444;color:#fff;font-size:0.85em;font-weight:700;border-radius:50%;margin-left:6px;vertical-align:middle;display:flex;align-items:center;justify-content:center;'>${numNaoLidas}</span>` : ''}</div>
+              <div class='conv-nome'>${nome} ${unreadBadge}</div>
               <div class='conv-msg'>${conv.ultimaMensagem || 'Sem mensagens ainda.'}</div>
               <div class='conv-hora'>${hora}</div>
             </div>
           </div>`;
         }
+        
         messagesList.innerHTML = html;
+        
         document.querySelectorAll('.conv-item').forEach(item => {
           item.onclick = () => abrirConversa(item.getAttribute('data-id'));
         });
       });
     }
+    
     async function abrirConversa(convId) {
       currentConvId = convId;
-      chatArea.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin fa-2x mb-2"></i><h5>Carregando mensagens...</h5></div>`;
+      
+      // Remover classe active de todas as conversas
+      document.querySelectorAll('.conv-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // Adicionar classe active à conversa selecionada
+      document.querySelector(`[data-id="${convId}"]`).classList.add('active');
+      
+      chatArea.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin"></i><h5>Carregando mensagens...</h5></div>`;
       sendMsgForm.classList.remove('d-none');
       msgInput.value = '';
+      
       // Mini-card do produto (se for conversa de produto)
       const conv = convs.find(c => c.id === convId);
       let miniCardHtml = '';
+      
       if (conv && conv.produtoId) {
-        const produtoId = conv.produtoId;
-        const prodSnap = await getDoc(doc(db, 'produtos', produtoId));
-        if (prodSnap.exists()) {
-          const p = prodSnap.data();
-          let img = p.imagemPrincipal || (p.imagens && p.imagens[0]) || 'images/banner1.png';
-          miniCardHtml = `<div style='display:flex;align-items:center;gap:12px;background:#f8f9fa;border-radius:8px;padding:8px 12px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.03);'>
-            <img src='${img}' alt='Produto' style='width:48px;height:48px;border-radius:8px;object-fit:cover;'>
-            <div style='flex:1;'>
-              <div style='font-weight:600;font-size:1rem;'>${p.nome}</div>
-              <div style='color:#0d6efd;font-weight:700;font-size:1rem;'>€${p.preco || '--'}</div>
-            </div>
-            <a href='produto-detalhe.html?id=${produtoId}' class='btn btn-link p-0'>Ver Produto</a>
-          </div>`;
+        try {
+          const produtoId = conv.produtoId;
+          const prodSnap = await getDoc(doc(db, 'produtos', produtoId));
+          if (prodSnap.exists()) {
+            const p = prodSnap.data();
+            let img = p.imagemPrincipal || (p.imagens && p.imagens[0]) || 'images/banner1.png';
+            miniCardHtml = `<div class="product-mini-card">
+              <img src='${img}' alt='Produto'>
+              <div class='prod-info'>
+                <div class='prod-name'>${p.nome}</div>
+                <div class='prod-price'>€${p.preco || '--'}</div>
+              </div>
+              <a href='produto-detalhe.html?id=${produtoId}' class='btn btn-link p-0'>Ver Produto</a>
+            </div>`;
+          }
+        } catch (error) {
+          console.error('Erro ao carregar produto:', error);
         }
       }
+      
       // Marcar mensagens como lidas
-      await updateDoc(doc(db, "conversas", convId), {
-        [`naoLidas.${user.uid}`]: 0
-      });
+      try {
+        await updateDoc(doc(db, "conversas", convId), {
+          [`naoLidas.${user.uid}`]: 0
+        });
+      } catch (error) {
+        console.error('Erro ao marcar mensagens como lidas:', error);
+      }
+      
       // Exibir mensagens em tempo real
       if (unsubscribeMsgs) unsubscribeMsgs();
+      
       const msgsRef = collection(db, "conversas", convId, "mensagens");
       const msgsQuery = query(msgsRef, orderBy("timestamp"));
+      
       unsubscribeMsgs = onSnapshot(msgsQuery, (msgsSnap) => {
         if (msgsSnap.empty) {
-          chatArea.innerHTML = miniCardHtml + "<div class='empty-state'><i class='fa fa-comments fa-2x mb-2'></i><h5>Sem mensagens ainda.</h5></div>";
+          chatArea.innerHTML = miniCardHtml + "<div class='empty-state'><i class='fa fa-comments'></i><h5>Sem mensagens ainda.</h5></div>";
           return;
         }
-        let html = miniCardHtml + '<div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">';
+        
+        let html = miniCardHtml + '<div style="display:flex;flex-direction:column;gap:10px;flex:1;">';
+        
         msgsSnap.forEach(docSnap => {
           const m = docSnap.data();
           const isMe = m.from === user.uid;
-          html += `<div style='align-self:${isMe ? 'flex-end' : 'flex-start'};background:${isMe ? '#e0e7ff' : '#f1f5f9'};padding:8px 14px;border-radius:12px;max-width:70%;'>
-            <div style='font-size:0.98em;'>${m.text}</div>
-            <div style='font-size:0.8em;color:#888;text-align:right;'>${m.timestamp?.toDate ? new Date(m.timestamp.toDate()).toLocaleString('pt-PT') : ''}</div>
+          const messageClass = isMe ? 'my-message' : 'other-message';
+          
+          let timeStr = '';
+          if (m.timestamp?.toDate) {
+            timeStr = new Date(m.timestamp.toDate()).toLocaleTimeString('pt-PT', { 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            });
+          }
+          
+          html += `<div class='message-bubble ${messageClass}'>
+            <div>${m.text}</div>
+            <div class='message-time'>${timeStr}</div>
           </div>`;
         });
+        
         html += '</div>';
         chatArea.innerHTML = html;
         chatArea.scrollTop = chatArea.scrollHeight;
       });
     }
+    
     sendMsgForm.onsubmit = async (e) => {
       e.preventDefault();
       if (!currentConvId || !msgInput.value.trim()) return;
+      
       const conv = convs.find(c => c.id === currentConvId);
       const otherId = conv.participantes.find(id => id !== user.uid);
-      const msgsRef = collection(db, "conversas", currentConvId, "mensagens");
-      await addDoc(msgsRef, {
-        text: msgInput.value,
-        from: user.uid,
-        to: otherId,
-        produtoId: conv.produtoId || null,
-        timestamp: serverTimestamp(),
-        lida: false
-      });
-      // Atualizar última mensagem e contador de não lidas
-      await updateDoc(doc(db, "conversas", currentConvId), {
-        ultimaMensagem: msgInput.value,
-        timestamp: serverTimestamp(),
-        [`naoLidas.${otherId}`]: (conv.naoLidas && conv.naoLidas[otherId] ? conv.naoLidas[otherId] : 0) + 1
-      });
-      msgInput.value = '';
+      
+      try {
+        const msgsRef = collection(db, "conversas", currentConvId, "mensagens");
+        await addDoc(msgsRef, {
+          text: msgInput.value,
+          from: user.uid,
+          to: otherId,
+          produtoId: conv.produtoId || null,
+          timestamp: serverTimestamp(),
+          lida: false
+        });
+        
+        // Atualizar última mensagem e contador de não lidas
+        await updateDoc(doc(db, "conversas", currentConvId), {
+          ultimaMensagem: msgInput.value,
+          timestamp: serverTimestamp(),
+          [`naoLidas.${otherId}`]: increment(1)
+        });
+        
+        msgInput.value = '';
+      } catch (error) {
+        console.error('Erro ao enviar mensagem:', error);
+        alert('Erro ao enviar mensagem. Tente novamente.');
+      }
     };
+    
+    // Cleanup ao sair da página
+    window.addEventListener('beforeunload', () => {
+      if (unsubscribeMsgs) unsubscribeMsgs();
+      if (unsubscribeConvs) unsubscribeConvs();
+    });
   </script>
 </body>
 </html>
