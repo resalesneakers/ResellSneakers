@@ -110,12 +110,14 @@
       }
       // Garantir que o documento da conversa existe e tem o campo participantes
       const conversaRef = doc(db, 'conversas', chatId);
-      const conversaSnap = await getDoc(conversaRef);
+      let conversaSnap = await getDoc(conversaRef);
       if (!conversaSnap.exists()) {
         await setDoc(conversaRef, {
           participantes: [currentUser.uid, otherUserId],
           criadoEm: serverTimestamp()
         });
+        // Buscar novamente após criar
+        conversaSnap = await getDoc(conversaRef);
       } else {
         // Se já existe, mas não tem participantes, atualiza
         const data = conversaSnap.data();
