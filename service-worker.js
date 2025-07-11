@@ -4,8 +4,23 @@
 
 const CACHE_NAME = 'resellsneakers-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
+  '/resellsneakers/index.html',
+  '/resellsneakers/home.html',
+  '/resellsneakers/produtos.html',
+  '/resellsneakers/produto-detalhe.html',
+  '/resellsneakers/carrinho.html',
+  '/resellsneakers/meu-perfil.html',
+  '/resellsneakers/favoritos.html',
+  '/resellsneakers/faq.html',
+  '/resellsneakers/navbar-styles.css',
+  '/resellsneakers/script.js',
+  '/resellsneakers/home.js',
+  '/resellsneakers/produtos.js',
+  '/resellsneakers/carrinho.js',
+  '/resellsneakers/images/banner1.png',
+  '/resellsneakers/images/banner2.png',
+  '/resellsneakers/images/banner3.png',
+  '/resellsneakers/images/default-profile.png',
   // Adicione outros arquivos essenciais aqui
 ];
 
