@@ -1,6 +1,6 @@
-import { auth, db } from "./firebase-config.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { 
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { auth } from "./firebase-config.js";
+import {
   collection, 
   doc, 
   addDoc, 
@@ -14,7 +14,7 @@ import {
   where,
   getDocs,
   increment
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // Variáveis globais
 let currentUser = null;
@@ -149,11 +149,16 @@ async function createOrGetConversation() {
         }
       });
     } else {
-      // Atualizar conversa antiga para garantir campo participantes correto
+      // Verificar permissão
       const data = conversationSnap.data();
+      if (!data.participantes || !data.participantes.includes(currentUser.uid)) {
+        showError('Você não tem permissão para acessar esta conversa.');
+        return;
+      }
+      // Atualizar conversa antiga para garantir campo participantes correto
       let updateObj = {};
       let precisaAtualizar = false;
-      if (!data.participantes || !Array.isArray(data.participantes) || data.participantes.length !== 2 || !data.participantes.includes(currentUser.uid) || !data.participantes.includes(otherUserId)) {
+      if (!Array.isArray(data.participantes) || data.participantes.length !== 2 || !data.participantes.includes(currentUser.uid) || !data.participantes.includes(otherUserId)) {
         updateObj.participantes = participantesArr;
         precisaAtualizar = true;
       }
@@ -181,16 +186,17 @@ async function loadProductMiniCard() {
     if (productDoc.exists()) {
       const product = productDoc.data();
       const image = product.imagemPrincipal || (product.imagens && product.imagens[0]) || 'images/banner1.png';
-      
       productMiniCard.innerHTML = `
-        <img src="${image}" alt="${product.nome}" style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover;">
-        <div class="prod-info">
-          <div class="prod-name">${product.nome}</div>
-          <div class="prod-price">€${product.preco || '--'}</div>
+        <div style="display:flex;align-items:center;gap:1rem;background:var(--card);padding:0.5rem 1rem;border-radius:12px;box-shadow:var(--shadow);margin-bottom:1rem;">
+          <img src="${image}" alt="${product.nome}" style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <div class="prod-info">
+            <div class="prod-name fw-bold">${product.nome}</div>
+            <div class="prod-price text-danger">€${product.preco || '--'}</div>
+          </div>
+          <a href="produto-detalhe.html?id=${productId}" class="btn btn-outline-primary btn-sm ms-auto">Ver Produto</a>
         </div>
-        <a href="produto-detalhe.html?id=${productId}" class="btn btn-link p-0">Ver Produto</a>
       `;
-      productMiniCard.style.display = 'flex';
+      productMiniCard.style.display = 'block';
     }
   } catch (error) {
     console.error('Erro ao carregar produto:', error);
@@ -199,12 +205,15 @@ async function loadProductMiniCard() {
 
 // Inicializar listeners do chat
 function initializeChatListeners() {
+  const loader = document.getElementById('globalLoader');
+  if (loader) loader.style.display = 'block';
   // Listener para mensagens em tempo real
   const messagesRef = collection(db, 'conversas', chatId, 'mensagens');
   const messagesQuery = query(messagesRef, orderBy('timestamp', 'asc'));
   
   unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
     messagesContainer.innerHTML = '';
+    if (loader) loader.style.display = 'none';
     
     snapshot.forEach((doc) => {
       const message = doc.data();
@@ -273,7 +282,7 @@ function createMessageElement(message) {
 
 // Enviar mensagem
 async function handleSendMessage(e) {
-  e.preventDefault();
+      e.preventDefault();
   
   const text = messageInput.value.trim();
   if (!text) return;
@@ -323,7 +332,7 @@ async function markMessagesAsRead() {
     await updateDoc(conversationRef, {
       [`naoLidas.${currentUser.uid}`]: 0
     });
-    
+
     // Marcar mensagens como lidas
     const messagesRef = collection(db, 'conversas', chatId, 'mensagens');
     const unreadQuery = query(
@@ -331,14 +340,14 @@ async function markMessagesAsRead() {
       where('to', '==', currentUser.uid),
       where('lida', '==', false)
     );
-    
+
     const unreadSnap = await getDocs(unreadQuery);
     const updatePromises = unreadSnap.docs.map(doc => 
       updateDoc(doc.ref, { lida: true })
     );
-    
+
     await Promise.all(updatePromises);
-    
+
   } catch (error) {
     console.error('Erro ao marcar mensagens como lidas:', error);
   }
@@ -369,3 +378,9 @@ window.addEventListener('beforeunload', () => {
 
 // Inicializar quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', initializeChat);
+
+// Badge de não lidas (exemplo visual, pode ser usado em lista de conversas)
+function renderNaoLidasBadge(qtd) {
+  if (!qtd || qtd <= 0) return '';
+  return `<span class="badge bg-danger ms-2">${qtd}</span>`;
+}

@@ -48,10 +48,9 @@
     </div>
   </div>
   <script type="module">
-    import { db, storage, auth } from './firebase-config.js';
-    import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     const urlParams = new URLSearchParams(window.location.search);
     const userId = urlParams.get('id');
     const profileHeader = document.getElementById('profileHeader');
@@ -108,7 +107,7 @@
             <div class="stat"><div class="value">${rating}</div><div class="label">Classificação</div></div>
           </div>
           <div class="profile-actions">
-            ${!isMe && uid ? `<a href="chat.html?vendedor=${uid}" class="btn btn-primary"><i class="fa fa-comments"></i> Enviar mensagem</a>` : (!isMe ? `<button class="btn btn-secondary" disabled>Vendedor não encontrado</button>` : '')}
+            ${!isMe && uid ? `<a href="chat.html?user=${uid}" class="btn btn-sm btn-primary chat-link">Conversar</a>` : (!isMe ? `<button class="btn btn-secondary" disabled>Vendedor não encontrado</button>` : '')}
           </div>
         </div>
       `;
@@ -138,6 +137,27 @@
       }
       productsList.innerHTML = html;
     }
+  </script>
+  <!-- Adicionar botão de dark mode -->
+  <button id="darkModeToggle" title="Alternar modo escuro/claro">🌙</button>
+  <!-- Loader universal -->
+  <div id="globalLoader" class="loader" style="display:none;"></div>
+  <script>
+    // Dark mode toggle
+    const toggle = document.getElementById('darkModeToggle');
+    if (toggle) {
+      toggle.onclick = () => {
+        const theme = document.documentElement.getAttribute('data-theme');
+        document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
+        localStorage.setItem('theme', document.documentElement.getAttribute('data-theme'));
+      };
+      // Carregar preferência
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    }
+    // Loader global
+    window.showLoader = () => { document.getElementById('globalLoader').style.display = 'block'; };
+    window.hideLoader = () => { document.getElementById('globalLoader').style.display = 'none'; };
   </script>
 </body>
 </html> 

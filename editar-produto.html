@@ -465,11 +465,13 @@
   </div>
 </div>
 
-<!-- Firebase & Bootstrap -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<!-- Firebase v10.8.1 -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+  import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -482,10 +484,10 @@
     appId: "1:698715655625:web:fde7f7a7f2da0037792c18"
   };
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  const storage = firebase.storage();
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
 
   const params = new URLSearchParams(window.location.search);
   const produtoId = params.get("id");
@@ -529,13 +531,10 @@
     if (produtoAtual.imagemPrincipal) {
       // Se for um caminho do Storage, buscar o downloadURL
       if (!produtoAtual.imagemPrincipal.startsWith('http')) {
-        storage.ref(produtoAtual.imagemPrincipal).getDownloadURL().then(url => {
-          previewImagem.src = url;
-          previewImagem.style.display = "block";
-          imagemAnterior = produtoAtual.imagemPrincipal;
-        }).catch(() => {
-          previewImagem.style.display = "none";
-        });
+        const url = await storage.ref(produtoAtual.imagemPrincipal).getDownloadURL();
+        previewImagem.src = url;
+        previewImagem.style.display = "block";
+        imagemAnterior = produtoAtual.imagemPrincipal;
       } else {
         // Suporte legado: se for URL completo
         previewImagem.src = produtoAtual.imagemPrincipal;
@@ -654,6 +653,28 @@
   fetch('menu.html').then(res => res.text()).then(html => {
     document.getElementById('menu-container').innerHTML = html;
   });
+</script>
+<!-- Adicionar botão de dark mode -->
+<button id="darkModeToggle" title="Alternar modo escuro/claro">🌙</button>
+<!-- Loader universal -->
+<div id="globalLoader" class="loader" style="display:none;"></div>
+<link rel="stylesheet" href="navbar-styles.css" />
+<script>
+// Dark mode toggle
+const toggle = document.getElementById('darkModeToggle');
+if (toggle) {
+  toggle.onclick = () => {
+    const theme = document.documentElement.getAttribute('data-theme');
+    document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
+    localStorage.setItem('theme', document.documentElement.getAttribute('data-theme'));
+  };
+  // Carregar preferência
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+}
+// Loader global
+window.showLoader = () => { document.getElementById('globalLoader').style.display = 'block'; };
+window.hideLoader = () => { document.getElementById('globalLoader').style.display = 'none'; };
 </script>
 </body>
 </html>

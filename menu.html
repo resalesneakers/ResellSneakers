@@ -1,4 +1,26 @@
-<link rel="stylesheet" href="navbar-styles.css">
+<!-- Adicionar botão de dark mode -->
+<button id="darkModeToggle" title="Alternar modo escuro/claro">🌙</button>
+<!-- Loader universal -->
+<div id="globalLoader" class="loader" style="display:none;"></div>
+<link rel="stylesheet" href="navbar-styles.css" />
+<script>
+// Dark mode toggle
+const toggle = document.getElementById('darkModeToggle');
+if (toggle) {
+  toggle.onclick = () => {
+    const theme = document.documentElement.getAttribute('data-theme');
+    document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
+    localStorage.setItem('theme', document.documentElement.getAttribute('data-theme'));
+  };
+  // Carregar preferência
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+}
+// Loader global
+window.showLoader = () => { document.getElementById('globalLoader').style.display = 'block'; };
+window.hideLoader = () => { document.getElementById('globalLoader').style.display = 'none'; };
+</script>
+
 <style>
   /* Estilos unificados para a navbar em todas as páginas */
   .modern-navbar {
@@ -194,8 +216,11 @@
         <li class="nav-item">
           <a class="nav-link" href="meus-produtos.html"><i class="fas fa-list"></i> Meus Produtos</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="mensagens.html"><i class="fas fa-comments"></i> Mensagens</a>
+        <li class="nav-item position-relative">
+          <a class="nav-link" href="mensagens.html" id="menuMensagensLink">
+            <i class="fa fa-comments"></i> Mensagens
+            <span id="badgeMensagens" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none;">0</span>
+          </a>
         </li>
         <li class="nav-item d-none" id="adminLink">
           <a class="nav-link" href="admin.html"><i class="fas fa-user-shield"></i> Admin</a>
@@ -236,8 +261,9 @@
 </nav>
 
 <script type="module">
-  import { auth } from './firebase-config.js';
-  import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+  import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
+  import { auth, db } from './firebase-config.js';
+  import { collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
   
   const UID_ADMIN = "Up3RIVwJBGQVYWW3kPJCg0I5GIf1";
   
@@ -280,6 +306,27 @@
         }
       });
     }
+  });
+
+  const badgeMensagens = document.getElementById('badgeMensagens');
+  onAuthStateChanged(auth, user => {
+    if (!user) return;
+    const q = query(collection(db, 'conversas'), where('participantes', 'array-contains', user.uid));
+    onSnapshot(q, snapshot => {
+      let totalNaoLidas = 0;
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.naoLidas && data.naoLidas[user.uid] && data.naoLidas[user.uid] > 0) {
+          totalNaoLidas += data.naoLidas[user.uid];
+        }
+      });
+      if (totalNaoLidas > 0) {
+        badgeMensagens.textContent = totalNaoLidas;
+        badgeMensagens.style.display = 'inline-block';
+      } else {
+        badgeMensagens.style.display = 'none';
+      }
+    });
   });
 </script>
 

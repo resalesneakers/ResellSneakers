@@ -430,9 +430,8 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { collection, query, where, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { collection, query, where, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     // Carregar menu universal
     // fetch('menu.html').then(res => res.text()).then(html => {
@@ -509,6 +508,7 @@
             <div class='product-meta'>${produto.marca || ''} | ${produto.condicao || ''}</div>
             <div class='product-actions'>
               <a href='produto-detalhe.html?id=${produto.id}' class='action-btn btn-edit'><i class='fas fa-eye'></i> Ver</a>
+              <a href="chat.html?produto=${produto.id}&vendedor=${produto.vendedorId}" class="btn btn-sm btn-primary chat-link">Conversar com o comprador</a>
               <button class='action-btn btn-delete' data-id='${produto.id}'><i class='fas fa-trash'></i> Remover</button>
             </div>
           </div>
@@ -539,6 +539,27 @@
     document.getElementById('btnAddProduct').onclick = () => {
       window.location.href = 'vender.html';
     };
+    </script>
+    <!-- Adicionar botão de dark mode -->
+    <button id="darkModeToggle" title="Alternar modo escuro/claro">🌙</button>
+    <!-- Loader universal -->
+    <div id="globalLoader" class="loader" style="display:none;"></div>
+    <script>
+    // Dark mode toggle
+    const toggle = document.getElementById('darkModeToggle');
+    if (toggle) {
+      toggle.onclick = () => {
+        const theme = document.documentElement.getAttribute('data-theme');
+        document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
+        localStorage.setItem('theme', document.documentElement.getAttribute('data-theme'));
+      };
+      // Carregar preferência
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    }
+    // Loader global
+    window.showLoader = () => { document.getElementById('globalLoader').style.display = 'block'; };
+    window.hideLoader = () => { document.getElementById('globalLoader').style.display = 'none'; };
     </script>
 </body>
 </html>

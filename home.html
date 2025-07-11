@@ -160,10 +160,10 @@
   </footer>
 
   <!-- Firebase SDKs -->
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js"></script>
 
   <!-- Scripts personalizados -->
   <script type="module" src="home.js"></script>
@@ -179,98 +179,28 @@
         document.getElementById('menu-container').innerHTML = html;
       });
   </script>
-
-  <!-- Autenticação e Logout -->
-  <script type="module">
-  import { auth, db, storage } from "./firebase-config.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-  const logoutBtn = document.getElementById("logoutBtn");
-  const produtosContainer = document.getElementById("produtosContainer");
-
-  logoutBtn?.addEventListener("click", () => {
-    signOut(auth).then(() => window.location.href = "log.html");
-  });
-
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = "log.html";
-      return;
-    }
-
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-
-    if (userSnap.exists()) {
-      const userData = userSnap.data();
-      document.getElementById("userEmail").textContent = user.email;
-      document.getElementById("userPhoto").src = user.photoURL || "images/default-profile.png";
-    }
-
-    // Carregar produtos
-    const produtosRef = collection(db, "produtos");
-    const querySnapshot = await getDocs(produtosRef);
-
-    querySnapshot.forEach(async (docSnap) => {
-      const data = docSnap.data();
-      const div = document.createElement("div");
-      div.className = "col";
-      div.innerHTML = `
-        <div class="card product h-100" data-product-id="${docSnap.id}">
-          <span class="wishlist-icon"><i class="bi bi-heart-fill"></i></span>
-          <img src="" class="card-img-top product-img" alt="${data.nome}">
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title">${data.nome}</h5>
-            <p class="card-text mb-1"><strong>Preço:</strong> €${data.preco}</p>
-            <p class="card-text mb-2"><strong>Condição:</strong> ${data.condicao}</p>
-            <p class="text-muted mt-auto"><i class="bi bi-bag-check"></i> ${data.disponibilidade}</p>
-            <button class="btn btn-sm btn-outline-dark mt-2" onclick="window.location.href='produto-detalhe.html?id=${docSnap.id}'">Ver detalhes</button>
-            <a href="chat.html?produto=${docSnap.id}&vendedor=${data.vendedorId ? data.vendedorId : ''}" class="btn btn-sm btn-primary mt-2" ${!data.vendedorId ? 'onclick="alert(\'Vendedor não encontrado\');return false;"' : ''}>Conversar</a>
-          </div>
-        </div>
-      `;
-
-      const img = div.querySelector("img");
-      try {
-        if (data.imagemPrincipal) {
-          const imageRef = ref(storage, data.imagemPrincipal);
-          const imageUrl = await getDownloadURL(imageRef);
-          img.src = imageUrl;
-        } else {
-          img.src = "images/no-image.png";
-        }
-      } catch {
-        img.src = "images/no-image.png";
-      }
-
-      produtosContainer.appendChild(div);
-    });
-  });
-
-  // Evento global para redirecionar ao detalhe
-  document.addEventListener("click", (e) => {
-    const card = e.target.closest(".product");
-    if (card?.dataset.productId) {
-      const id = card.dataset.productId;
-      window.location.href = `produto-detalhe.html?id=${id}`;
-    }
-  });
-</script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <!-- Remover o script inline de Firebase/autenticação/produtos -->
+  <!-- Adicionar botão de dark mode -->
+<button id="darkModeToggle" title="Alternar modo escuro/claro">🌙</button>
+<!-- Loader universal -->
+<div id="globalLoader" class="loader" style="display:none;"></div>
+<link rel="stylesheet" href="navbar-styles.css" />
 <script>
-  function adicionarAoCarrinho(id, nome, preco, imagem) {
-    let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
-    carrinho.push({ id, nome, preco, imagem });
-    localStorage.setItem("carrinho", JSON.stringify(carrinho));
-    alert("Produto adicionado ao carrinho!");
-  }
+// Dark mode toggle
+const toggle = document.getElementById('darkModeToggle');
+if (toggle) {
+  toggle.onclick = () => {
+    const theme = document.documentElement.getAttribute('data-theme');
+    document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
+    localStorage.setItem('theme', document.documentElement.getAttribute('data-theme'));
+  };
+  // Carregar preferência
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+}
+// Loader global
+window.showLoader = () => { document.getElementById('globalLoader').style.display = 'block'; };
+window.hideLoader = () => { document.getElementById('globalLoader').style.display = 'none'; };
 </script>
-<!-- Bootstrap JS (necessário para a navbar funcionar corretamente no mobile) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-  <script src="script.js"></script>
-  <script src="chatbot.js"></script>
 </body>
 </html>

@@ -264,6 +264,7 @@
     }
   </style>
   <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="navbar-styles.css" />
 </head>
 <body>
   <div id="menu-container">
@@ -277,8 +278,21 @@
     </nav>
   </div>
   <script>
-    // This script block is no longer needed as the menu is now statically included.
-    // Keeping it for now, but it will be removed in a subsequent edit if not used.
+    // Dark mode toggle
+    const toggle = document.getElementById('darkModeToggle');
+    if (toggle) {
+      toggle.onclick = () => {
+        const theme = document.documentElement.getAttribute('data-theme');
+        document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
+        localStorage.setItem('theme', document.documentElement.getAttribute('data-theme'));
+      };
+      // Carregar preferência
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    }
+    // Loader global
+    window.showLoader = () => { document.getElementById('globalLoader').style.display = 'block'; };
+    window.hideLoader = () => { document.getElementById('globalLoader').style.display = 'none'; };
   </script>
 
   <!-- Hero Section -->

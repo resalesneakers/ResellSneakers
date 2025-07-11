@@ -3,7 +3,7 @@ import {
   ref as storageRef,
   uploadBytesResumable,
   getDownloadURL,
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 import {
   collection,
   addDoc,
@@ -11,8 +11,8 @@ import {
   getDocs,
   query,
   where,
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
 let uploadedImages = [];
 const imageInput = document.getElementById("imageInput");
@@ -65,14 +65,17 @@ function uploadImages(userId) {
           progressBar.style.width = `${progress}%`;
           progressText.textContent = `A carregar imagens... ${Math.floor(progress)}%`;
         },
-        reject,
+        (error) => {
+          console.error('Erro ao fazer upload da imagem:', error);
+          reject(error);
+        },
         async () => {
-          // Após upload, buscar o downloadURL (lógica antiga)
           try {
             const url = await getDownloadURL(fileRef);
             resolve(url);
           } catch (e) {
-            resolve(filePath); // fallback para o caminho
+            console.error('Erro ao obter downloadURL:', e);
+            reject(e);
           }
         }
       );
@@ -148,6 +151,7 @@ onAuthStateChanged(auth, (u) => {
         dataCriacao: serverTimestamp(),
         userId: user.uid,
         vendedorId: user.uid,
+        vendedor: user.uid // <- campo obrigatório para as regras
       };
       console.log("Produto a ser publicado:", produto);
       await addDoc(collection(db, "produtos"), produto);
@@ -175,7 +179,7 @@ onAuthStateChanged(auth, (u) => {
       window.location.href = "meu-perfil.html";
     } catch (err) {
       console.error("Erro ao publicar produto:", err);
-      alert("❌ Erro ao publicar produto.");
+      alert(`❌ Erro ao publicar produto.\n${err && err.message ? err.message : err}`);
     } finally {
       btn.disabled = false;
       btn.textContent = "Publicar";

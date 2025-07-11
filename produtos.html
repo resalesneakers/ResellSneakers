@@ -73,8 +73,7 @@
     <div class="prod-list" id="prod-list"></div>
   </div>
   <script type="module">
-    import { db } from './firebase-config.js';
-    import { collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     // Carregar menu universal
     fetch('menu.html').then(res => res.text()).then(html => {
@@ -113,5 +112,26 @@
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script src="navbar-script.js"></script>
+  <!-- Adicionar botão de dark mode -->
+<button id="darkModeToggle" title="Alternar modo escuro/claro">🌙</button>
+<!-- Loader universal -->
+<div id="globalLoader" class="loader" style="display:none;"></div>
+<script>
+// Dark mode toggle
+const toggle = document.getElementById('darkModeToggle');
+if (toggle) {
+  toggle.onclick = () => {
+    const theme = document.documentElement.getAttribute('data-theme');
+    document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
+    localStorage.setItem('theme', document.documentElement.getAttribute('data-theme'));
+  };
+  // Carregar preferência
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+}
+// Loader global
+window.showLoader = () => { document.getElementById('globalLoader').style.display = 'block'; };
+window.hideLoader = () => { document.getElementById('globalLoader').style.display = 'none'; };
+</script>
 </body>
 </html> 

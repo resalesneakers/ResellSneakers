@@ -2,8 +2,9 @@
 import { app, auth, db, storage } from './firebase-config.js';
 import {
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  signInWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
 document.getElementById("btn-signup").addEventListener("click", async () => {
   const email = document.getElementById("signup-email").value;

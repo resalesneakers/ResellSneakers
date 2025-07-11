@@ -228,6 +228,10 @@
 <body>
   <div id="menu-container"></div>
   <script>fetch('menu.html').then(res => res.text()).then(html => {document.getElementById('menu-container').innerHTML = html;});</script>
+  <div class="container py-4">
+    <h2 class="mb-4">Minhas Conversas</h2>
+    <div id="conversasList" class="row g-3"></div>
+  </div>
   <div class="container">
     <div class="messages-header">
       <h1><i class="fa fa-comments"></i> As Suas Mensagens</h1>
@@ -258,9 +262,10 @@
   </div>
   <script type="module">
     import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { collection, query, where, onSnapshot, doc, getDoc, addDoc, orderBy, serverTimestamp, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { collection, query, where, orderBy, onSnapshot, doc, getDoc, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
     
+    const conversasList = document.getElementById('conversasList');
     const messagesList = document.getElementById('messages-list');
     const chatArea = document.getElementById('chat-area');
     const sendMsgForm = document.getElementById('sendMsgForm');
@@ -275,16 +280,16 @@
     onAuthStateChanged(auth, u => {
       if (!u) return (window.location.href = "log.html");
       user = u;
-      carregarConversas();
+      carregarConversas(user.uid);
     });
     
-    function carregarConversas() {
-      messagesList.innerHTML = `<div class="empty-state"><i class="fa fa-spinner fa-spin"></i><h5>A carregar...</h5></div>`;
+    function carregarConversas(uid) {
+      conversasList.innerHTML = `<div class="col-12 text-center text-muted"><i class="fa fa-spinner fa-spin"></i><h5>A carregar conversas...</h5></div>`;
       
-      const convsQuery = query(collection(db, "conversas"), where("participantes", "array-contains", user.uid));
+      const convsQuery = query(collection(db, "conversas"), where("participantes", "array-contains", uid), orderBy("timestamp", "desc"));
       unsubscribeConvs = onSnapshot(convsQuery, async (convsSnap) => {
         if (convsSnap.empty) {
-          messagesList.innerHTML = "<div class='empty-state'><i class='fa fa-comments'></i><h5>Sem conversas ainda.</h5></div>";
+          conversasList.innerHTML = '<div class="col-12 text-center text-muted">Nenhuma conversa encontrada.</div>';
           chatArea.innerHTML = "<div class='empty-state'><i class='fa fa-comments'></i><h5>Selecione uma conversa para ver as mensagens.</h5></div>";
           sendMsgForm.classList.add('d-none');
           return;
@@ -304,11 +309,11 @@
           if (otherId) {
             try {
               const userRef = doc(db, 'users', otherId);
-              const userSnap = await getDoc(userRef);
-              if (userSnap.exists()) {
-                const u = userSnap.data();
-                nome = u.nome || 'Outro utilizador';
-                foto = u.foto || 'images/default-profile.png';
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+              const u = userSnap.data();
+              nome = u.nome || 'Outro utilizador';
+              foto = u.foto || 'images/default-profile.png';
                 if (u.lastOnline && u.lastOnline.toDate) {
                   const diff = Date.now() - u.lastOnline.toDate().getTime();
                   online = diff < 2 * 60 * 1000;
@@ -471,6 +476,27 @@
       if (unsubscribeMsgs) unsubscribeMsgs();
       if (unsubscribeConvs) unsubscribeConvs();
     });
+  </script>
+  <!-- Adicionar botão de dark mode -->
+<button id="darkModeToggle" title="Alternar modo escuro/claro">🌙</button>
+<!-- Loader universal -->
+<div id="globalLoader" class="loader" style="display:none;"></div>
+<script>
+// Dark mode toggle
+const toggle = document.getElementById('darkModeToggle');
+if (toggle) {
+  toggle.onclick = () => {
+    const theme = document.documentElement.getAttribute('data-theme');
+    document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
+    localStorage.setItem('theme', document.documentElement.getAttribute('data-theme'));
+  };
+  // Carregar preferência
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+}
+// Loader global
+window.showLoader = () => { document.getElementById('globalLoader').style.display = 'block'; };
+window.hideLoader = () => { document.getElementById('globalLoader').style.display = 'none'; };
   </script>
 </body>
 </html>

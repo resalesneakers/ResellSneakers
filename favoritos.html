@@ -30,10 +30,9 @@
     <div class="fav-list" id="fav-list"></div>
   </div>
   <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { collection, query, where, onSnapshot, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { getDownloadURL, ref as storageRef } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { collection, query, where, onSnapshot, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getDownloadURL, ref as storageRef } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
     const favList = document.getElementById("fav-list");
     let favoritosDocs = [];
     onAuthStateChanged(auth, user => {
@@ -61,6 +60,7 @@
               <div class="product-title">${p.nome}</div>
               <div class="product-price">€${p.preco}</div>
               <a href="produto-detalhe.html?id=${doc.id}" class="btn btn-outline-dark btn-sm mt-2">Ver Detalhes</a>
+              <a href="chat.html?produto=${doc.id}&vendedor=${p.userId}" class="btn btn-sm btn-primary chat-link">Conversar com o vendedor</a>
               <button class="remove-btn" data-index="${index}"><i class="fa fa-trash"></i> Remover</button>
             </div>
           `;
@@ -84,6 +84,27 @@
         });
       });
     });
+  </script>
+  <!-- Adicionar botão de dark mode -->
+  <button id="darkModeToggle" title="Alternar modo escuro/claro">🌙</button>
+  <!-- Loader universal -->
+  <div id="globalLoader" class="loader" style="display:none;"></div>
+  <script>
+    // Dark mode toggle
+    const toggle = document.getElementById('darkModeToggle');
+    if (toggle) {
+      toggle.onclick = () => {
+        const theme = document.documentElement.getAttribute('data-theme');
+        document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
+        localStorage.setItem('theme', document.documentElement.getAttribute('data-theme'));
+      };
+      // Carregar preferência
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    }
+    // Loader global
+    window.showLoader = () => { document.getElementById('globalLoader').style.display = 'block'; };
+    window.hideLoader = () => { document.getElementById('globalLoader').style.display = 'none'; };
   </script>
 </body>
 </html>
