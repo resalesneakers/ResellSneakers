@@ -362,11 +362,11 @@
                     <i class="fas fa-search search-icon"></i>
                 </div>
                 <div class="filter-buttons">
-                    <button class="filter-btn active" data-filter="todos">Todos</button>
-                    <button class="filter-btn" data-filter="ativo">Ativos</button>
-                    <button class="filter-btn" data-filter="vendido">Vendidos</button>
-                    <button class="filter-btn" data-filter="reservado">Reservados</button>
-                    <button class="filter-btn" data-filter="inativo">Inativos</button>
+                    <button class="filter-btn active" data-status="todos">Todos</button>
+                    <button class="filter-btn" data-status="ativo">Ativos</button>
+                    <button class="filter-btn" data-status="vendido">Vendidos</button>
+                    <button class="filter-btn" data-status="reservado">Reservados</button>
+                    <button class="filter-btn" data-status="inativo">Inativos</button>
                 </div>
             </div>
 
@@ -377,8 +377,11 @@
             </div>
 
             <!-- Products Grid -->
-            <div class="products-grid" id="productsGrid" style="display: none;">
-                <!-- Products will be loaded here dynamically -->
+            <div class="products-grid" id="productsGrid" style="display: none;"></div>
+            <!-- Explicação sobre troca -->
+            <div class="alert alert-info mt-4" style="max-width:700px;margin:auto;">
+              <b>Como funciona a troca?</b><br>
+              Toda negociação de troca é feita exclusivamente pelo chat. Clique em "Trocar" no produto desejado para iniciar uma conversa com o vendedor, combine os detalhes e, após acordo, marque o produto como "trocado" ou "vendido" em Meus Produtos.
             </div>
 
             <!-- Empty State -->
@@ -478,7 +481,7 @@
 
     function filtrarProdutos() {
       const termo = searchInput.value.trim().toLowerCase();
-      const filtro = document.querySelector('.filter-btn.active').dataset.filter;
+      const filtro = document.querySelector('.filter-btn.active').dataset.status;
       filteredProducts = allProducts.filter(p => {
         const matchNome = p.nome?.toLowerCase().includes(termo);
         const matchFiltro = filtro === 'todos' || (p.status === filtro);

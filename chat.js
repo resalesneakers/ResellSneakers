@@ -194,13 +194,12 @@ async function loadProductMiniCard() {
             <div class="prod-price text-danger">€${product.preco || '--'}</div>
           </div>
           <a href="produto-detalhe.html?id=${productId}" class="btn btn-outline-primary btn-sm ms-auto">Ver Produto</a>
+          <button class="btn btn-success btn-sm ms-2" onclick="iniciarTroca('${productId}','${product.vendedor || product.userId}')">Negociar Troca</button>
         </div>
       `;
       productMiniCard.style.display = 'block';
     }
-  } catch (error) {
-    console.error('Erro ao carregar produto:', error);
-  }
+  } catch (e) {}
 }
 
 // Inicializar listeners do chat
@@ -384,3 +383,8 @@ function renderNaoLidasBadge(qtd) {
   if (!qtd || qtd <= 0) return '';
   return `<span class="badge bg-danger ms-2">${qtd}</span>`;
 }
+
+// Função para redirecionar para chat de troca
+window.iniciarTroca = function(produtoId, vendedorId) {
+  window.location.href = `chat.html?vendedor=${vendedorId}&produto=${produtoId}`;
+};

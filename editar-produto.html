@@ -385,79 +385,46 @@
       <p>Atualize as informações do seu produto</p>
     </div>
 
-    <form id="formEditarProduto">
+    <form id="form-editar-produto">
       <div id="mensagem"></div>
       
       <div class="form-group">
-        <label for="nome" class="form-label">
+        <label for="titulo" class="form-label">
           <i class="fas fa-tag me-2"></i>Nome do Produto
         </label>
-        <input type="text" class="form-control" id="nome" required placeholder="Ex: Air Jordan 1 Retro High">
+        <input type="text" class="form-control" id="titulo" required placeholder="Ex: Air Jordan 1 Retro High">
         <i class="fas fa-sneaker-glow"></i>
       </div>
 
       <div class="form-group">
         <label for="preco" class="form-label">
-          <i class="fas fa-euro-sign me-2"></i>Preço (€)
+          <i class="fas fa-euro-sign me-2"></i>Preço
         </label>
-        <input type="number" class="form-control" id="preco" required placeholder="0.00">
-        <i class="fas fa-money-bill-wave"></i>
+        <input type="number" class="form-control" id="preco" required min="0" step="0.01" placeholder="Ex: 499.99">
+        <i class="fas fa-euro-sign"></i>
       </div>
 
       <div class="form-group">
-        <label for="condicao" class="form-label">
-          <i class="fas fa-star me-2"></i>Condição
+        <label for="descricao" class="form-label">
+          <i class="fas fa-align-left me-2"></i>Descrição
         </label>
-        <select class="form-select" id="condicao" required>
-          <option value="">Seleciona a condição...</option>
-          <option value="Novo">🌟 Novo</option>
-          <option value="Usado - Excelente">💎 Usado - Excelente</option>
-          <option value="Usado - Bom">✨ Usado - Bom</option>
-        </select>
-        <i class="fas fa-check-circle"></i>
+        <textarea class="form-control" id="descricao" rows="4" required placeholder="Descreva o produto..."></textarea>
+        <i class="fas fa-align-left"></i>
       </div>
 
       <div class="form-group">
-        <label for="disponibilidade" class="form-label">
-          <i class="fas fa-handshake me-2"></i>Disponibilidade
-        </label>
-        <select class="form-select" id="disponibilidade" required>
-          <option value="">Seleciona a disponibilidade...</option>
-          <option value="venda">💰 Venda</option>
-          <option value="troca">🔄 Troca</option>
-          <option value="venda e troca">💰🔄 Venda e Troca</option>
-        </select>
-        <i class="fas fa-shopping-cart"></i>
+        <label class="form-label">Imagens atuais</label>
+        <div id="imagens-preview" class="image-preview-container"></div>
       </div>
 
       <div class="form-group">
-        <div class="image-preview-container">
-          <div class="image-label">
-            <i class="fas fa-image me-2"></i>Imagem Atual
-          </div>
-          <img id="previewImagem" src="#" alt="Imagem atual">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="imagemProduto" class="form-label">
-          <i class="fas fa-camera me-2"></i>Substituir Imagem
-        </label>
-        <div class="file-input-container" onclick="document.getElementById('imagemProduto').click()">
-          <div class="file-input-icon">
-            <i class="fas fa-cloud-upload-alt"></i>
-          </div>
-          <div class="file-input-text">
-            Clique para selecionar uma nova imagem
-          </div>
-          <small class="text-muted">Formatos suportados: JPG, PNG, GIF</small>
-        </div>
-        <input type="file" class="form-control" id="imagemProduto" accept="image/*">
+        <label for="novas-imagens" class="form-label">Adicionar novas imagens</label>
+        <input type="file" class="form-control" id="novas-imagens" multiple accept="image/*">
       </div>
 
       <button type="submit" class="btn btn-primary w-100">
         <i class="fas fa-save me-2"></i>
-        Guardar Alterações
+        Salvar alterações
       </button>
     </form>
     
@@ -491,9 +458,9 @@
 
   const params = new URLSearchParams(window.location.search);
   const produtoId = params.get("id");
-  const imagemInput = document.getElementById("imagemProduto");
+  const imagemInput = document.getElementById("novas-imagens");
   const previewImagem = document.getElementById("previewImagem");
-  const form = document.getElementById('formEditarProduto');
+  const form = document.getElementById('form-editar-produto');
   const mensagemEl = document.getElementById('mensagem');
   const loadingOverlay = document.getElementById('loadingOverlay');
 
@@ -523,10 +490,9 @@
     }
 
     produtoAtual = doc.data();
-    document.getElementById("nome").value = produtoAtual.nome || "";
+    document.getElementById("titulo").value = produtoAtual.nome || "";
     document.getElementById("preco").value = produtoAtual.preco || "";
-    document.getElementById("condicao").value = produtoAtual.condicao || "";
-    document.getElementById("disponibilidade").value = produtoAtual.disponibilidade || "";
+    document.getElementById("descricao").value = produtoAtual.descricao || "";
 
     if (produtoAtual.imagemPrincipal) {
       // Se for um caminho do Storage, buscar o downloadURL
@@ -555,20 +521,19 @@
     mensagemEl.className = '';
     showLoading();
 
-    const nome = document.getElementById("nome").value.trim();
+    const nome = document.getElementById("titulo").value.trim();
     const preco = parseFloat(document.getElementById("preco").value);
-    const condicao = document.getElementById("condicao").value;
-    const disponibilidade = document.getElementById("disponibilidade").value;
+    const descricao = document.getElementById("descricao").value.trim();
 
     if (nome.length < 3) return mostrarMensagem("O nome deve ter pelo menos 3 caracteres.", "danger", submitBtn);
     if (isNaN(preco) || preco <= 0) return mostrarMensagem("O preço deve ser maior que 0.", "danger", submitBtn);
-    if (!condicao || !disponibilidade) return mostrarMensagem("Preencha todos os campos obrigatórios.", "danger", submitBtn);
+    if (!descricao) return mostrarMensagem("A descrição é obrigatória.", "danger", submitBtn);
 
     try {
       let imagemPath = produtoAtual.imagemPrincipal;
-      const novaImagem = imagemInput.files[0];
+      const novasImagens = imagemInput.files;
 
-      if (novaImagem) {
+      if (novasImagens.length > 0) {
         if (imagemAnterior) {
           try {
             // Se for caminho do Storage, deletar corretamente
@@ -583,18 +548,20 @@
           }
         }
 
-        const nomeImagem = `${Date.now()}_${novaImagem.name}`;
-        const storagePath = `produtos/${user.uid}/${nomeImagem}`;
-        const storageRef = storage.ref().child(storagePath);
-        await storageRef.put(novaImagem);
-        imagemPath = storagePath; // Salva apenas o caminho!
+        for (let i = 0; i < novasImagens.length; i++) {
+          const novaImagem = novasImagens[i];
+          const nomeImagem = `${Date.now()}_${novaImagem.name}`;
+          const storagePath = `produtos/${user.uid}/${nomeImagem}`;
+          const storageRef = storage.ref().child(storagePath);
+          await storageRef.put(novaImagem);
+          imagemPath = storagePath; // Salva apenas o caminho!
+        }
       }
 
       await db.collection("produtos").doc(produtoId).update({
         nome,
         preco,
-        condicao,
-        disponibilidade,
+        descricao,
         imagemPrincipal: imagemPath, // Salva só o caminho
         ultimaAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -613,21 +580,45 @@
     mensagemEl.className = `alert alert-${tipo} mt-3`;
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-save me-2"></i>Guardar Alterações';
+      btn.innerHTML = '<i class="fas fa-save me-2"></i>Salvar alterações';
     }
     hideLoading();
   }
 
   // File input preview
   imagemInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        previewImagem.src = e.target.result;
-        previewImagem.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    const previewContainer = document.getElementById('imagens-preview');
+    previewContainer.innerHTML = ''; // Limpa previews anteriores
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.alt = `Preview ${i+1}`;
+          img.style.maxWidth = '100%';
+          img.style.height = 'auto';
+          img.style.borderRadius = '15px';
+          img.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.2)';
+          img.style.border = '3px solid white';
+          img.style.transition = 'transform 0.3s ease';
+          img.style.marginBottom = '15px';
+          img.style.display = 'block';
+
+          img.addEventListener('mouseover', () => {
+            img.style.transform = 'scale(1.05)';
+          });
+          img.addEventListener('mouseout', () => {
+            img.style.transform = 'scale(1)';
+          });
+
+          previewContainer.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   });
 
